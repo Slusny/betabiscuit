@@ -1,0 +1,81 @@
+import argparse
+import gymnasium as gym
+import sys
+from pathlib import Path
+sys.path.insert(0,'./DDPG')
+from DDPG import DDPGAgent
+
+# Available arguments for program
+environments_implemented=['pendulum', 'lunarlander', 'hockey']
+algorithms_implemented = ['ddpg']
+
+# Loggin
+log_interval = 20           # print avg reward in the interval
+max_timesteps = 2000         # max timesteps in one episode
+
+
+# Argument Parser
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('--env', type=str, required=True,
+                    dest='env_name', choices=environments_implemented,
+                    help="specify environment, choose one of: "+str(environments_implemented))
+parser.add_argument('--algo', type=str, required=True,
+                    choices=algorithms_implemented,
+                    help="specify algorithm, choose one of: " + str(algorithms_implemented))
+parser.add_argument('-r', '--run', action='store_true',
+                    help='Do you wish to run/infer and not train')
+
+# Training parameters
+parser.add_argument('--train_iter', type=int,
+                    default=32,
+                    help='number of training batches per episode')
+parser.add_argument('-l', '--lr', type=float,
+                    default=0.0001,
+                    help='learning rate for actor/policy')
+parser.add_argument('-n', '--eps',action='store',  type=float,
+                    dest='eps',default=0.1,
+                    help='Policy noise')
+parser.add_argument('--maxepisodes', type=float,
+                    dest='max_episodes', default=2000,
+                    help='number of episodes')
+parser.add_argument('--maxtimesteps', type=int,
+                    dest='max_timesteps', default=2000,
+                    help='max timesteps in one episode')
+parser.add_argument('--loginterval', type=int,
+                    dest='log_interval', default=20,
+                    help='print avg reward in the interval')
+parser.add_argument('-u', '--update', type=float,
+                    dest='update_every',default=100,
+                    help='number of episodes between target network updates')
+parser.add_argument('-s', '--seed', type=int,
+                    default=None,
+                    help='random seed')
+parser.add_argument('--savepath', type=str,
+                    default='results',
+                    help='random seed')
+args = parser.parse_args()
+
+if __name__ == "__main__":
+
+    # creating environment
+    env_name = args.env_name
+    if env_name == "lunarlander":
+        env = gym.make("LunarLander-v2", continuous = True)
+    elif env_name == "pendulum":
+        env = gym.make("Pendulum-v1", continuous = True)
+    else:
+        env = gym.make(env_name)
+
+    #create save path
+    Path(args.savepath).mkdir(parents=True, exist_ok=True)
+
+    if args.algo == "ddpg":
+        agent = DDPGAgent(env, env_name, args.seed, args.savepath,
+                        eps = args.eps, 
+                        learning_rate_actor = args.lr,
+                        update_target_every = args.update_every)
+    
+    if args.run:
+        print("infer")
+    else:
+        agent.train(args.train_iter, args.max_episodes, args.max_timesteps, args.log_interval)
