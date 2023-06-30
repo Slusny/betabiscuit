@@ -7,6 +7,7 @@ from gymnasium import spaces
 import optparse
 import pickle
 import os
+import wandb
 
 import memory as mem
 from feedforward import Feedforward
@@ -75,7 +76,7 @@ class DDPGAgent(object):
     """
     Agent implementing Q-learning with NN function approximation.
     """
-    def __init__(self, env, env_name, seed, savepath, **userconfig):
+    def __init__(self, env, env_name, seed, savepath, wandb_run, **userconfig):
 
         observation_space = env.observation_space
         action_space = env.action_space
@@ -145,6 +146,12 @@ class DDPGAgent(object):
                                         lr=self._config["learning_rate_actor"],
                                         eps=0.000001)
         self.train_iter = 0
+
+        self.wandb_run = wandb_run
+        if(wandb_run):
+            wandb.watch(self.Q, log_freq=100)
+            wandb.watch(self.policy, log_freq=100)
+
 
     def _copy_nets(self):
         self.Q_target.load_state_dict(self.Q.state_dict())
@@ -219,10 +226,16 @@ class DDPGAgent(object):
         lr = self._config['learning_rate_actor']
         update_target_every=self._config['update_target_every']
 
+
         def save_statistics():
             with open(os.path.join(self.savepath,f"DDPG_{self.env_name}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}-stat.pkl"), 'wb') as f:
                 pickle.dump({"rewards" : rewards, "lengths": lengths, "eps": self._eps, "train": train_iter,
                             "lr": lr, "update_every":update_target_every , "losses": losses}, f)
+        
+        def wandb_save_model(savepath):
+            artifact = wandb.Artifact('model', type='model')
+            artifact.add_file(savepath)
+            self.wandb_run.log_artifact(artifact)
 
         # training loop
         for i_episode in range(1, max_episodes+1):
@@ -243,20 +256,22 @@ class DDPGAgent(object):
 
             rewards.append(total_reward)
             lengths.append(t)
+            if self.wandb_run : wandb.log({"actor_loss": np.array(losses)[:,0].mean() , "critic_loss": np.array(losses)[:1].mean() , "reward": total_reward, "length":t })
 
             # save every 500 episodes
             if i_episode % 500 == 0:
                 print("########## Saving a checkpoint... ##########")
-                torch.save(self.state(), os.path.join(self.savepath,f'DDPG_{self.env_name}_{i_episode}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}.pth'))
+                savepath = os.path.join(self.savepath,f'DDPG_{self.env_name}_{i_episode}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}.pth')
+                torch.save(self.state(), savepath )
                 save_statistics()
 
             # logging
             if i_episode % log_interval == 0:
                 avg_reward = np.mean(rewards[-log_interval:])
                 avg_length = int(np.mean(lengths[-log_interval:]))
-
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
         save_statistics()
+        if self.wandb_run : wandb_save_model(savepath)
 
 
 def main():
