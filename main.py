@@ -2,8 +2,10 @@ import argparse
 import gymnasium as gym
 import sys
 from pathlib import Path
+import laserhockey.hockey_env as h_env
 sys.path.insert(0,'./DDPG')
 from DDPG import DDPGAgent
+from importlib import reload
 
 # Available arguments for program
 environments_implemented=['pendulum', 'lunarlander', 'hockey']
@@ -63,6 +65,14 @@ if __name__ == "__main__":
         env = gym.make("LunarLander-v2", continuous = True)
     elif env_name == "pendulum":
         env = gym.make("Pendulum-v1", continuous = True)
+    elif env_name == "hockey":
+        # reload(h_env)
+        env = h_env.HockeyEnv()
+    elif env_name == "hockey-train-shooting":
+        # reload(h_env)
+        env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
+    elif env_name == "hockey-train-defence":
+        env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
     else:
         env = gym.make(env_name)
 
