@@ -48,6 +48,7 @@
 #d) Write your checkpoints to your home directory, so that you still have them if your job fails
 ####
 
-singularity exec --nv /common/singularityImages/TCML-Cuda11_0_TF2_4_1_PT1_7_1.simg python main.py --algo ddpg --env pendulum --wandb
+pip install -r requirements_pip.txt 
+singularity exec --nv /common/singularityImages/TCML-Cuda12_0_TF2_12_PT1_13.simg python main.py --algo ddpg --env pendulum --wandb
 
 echo DONE!

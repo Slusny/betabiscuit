@@ -78,9 +78,9 @@ smmap==5.0.0
 stack-data @ file:///home/conda/feedstock_root/build_artifacts/stack_data_1669632077133/work
 sympy @ file:///croot/sympy_1668202399572/work
 toml @ file:///tmp/build/80754af9/toml_1616166611790/work
-torch==2.0.1
-torchaudio==2.0.2
-torchvision==0.15.2
+torch>=1.13.1
+torchaudio>=0.13.1
+torchvision>=0.14.1
 tornado @ file:///home/conda/feedstock_root/build_artifacts/tornado_1648827245914/work
 traitlets @ file:///home/conda/feedstock_root/build_artifacts/traitlets_1675110562325/work
 triton==2.0.0
