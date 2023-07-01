@@ -48,10 +48,12 @@
 #d) Write your checkpoints to your home directory, so that you still have them if your job fails
 ####
 
-pip -V
-sudo apt-get install python3-setuptools
-pip install -r requirements_pip.txt 
-python -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /common/singularityImages/TCML-CUDA12_0_TF2_12_PT1_13.simg python main.py --algo ddpg --env pendulum --wandb
+# pip3 -V
+# python -V
+# python3 -V
+# #sudo apt-get install python3-setuptools
+# pip3 install -r requirements_pip.txt 
+# python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
+singularity exec --nv /common/singularityImages/TCML-CUDA12_0_TF2_12_PT1_13.simg main_wrapper.sh
 
 echo DONE!
