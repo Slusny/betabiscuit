@@ -49,6 +49,7 @@
 ####
 
 pip install -r requirements_pip.txt 
+python -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
 singularity exec --nv /common/singularityImages/TCML-Cuda12_0_TF2_12_PT1_13.simg python main.py --algo ddpg --env pendulum --wandb
 
 echo DONE!
