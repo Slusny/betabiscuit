@@ -8,7 +8,6 @@ import optparse
 import pickle
 import os
 import wandb
-
 import memory as mem
 from feedforward import Feedforward
 
@@ -50,8 +49,10 @@ class QFunction(Feedforward):
         return loss.item()
 
     def Q_value(self, observations, actions):
+        # hstack: concatenation along the first axis for 1-D tensors
         return self.forward(torch.hstack([observations,actions]))
 
+# Orstein-Uhlenbeck noise
 class OUNoise():
     def __init__(self, shape, theta: float = 0.15, dt: float = 1e-2):
         self._shape = shape
@@ -86,7 +87,7 @@ class DDPGAgent(object):
         if not isinstance(action_space, spaces.box.Box):
             raise UnsupportedSpace('Action space {} incompatible with {}.' \
                                    ' (Require Box)'.format(action_space, self))
-        
+
         # Seed
         if seed is not None:
             torch.manual_seed(seed)
@@ -231,7 +232,7 @@ class DDPGAgent(object):
             with open(os.path.join(self.savepath,f"DDPG_{self.env_name}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}-stat.pkl"), 'wb') as f:
                 pickle.dump({"rewards" : rewards, "lengths": lengths, "eps": self._eps, "train": train_iter,
                             "lr": lr, "update_every":update_target_every , "losses": losses}, f)
-        
+
         def wandb_save_model(savepath):
             artifact = wandb.Artifact('model', type='model')
             artifact.add_file(savepath)
@@ -321,7 +322,7 @@ def main():
         torch.manual_seed(random_seed)
         np.random.seed(random_seed)
 
-    ddpg = DDPGAgent(env, env_name, opts.seed, eps = eps, learning_rate_actor = lr,
+    ddpg = DDPGAgent(env, env_name, opts.seed, "test", False, eps = eps, learning_rate_actor = lr,
                      update_target_every = opts.update_every)
 
     # logging variables
@@ -350,7 +351,7 @@ def main():
             ob=ob_new
             if done or trunc: break
 
-        losses.extend(ddpg.train(train_iter))
+        losses.extend(ddpg.train(train_iter,max_episodes, max_timesteps, log_interval))
 
         rewards.append(total_reward)
         lengths.append(t)
