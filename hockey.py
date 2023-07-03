@@ -27,16 +27,28 @@ def normal_play():
 
     return info
 
+# shooting with guidance
 def shooting():
     env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
     o, info = env.reset()
     _ = env.render()
 
-    for _ in range(50):
+    for i in range(500):
         env.render()
-        a1 = [1,0,0,1] # np.random.uniform(-1,1,4)
+
+        a1 = [0,0,0,1]
+        if i > 0:
+            pos = np.array((obs[0], obs[1]))
+            puck = np.array((obs[12], obs[13]))
+            vel = puck-pos/(np.sqrt((puck[0]-pos[0])**2 + (puck[1] - pos[1])**2))
+            print(vel)
+            a1 = [vel[0], vel[1], 0, 0]
+            # print(a1)
+
+        # a1 = [0,0,-.1,1] # np.random.uniform(-1,1,4)
         a2 = [0,0.,0,0]
         obs, r, d, _ , info = env.step(np.hstack([a1,a2]))
+
         obs_agent2 = env.obs_agent_two()
         if d: break
 
@@ -49,10 +61,11 @@ def defending():
     o, info = env.reset()
     _ = env.render()
 
-    for _ in range(60):
+    for _ in range(600):
         env.render()
-        a1 = [0.1,0,0,1] # np.random.uniform(-1,1,3)
-        a2 = [0,0.,0,0]
+        print(env)
+        a1 = [0,0,.1,1] # np.random.uniform(-1,1,3)
+        a2 = [0,0.,0,1]
         obs, r, d,_, info = env.step(np.hstack([a1,a2]))
         print(r)
         obs_agent2 = env.obs_agent_two()
@@ -61,4 +74,4 @@ def defending():
 
     return info
 
-print(defending())
+print(shooting())

@@ -160,17 +160,63 @@ class DQNAgent(object):
 
         return losses
 
+def discrete_to_continous_action(discrete_action, env):
+    ''' converts discrete actions into continuous ones (for each player)
+        The actions allow only one operation each timestep, e.g. X or Y or angle change.
+        This is surely limiting. Other discrete actions are possible
+        Action 0: do nothing
+        Action 1: -1 in x
+        Action 2: 1 in x
+        Action 3: -1 in y
+        Action 4: 1 in y
+        Action 5: -1 in angle
+        Action 6: 1 in angle
+        Action 7: shoot (if keep_mode is on)
+        '''
+    action_cont = [((discrete_action == 1) | (discrete_action == 8) | (discrete_action == 9)) * -1 + ((discrete_action == 2) | (discrete_action == 10) | (discrete_action == 11)) * 1,  # player x
+                   ((discrete_action == 3) | (discrete_action == 8) | (discrete_action == 10)) * -1 + ((discrete_action == 4) | (discrete_action == 9) | (discrete_action == 11)) * 1,  # player y
+                   (discrete_action == 5) * -1 + (discrete_action == 6) * 1]  # player angle
+    if env.keep_mode:
+      action_cont.append(discrete_action == 7)
+
+    return action_cont
+
+def continuous_to_discrete_action(continuous_action, map):
+    ''' converts discrete actions into continuous ones (for each player)
+        The actions allow only one operation each timestep, e.g. X or Y or angle change.
+        This is surely limiting. Other discrete actions are possible
+        Action 0: do nothing
+        Action 1: -1 in x
+        Action 2: 1 in x
+        Action 3: -1 in y
+        Action 4: 1 in y
+        Action 5: -1 in angle
+        Action 6: 1 in angle
+        Action 7: shoot (if keep_mode is on)
+        '''
+
+    return map[tuple(continuous_action)]
+
 def main():
+
+
+
     env_name = 'Pendulum-v1'
     # env_name = 'CartPole-v0'
 
     env = gym.make(env_name)
-    env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
+    env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
     # if isinstance(env.action_space, spaces.Box):
     #     print("test")
     #     env = DiscreteActionWrapper(env,5)
 
-    ac_space = env.discrete_action_space
+    action_map = {}
+    for i in range(0,12):
+        action_map[tuple(discrete_to_continous_action(i, env))] = i
+
+
+
+    ac_space = spaces.Discrete(14)
     # ac_space = env.action_space
     o_space = env.observation_space
     print(ac_space)
@@ -179,7 +225,7 @@ def main():
 
 
     o, info = env.reset()
-    # _ = env.render()
+    _ = env.render()
 
     use_target = True
     target_update = 20
@@ -192,17 +238,45 @@ def main():
     stats = []
     losses = []
 
-    max_episodes=500
+    max_episodes=2000
     max_steps=60
     for i in range(max_episodes):
         # print("Starting a new episode")
         total_reward = 0
         ob, _info = env.reset()
         for t in range(max_steps):
-            # env.render()
+            if i > 1600:
+                env.render()
             done = False
-            a = q_agent.act(ob)
-            a1 = env.discrete_to_continous_action(a)
+            if np.random.random() > .1:
+                a = q_agent.act(ob)
+                a1 = env.discrete_to_continous_action(a)
+            else:
+                pos = np.array((ob[0], ob[1]))
+                puck = np.array((ob[12], ob[13]))
+
+                vel = puck - pos
+
+                if vel[0] >= .3:
+                    vel[0] = 1
+                elif vel[0] <= -.3:
+                    vel[0] = -1
+                else:
+                    vel[0] = 0
+
+                if vel[1] >= .3:
+                    vel[1] = 1
+                elif vel[1] <= -.3:
+                    vel[1] = -1
+                else:
+                    vel[1] = 0
+
+
+                a1 = [vel[0], vel[1], 0, 0]
+
+                a = continuous_to_discrete_action(a1, action_map)
+
+                # print(continuous_to_discrete_action(a1))
             a2 = [0,0.,0,0]
             a_step = np.hstack([a1,a2])
             # a = q_agent.act(ob)
@@ -223,7 +297,7 @@ def main():
     losses_np = np.asarray(losses)
     fig=plt.figure(figsize=(6,3.8))
     plt.plot(stats_np[:,1], label="return")
-    plt.plot(running_mean(stats_np[:,1],100), label="smoothed-return")
+    plt.plot(running_mean(stats_np[:,1],500), label="smoothed-return")
     plt.legend()
     plt.show()
 

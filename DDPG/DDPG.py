@@ -11,6 +11,8 @@ import wandb
 import memory as mem
 from feedforward import Feedforward
 
+import laserhockey.hockey_env as h_env
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 torch.set_num_threads(1)
 
@@ -219,6 +221,7 @@ class DDPGAgent(object):
         return losses
 
     def train(self, train_iter, max_episodes, max_timesteps,log_interval):
+        print("hello")
          # logging variables
         rewards = []
         lengths = []
@@ -247,7 +250,9 @@ class DDPGAgent(object):
                 timestep += 1
                 done = False
                 a = self.act(ob)
-                (ob_new, reward, done, trunc, _info) = self.env.step(a)
+                a2 = [0,0.,0,0]
+
+                (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
                 self.store_transition((ob, a, reward, ob_new, done))
                 ob=ob_new
@@ -273,6 +278,7 @@ class DDPGAgent(object):
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
         save_statistics()
         if self.wandb_run : wandb_save_model(savepath)
+        return losses
 
 
 def main():
@@ -289,7 +295,7 @@ def main():
     optParser.add_option('-l', '--lr',action='store',  type='float',
                          dest='lr',default=0.0001,
                          help='learning rate for actor/policy (default %default)')
-    optParser.add_option('-m', '--maxepisodes',action='store',  type='float',
+    optParser.add_option('-m', '--maxepisodes',action='store',  type='int',
                          dest='max_episodes',default=2000,
                          help='number of episodes (default %default)')
     optParser.add_option('-u', '--update',action='store',  type='float',
@@ -302,10 +308,13 @@ def main():
     ############## Hyperparameters ##############
     env_name = opts.env_name
     # creating environment
-    if env_name == "LunarLander-v2":
-        env = gym.make(env_name, continuous = True)
-    else:
-        env = gym.make(env_name)
+    # if env_name == "LunarLander-v2":
+    #     env = gym.make(env_name, continuous = True)
+    # else:
+    #     env = gym.make(env_name)
+
+    env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
+
     render = False
     log_interval = 20           # print avg reward in the interval
     max_episodes = opts.max_episodes # max training episodes
@@ -337,38 +346,40 @@ def main():
                          "lr": lr, "update_every": opts.update_every, "losses": losses}, f)
 
     # training loop
-    for i_episode in range(1, max_episodes+1):
-        ob, _info = env.reset()
-        ddpg.reset()
-        total_reward=0
-        for t in range(max_timesteps):
-            timestep += 1
-            done = False
-            a = ddpg.act(ob)
-            (ob_new, reward, done, trunc, _info) = env.step(a)
-            total_reward+= reward
-            ddpg.store_transition((ob, a, reward, ob_new, done))
-            ob=ob_new
-            if done or trunc: break
+    # for i_episode in range(1, max_episodes+1):
+    #     ob, _info = env.reset()
+    #     ddpg.reset()
+    #     total_reward=0
+        # for t in range(max_timesteps):
+        #     timestep += 1
+        #     done = False
+        #     a = ddpg.act(ob)
+        #     (ob_new, reward, done, trunc, _info) = env.step(a)
+        #     total_reward+= reward
+        #     ddpg.store_transition((ob, a, reward, ob_new, done))
+        #     ob=ob_new
+        #     if done or trunc: break
 
-        losses.extend(ddpg.train(train_iter,max_episodes, max_timesteps, log_interval))
+    testing_loss = ddpg.train(train_iter,max_episodes, max_timesteps, log_interval)
+    print(testing_loss)
 
-        rewards.append(total_reward)
-        lengths.append(t)
+
+        # rewards.append(total_reward)
+        # lengths.append(t)
 
         # save every 500 episodes
-        if i_episode % 500 == 0:
-            print("########## Saving a checkpoint... ##########")
-            torch.save(ddpg.state(), f'./results/DDPG_{env_name}_{i_episode}-eps{eps}-t{train_iter}-l{lr}-s{random_seed}.pth')
-            save_statistics()
+        # if i_episode % 500 == 0:
+        #     print("########## Saving a checkpoint... ##########")
+        #     torch.save(ddpg.state(), f'./results/DDPG_{env_name}_{i_episode}-eps{eps}-t{train_iter}-l{lr}-s{random_seed}.pth')
+        #     save_statistics()
 
         # logging
-        if i_episode % log_interval == 0:
-            avg_reward = np.mean(rewards[-log_interval:])
-            avg_length = int(np.mean(lengths[-log_interval:]))
-
-            print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
-    save_statistics()
+        # if i_episode % log_interval == 0:
+        #     avg_reward = np.mean(rewards[-log_interval:])
+        #     avg_length = int(np.mean(lengths[-log_interval:]))
+        #
+        #     print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
+    # save_statistics()
 
 if __name__ == '__main__':
     main()
