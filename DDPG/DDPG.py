@@ -257,7 +257,7 @@ class DDPGAgent(object):
 
             # save every 500 episodes
             if i_episode % 500 == 0:
-                save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed)
+                save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed,rewards,lengths, losses)
 
             # logging
             if i_episode % log_interval == 0:
@@ -265,7 +265,7 @@ class DDPGAgent(object):
                 avg_length = int(np.mean(lengths[-log_interval:]))
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
 
-        if i_episode % 500 != 0: save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed)
+        if i_episode % 500 != 0: save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed,rewards,lengths, losses)
             
         return losses
 
