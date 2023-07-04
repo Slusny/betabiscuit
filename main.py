@@ -60,6 +60,10 @@ parser.add_argument('--loginterval', type=int,
                     help='print avg reward in the interval')
 parser.add_argument('--wandb', action='store_true',
                     help='use weights and biases')
+parser.add_argument('--notes', type=str, default="",
+                    help='any notes to add in logging')
+parser.add_argument('--tags', type=str, default="",
+                    help='any tags to add in logging')
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -82,7 +86,14 @@ if __name__ == "__main__":
         env = gym.make(env_name)
 
     #weights and biases
-    if args.wandb   : wandb_run = wandb.init(project=env_name + " - " +args.algo, config=args)
+    if args.wandb   : 
+        config_wandb = args.copy()
+        for key in ['notes','tags','wandb']:del config_wandb[key]
+        del config_wandb
+        wandb_run = wandb.init(project=env_name + " - " +args.algo, 
+                               config=args,
+                               notes=args.notes,
+                               tags=args.tags)
     else            : wandb_run = None
 
     #create save path

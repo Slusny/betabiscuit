@@ -1,4 +1,5 @@
 import torch
+import sys
 import torch.nn as nn
 from torch.distributions import MultivariateNormal
 import numpy as np
@@ -10,6 +11,8 @@ import os
 import wandb
 import memory as mem
 from feedforward import Feedforward
+sys.path.append('..')
+from utility import save_checkpoint
 
 import laserhockey.hockey_env as h_env
 
@@ -230,17 +233,6 @@ class DDPGAgent(object):
         lr = self._config['learning_rate_actor']
         update_target_every=self._config['update_target_every']
 
-
-        def save_statistics():
-            with open(os.path.join(self.savepath,f"DDPG_{self.env_name}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}-stat.pkl"), 'wb') as f:
-                pickle.dump({"rewards" : rewards, "lengths": lengths, "eps": self._eps, "train": train_iter,
-                            "lr": lr, "update_every":update_target_every , "losses": losses}, f)
-
-        def wandb_save_model(savepath):
-            artifact = wandb.Artifact('model', type='model')
-            artifact.add_file(savepath)
-            self.wandb_run.log_artifact(artifact)
-
         # training loop
         for i_episode in range(1, max_episodes+1):
             ob, _info = self.env.reset()
@@ -266,21 +258,16 @@ class DDPGAgent(object):
 
             # save every 500 episodes
             if i_episode % 500 == 0:
-                print("########## Saving a checkpoint... ##########")
-                savepath = os.path.join(self.savepath,f'DDPG_{self.env_name}_{i_episode}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}.pth')
-                torch.save(self.state(), savepath )
-                if self.wandb_run : wandb_save_model(savepath)
-                save_statistics()
+                save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self._eps, train_iter, lr, self.seed)
 
             # logging
             if i_episode % log_interval == 0:
                 avg_reward = np.mean(rewards[-log_interval:])
                 avg_length = int(np.mean(lengths[-log_interval:]))
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
-        savepath = os.path.join(self.savepath,f'DDPG_{self.env_name}_{i_episode}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}.pth')
-        save_statistics()
-        
-        if self.wandb_run : wandb_save_model(savepath)
+                
+        if i_episode % 500 != 0: save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed)
+            
         return losses
 
 
