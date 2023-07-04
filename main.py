@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     #weights and biases
     if args.wandb   : 
-        config_wandb = args.copy()
+        config_wandb = vars(args).copy()
         for key in ['notes','tags','wandb']:del config_wandb[key]
         del config_wandb
         wandb_run = wandb.init(project=env_name + " - " +args.algo, 
