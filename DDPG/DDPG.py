@@ -154,7 +154,7 @@ class DDPGAgent(object):
         self.train_iter = 0
 
         self.wandb_run = wandb_run
-        if(wandb_run):
+        if(wandb_run): # log gradients to W&B
             wandb.watch(self.Q, log_freq=100)
             wandb.watch(self.policy, log_freq=100)
 
@@ -224,7 +224,6 @@ class DDPGAgent(object):
         return losses
 
     def train(self, train_iter, max_episodes, max_timesteps,log_interval):
-        print("hello")
          # logging variables
         rewards = []
         lengths = []
@@ -258,14 +257,14 @@ class DDPGAgent(object):
 
             # save every 500 episodes
             if i_episode % 500 == 0:
-                save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self._eps, train_iter, lr, self.seed)
+                save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed)
 
             # logging
             if i_episode % log_interval == 0:
                 avg_reward = np.mean(rewards[-log_interval:])
                 avg_length = int(np.mean(lengths[-log_interval:]))
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
-                
+
         if i_episode % 500 != 0: save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed)
             
         return losses

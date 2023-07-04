@@ -13,6 +13,7 @@ def save_statistics(savepath,algo,env_name,i_episode,rewards=None,lengths=None,t
                     "lr": lr, "update_every":update_target_every , "losses": losses}, f)
                 
 def wandb_save_model(wandb_run,savepath):
+    #print("----------- Writing Model to W&B -----------")
     artifact = wandb.Artifact('model', type='model')
     artifact.add_file(savepath)
     wandb_run.log_artifact(artifact)
@@ -24,3 +25,9 @@ def save_checkpoint(torch_state,savepath,algo,env_name,i_episode,wandb=True,wand
     torch.save(torch_state, savepath_checkpoint)
     if wandb : wandb_save_model(wandb_run,savepath_checkpoint)
     save_statistics()
+
+def restore_from_wandb(str):
+    run = wandb.init()
+    artifact = run.use_artifact(str, type='model')
+    artifact_dir = artifact.download()
+    return artifact_dir
