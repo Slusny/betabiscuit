@@ -269,6 +269,7 @@ class DDPGAgent(object):
                 print("########## Saving a checkpoint... ##########")
                 savepath = os.path.join(self.savepath,f'DDPG_{self.env_name}_{i_episode}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}.pth')
                 torch.save(self.state(), savepath )
+                if self.wandb_run : wandb_save_model(savepath)
                 save_statistics()
 
             # logging
@@ -276,7 +277,9 @@ class DDPGAgent(object):
                 avg_reward = np.mean(rewards[-log_interval:])
                 avg_length = int(np.mean(lengths[-log_interval:]))
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
+        savepath = os.path.join(self.savepath,f'DDPG_{self.env_name}_{i_episode}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}.pth')
         save_statistics()
+        
         if self.wandb_run : wandb_save_model(savepath)
         return losses
 
