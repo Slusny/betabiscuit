@@ -38,7 +38,7 @@ parser.add_argument('-l', '--lr', type=float,
 parser.add_argument('-n', '--eps',action='store',  type=float,
                     dest='eps',default=0.1,
                     help='Policy noise')
-parser.add_argument('--maxepisodes', type=float,
+parser.add_argument('--maxepisodes', type=int,
                     dest='max_episodes', default=2000,
                     help='number of episodes')
 parser.add_argument('--maxtimesteps', type=int,
@@ -53,6 +53,23 @@ parser.add_argument('-s', '--seed', type=int,
 parser.add_argument('--savepath', type=str,
                     default='results',
                     help='random seed')
+
+# Architecture
+parser.add_argument('--hidden_sizes_actor', type=str,
+                    default='[128,128]')
+parser.add_argument('--hidden_sizes_critic', type=str,
+                    default='[128,128,64]')
+parser.add_argument('--buffer_size', type=int,
+                    default=int(1e6))
+parser.add_argument('--discount', type=float,
+                    default=0.95)
+parser.add_argument('--batch_size', type=int,
+                    default=128)
+parser.add_argument('--learning_rate_actor', type=float,
+                    default=0.00001)
+parser.add_argument('--learning_rate_critic', type=float,
+                    default=0.0001)
+
 
 # Logging
 parser.add_argument('--loginterval', type=int,

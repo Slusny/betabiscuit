@@ -10,6 +10,7 @@ cp -r /home/lenny/Downloads/laser-hockey-env ${SINGULARITY_ROOTFS}/laser-hockey-
 %files
 
 %environment
+export WANDB_API_KEY=acba70ec360a08475069be2222a9e630966d3e55
 
 %post
     apt-get update
