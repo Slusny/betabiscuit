@@ -3,7 +3,7 @@ import os
 import pickle
 import torch
 import wandb
-
+import numpy as np
 
 def save_statistics(savepath,algo,env_name,i_episode,rewards=None,lengths=None,train_iter=None, losses=None, eps="Nan",lr="Nan",seed="Nan"):
     date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
@@ -30,3 +30,49 @@ def restore_from_wandb(str):
     artifact = run.use_artifact(str, type='model')
     artifact_dir = artifact.download()
     return artifact_dir
+
+def transform_obs(obs,help=False):
+    names = ["x pos player one",
+            'y pos player one',
+            'angle player one',
+            'x vel player one',
+            'y vel player one',
+            'angular vel player one',
+            'x player two',
+            'y player two',
+            'angle player two',
+            'y vel player two',
+            'y vel player two',
+            'angular vel player two',
+            'x pos puck',
+            'y pos puck',
+            'x vel puck',
+            'y vel puck',
+            'time left player has puck',
+            'time left other player has puck']
+    limits = np.array([[-3,0],
+                      [-2,2],
+                      [-1,1],
+                      [-10,10],
+                      [-10,10],
+                      [-20,20],
+                      [-3,0],
+                      [-2,2],
+                      [-1,1],
+                      [-10,10],
+                      [-10,10],
+                      [-20,20],
+                      [-4,4],
+                      [-3,3],
+                      [-60,60],
+                      [-60,60],
+                      [0,15],
+                      [0,15]])
+    limit_range = (limits[:,1] - limits[:,0]).astype(float)
+    if help :
+        for i in range(18):
+            print(names[i]," : ",limits[i])
+    else : 
+        return ((obs-limits[:,0]) / limit_range)-0.5
+
+# transform_obs("",True)
