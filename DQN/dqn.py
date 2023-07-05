@@ -103,11 +103,16 @@ class DQNAgent(object):
 
         self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
-        # Q Network
-        self.Q = QFunction(observation_dim=self._observation_space.shape[0],
+        # Q Networks
+        self.Q_a = QFunction(observation_dim=self._observation_space.shape[0],
                            action_dim=self._action_n,
                            learning_rate = self._config["learning_rate"])
-        # Q Network
+
+        self.Q_b = QFunction(observation_dim=self._observation_space.shape[0],
+                           action_dim=self._action_n,
+                           learning_rate = self._config["learning_rate"])
+
+        # Q target Networks
         self.Q_target = QFunction(observation_dim=self._observation_space.shape[0],
                                   action_dim=self._action_n,
                                   learning_rate = 0)
@@ -121,6 +126,7 @@ class DQNAgent(object):
         if eps is None:
             eps = self._eps
         # epsilon greedy
+        # NOTE: modify noise process? exploratory process?
         if np.random.random() > eps:
             action = self.Q.greedyAction(observation)
         else:
@@ -145,6 +151,14 @@ class DQNAgent(object):
             s_prime = np.stack(data[:,3]) # s_t+1
             done = np.stack(data[:,4])[:,None] # done signal  (batchsize,1)
 
+
+            # NOTE: implement double DQN?
+            # Testing: check if values are overestimated
+            # This may help prevent overestimated value when getting close to the puck etc...
+
+            # Update Qa or Qb depending on smallest value (form of clipping)
+
+            # add targets Q(a) and Q(b)
             if self._config["use_target_net"]:
                 v_prime = self.Q_target.maxQ(s_prime)
             else:
@@ -154,6 +168,8 @@ class DQNAgent(object):
             td_target = rew + gamma * (1.0-done) * v_prime
 
             # optimize the lsq objective
+
+            # if update(a), update Qa, if update(b), update Q(b)
             fit_loss = self.Q.fit(s, a, td_target)
 
             losses.append(fit_loss)

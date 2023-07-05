@@ -220,7 +220,7 @@ class DDPGAgent(object):
 
         return losses
 
-    def train(self, train_iter, max_episodes, max_timesteps,log_interval):
+    def train(self, train_iter, max_episodes, max_timesteps,log_interval, env):
         print("hello")
          # logging variables
         rewards = []
@@ -247,6 +247,8 @@ class DDPGAgent(object):
             self.reset()
             total_reward=0
             for t in range(max_timesteps):
+                if i_episode > 18000:
+                    env.render()
                 timestep += 1
                 done = False
                 a = self.act(ob)
@@ -278,6 +280,8 @@ class DDPGAgent(object):
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
         save_statistics()
         if self.wandb_run : wandb_save_model(savepath)
+
+        env.close()
         return losses
 
 
@@ -360,7 +364,7 @@ def main():
         #     ob=ob_new
         #     if done or trunc: break
 
-    testing_loss = ddpg.train(train_iter,max_episodes, max_timesteps, log_interval)
+    testing_loss = ddpg.train(train_iter,max_episodes, max_timesteps, log_interval, env)
     print(testing_loss)
 
 
