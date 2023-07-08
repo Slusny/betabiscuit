@@ -34,7 +34,7 @@ runs = api.runs(entity + "/" + run_args.project)
 # run = api.runs(entity + "/" + project + "/" + args.run_id)
 args = runs[0].config
 
-art = api.artifact(entity + "/" + run_args.project + "/" + run_args.artifact_name, type='model')
+art = api.artifact(entity + "/" + run_args.project + "/" + run_args.artifact, type='model')
 print(art.file())
 artifact_dir = art.download()
 # run = wandb.init(mode='offline')
