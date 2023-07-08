@@ -22,8 +22,7 @@ parser.add_argument('-a','--artifact', type=str, default='model:v4')
 
 args = parser.parse_args()
 
-entity = "betabiscuit", 
-"hockey - ddpg" , 'il0xhoe5' # set to your entity and project
+entity = "betabiscuit"
 
 if args.vir :
     _display = pyvirtualdisplay.Display(visible=True,  # use False with Xvfb
