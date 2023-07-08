@@ -8,12 +8,18 @@ sys.path.insert(0,'./DDPG')
 from DDPG import DDPGAgent
 import wandb
 import numpy as np
+import pyvirtualdisplay
 
+virtual_disp = False
 max_timesteps = 100
 max_episodes = 2
 entity, project, runid = "betabiscuit", "hockey - ddpg" , 'il0xhoe5' # set to your entity and project
 artifact_name = 'model:v4'
 
+if virtual_disp :
+    _display = pyvirtualdisplay.Display(visible=True,  # use False with Xvfb
+                                        size=(1400, 900))
+    _display.start()
 
 api = wandb.Api()
 runs = api.runs(entity + "/" + project)
@@ -61,6 +67,7 @@ if args['algo'] == "ddpg":
         timestep = 0
         total_reward = 0
         for t in range(max_timesteps):
+            env.render()
             timestep += 1
             done = False
             a = agent.act(ob)
@@ -69,6 +76,9 @@ if args['algo'] == "ddpg":
             total_reward+= reward
             ob=ob_new
             if done: break
+
+if virtual_disp :
+    _display.stop()
 
 
 
