@@ -1,6 +1,8 @@
 .ipynb_checkpoints
 .pyc
+*.pyc 
 __pycache__/
+__pycache__
 # ignore results flder
 results/
 # ignore weight and biases folder
@@ -10,3 +12,5 @@ wandb/
 *.sif
 #/singularity/betabiscuit_container_prod.sif/
 #singularity/
+
+artifacts/
