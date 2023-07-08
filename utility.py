@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 import pickle
 import torch
-import wandb
+#import wandb
 import numpy as np
 
 def save_statistics(savepath,algo,env_name,i_episode,rewards=None,lengths=None,train_iter=None, losses=None, eps="Nan",lr="Nan",seed="Nan"):
@@ -50,20 +50,20 @@ def transform_obs(obs,help=False):
             'y vel puck',
             'time left player has puck',
             'time left other player has puck']
-    limits = np.array([[-3,0],
+    limits = np.array([[-3,0], #[4,0] can go behind barrier
+                      [-2,2],  #[3,3]
+                      [-1,1],  #[-1.25,1.25] can overshoot with momentum
+                      [-10,10],
+                      [-10,10],
+                      [-20,20],
+                      [0,3],
                       [-2,2],
                       [-1,1],
                       [-10,10],
                       [-10,10],
                       [-20,20],
-                      [-3,0],
-                      [-2,2],
-                      [-1,1],
-                      [-10,10],
-                      [-10,10],
-                      [-20,20],
-                      [-4,4],
                       [-3,3],
+                      [-2,2],
                       [-60,60],
                       [-60,60],
                       [0,15],
