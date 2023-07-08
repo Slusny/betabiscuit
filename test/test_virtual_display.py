@@ -15,7 +15,9 @@ obs_buffer = []
 reward_buffer=[]
 obs, info = env.reset()
 obs_agent2 = env.obs_agent_two()
+plt.figure()
 img = plt.imshow(env.render(mode='rgb_array'))
+plt.show()
 for k in range(100):
     img.set_data(env.render(mode='rgb_array'))
     display.display(plt.gcf())
