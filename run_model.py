@@ -25,7 +25,7 @@ args = parser.parse_args()
 entity = "betabiscuit", 
 "hockey - ddpg" , 'il0xhoe5' # set to your entity and project
 
-if args.virtual_disp :
+if args.vir :
     _display = pyvirtualdisplay.Display(visible=True,  # use False with Xvfb
                                         size=(1400, 900))
     _display.start()
@@ -86,7 +86,7 @@ if args['algo'] == "ddpg":
             ob=ob_new
             if done: break
 
-if args.virtual_disp :
+if args.vir :
     _display.stop()
 
 
