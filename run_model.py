@@ -20,21 +20,21 @@ parser.add_argument('-r','--run_name', type=str, default="latest")
 parser.add_argument('--run_id', type=str, default="latest")
 parser.add_argument('-a','--artifact', type=str, default='model:v4')
 
-args = parser.parse_args()
+run_args = parser.parse_args()
 
 entity = "betabiscuit"
 
-if args.vir :
+if run_args.vir :
     _display = pyvirtualdisplay.Display(visible=True,  # use False with Xvfb
                                         size=(1400, 900))
     _display.start()
 
 api = wandb.Api()
-runs = api.runs(entity + "/" + args.project)
+runs = api.runs(entity + "/" + run_args.project)
 # run = api.runs(entity + "/" + project + "/" + args.run_id)
 args = runs[0].config
 
-art = api.artifact(entity + "/" + args.project + "/" + args.artifact_name, type='model')
+art = api.artifact(entity + "/" + run_args.project + "/" + run_args.artifact_name, type='model')
 print(art.file())
 artifact_dir = art.download()
 # run = wandb.init(mode='offline')
@@ -70,11 +70,11 @@ if args['algo'] == "ddpg":
     agent.restore_state(state)
     
 
-    for i_episode in range(1, args.max_episodes+1):
+    for i_episode in range(1, run_args.max_episodes+1):
         ob, _info = env.reset()
         timestep = 0
         total_reward = 0
-        for t in range(args.max_timesteps):
+        for t in range(run_args.max_timesteps):
             env.render()
             timestep += 1
             done = False
@@ -85,7 +85,7 @@ if args['algo'] == "ddpg":
             ob=ob_new
             if done: break
 
-if args.vir :
+if run_args.vir :
     _display.stop()
 
 
