@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 import pyvirtualdisplay
 
 
-_display = pyvirtualdisplay.Display(visible=False,  # use False with Xvfb
+_display = pyvirtualdisplay.Display(visible=True,  # use False with Xvfb
                                     size=(1400, 900))
-_ = _display.start()
+_display.start()
 
 env = h_env.HockeyEnv()
 player1 = h_env.BasicOpponent()
@@ -38,3 +38,4 @@ for k in range(100):
 obs_buffer = np.asarray(obs_buffer)
 reward_buffer = np.asarray(reward_buffer)
 env.close()
+_display.stop()
