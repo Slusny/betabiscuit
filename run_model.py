@@ -10,23 +10,32 @@ import wandb
 import numpy as np
 import pyvirtualdisplay
 
-virtual_disp = False
-max_timesteps = 100
-max_episodes = 2
-entity, project, runid = "betabiscuit", "hockey - ddpg" , 'il0xhoe5' # set to your entity and project
-artifact_name = 'model:v4'
 
-if virtual_disp :
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('-v','--vir', action='store_true')
+parser.add_argument('-e','--max_episodes', type=int, default=2)
+parser.add_argument('-t','--max_timesteps', type=int, default=100)
+parser.add_argument('-p','--project', type=str, default="hockey - ddpg")
+parser.add_argument('-r','--run_name', type=str, default="latest")
+parser.add_argument('--run_id', type=str, default="latest")
+parser.add_argument('-a','--artifact', type=str, default='model:v4')
+
+args = parser.parse_args()
+
+entity = "betabiscuit", 
+"hockey - ddpg" , 'il0xhoe5' # set to your entity and project
+
+if args.virtual_disp :
     _display = pyvirtualdisplay.Display(visible=True,  # use False with Xvfb
                                         size=(1400, 900))
     _display.start()
 
 api = wandb.Api()
-runs = api.runs(entity + "/" + project)
-# run = api.runs(entity + "/" + project + "/" + runid)
+runs = api.runs(entity + "/" + args.project)
+# run = api.runs(entity + "/" + project + "/" + args.run_id)
 args = runs[0].config
 
-art = api.artifact(entity + "/" + project + "/" + artifact_name, type='model')
+art = api.artifact(entity + "/" + args.project + "/" + args.artifact_name, type='model')
 print(art.file())
 artifact_dir = art.download()
 # run = wandb.init(mode='offline')
@@ -62,11 +71,11 @@ if args['algo'] == "ddpg":
     agent.restore_state(state)
     
 
-    for i_episode in range(1, max_episodes+1):
+    for i_episode in range(1, args.max_episodes+1):
         ob, _info = env.reset()
         timestep = 0
         total_reward = 0
-        for t in range(max_timesteps):
+        for t in range(args.max_timesteps):
             env.render()
             timestep += 1
             done = False
@@ -77,7 +86,7 @@ if args['algo'] == "ddpg":
             ob=ob_new
             if done: break
 
-if virtual_disp :
+if args.virtual_disp :
     _display.stop()
 
 
