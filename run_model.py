@@ -27,12 +27,12 @@ runs = api.runs(entity + "/" + project)
 args = runs[0].config
 
 art = api.artifact(entity + "/" + project + "/" + artifact_name, type='model')
-print(art.metadata)
+print(art.file())
 artifact_dir = art.download()
 # run = wandb.init(mode='offline')
 # artifact = run.use_artifact('betabiscuit/hockey - ddpg/model:v4', type='model')
 # artifact_dir = artifact.download()
-state = torch.load(artifact_dir)
+state = torch.load(art.file())
 # creating environment
 env_name = args['env_name']
 if env_name == "lunarlander":
