@@ -1,6 +1,6 @@
 # singularity image based on ubuntu docker container
 # functioning version
-
+# how to build: 
 Bootstrap: docker
 From: ubuntu
 
@@ -19,7 +19,7 @@ export WANDB_API_KEY=acba70ec360a08475069be2222a9e630966d3e55
     apt-get install python3 -y
     python3 -V
     apt-get install python3-pip -y
-    apt-get install tigervnc-standalone-server  # to be able to vnc it
+    apt-get install tigervnc-standalone-server -y # to be able to vnc it
     pip3 install pyvirtualdisplay               # virtual display for vnc
     python3 -m pip install /laser-hockey-env
     pip3 install wandb
