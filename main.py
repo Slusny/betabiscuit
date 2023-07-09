@@ -9,7 +9,7 @@ from importlib import reload
 import wandb
 
 # Available arguments for program
-environments_implemented=['pendulum', 'lunarlander', 'hockey']
+environments_implemented=['pendulum', 'lunarlander', 'hockey', 'hockey-train-defence', "hockey-train-shooting"]
 algorithms_implemented = ['ddpg']
 
 # Loggin

@@ -254,7 +254,9 @@ class DDPGAgent(object):
 
             rewards.append(total_reward)
             lengths.append(t)
-            if self.wandb_run : wandb.log({"actor_loss": np.array(losses)[:,0].mean() , "critic_loss": np.array(losses)[:1].mean() , "reward": total_reward, "length":t })
+            if self.wandb_run : 
+                loss_mean_innerloop = np.array(l).mean(axis=0)
+                wandb.log({"actor_loss": loss_mean_innerloop[1] , "critic_loss": loss_mean_innerloop[0] , "reward": total_reward, "length":t })
 
             # save every 500 episodes
             if i_episode % save_interval == 0:
