@@ -26,7 +26,7 @@ entity = "betabiscuit"
 
 if run_args.vir :
     _display = pyvirtualdisplay.Display(visible=True,  # use False with Xvfb
-                                        size=(1400, 900))
+                rfbport=5904, backend="xvnc", size=(700, 450))
     _display.start()
 
 api = wandb.Api()
