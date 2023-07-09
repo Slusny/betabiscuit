@@ -9,7 +9,7 @@ from importlib import reload
 import wandb
 
 # Available arguments for program
-environments_implemented=['pendulum', 'lunarlander', 'hockey', 'hockey-train-defence', "hockey-train-shooting"]
+environments_implemented=['pendulum', 'lunarlander', 'hockey', 'hockey-train-defense', "hockey-train-shooting"]
 algorithms_implemented = ['ddpg']
 
 # Loggin
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     elif env_name == "hockey-train-shooting":
         # reload(h_env)
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
-    elif env_name == "hockey-train-defence":
+    elif env_name == "hockey-train-defense":
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
     else:
         env = gym.make(env_name)
