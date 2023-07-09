@@ -75,7 +75,7 @@ parser.add_argument('--learning_rate_critic', type=float,
 parser.add_argument('--loginterval', type=int,
                     dest='log_interval', default=20,
                     help='print avg reward in the interval')
-parser.add_argument('--save_interval', type=int,
+parser.add_argument('--saveinterval', type=int,
                     dest='save_interval', default=500,
                     help='when to save a backup of the model')
 parser.add_argument('--wandb', action='store_true',
