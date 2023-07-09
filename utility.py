@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 import pickle
 import torch
-#import wandb
+import wandb
 import numpy as np
 
 def save_statistics(savepath,algo,env_name,i_episode,rewards=None,lengths=None,train_iter=None, losses=None, eps="Nan",lr="Nan",seed="Nan"):
