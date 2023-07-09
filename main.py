@@ -75,6 +75,9 @@ parser.add_argument('--learning_rate_critic', type=float,
 parser.add_argument('--loginterval', type=int,
                     dest='log_interval', default=20,
                     help='print avg reward in the interval')
+parser.add_argument('--save_interval', type=int,
+                    dest='save_interval', default=500,
+                    help='when to save a backup of the model')
 parser.add_argument('--wandb', action='store_true',
                     help='use weights and biases')
 parser.add_argument('--notes', type=str, default="",
@@ -125,4 +128,4 @@ if __name__ == "__main__":
     if args.run:
         print("infer")
     else:
-        agent.train(args.train_iter, args.max_episodes, args.max_timesteps, args.log_interval)
+        agent.train(args.train_iter, args.max_episodes, args.max_timesteps, args.log_interval,args.save_interval)

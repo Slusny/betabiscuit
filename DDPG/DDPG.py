@@ -223,7 +223,7 @@ class DDPGAgent(object):
 
         return losses
 
-    def train(self, train_iter, max_episodes, max_timesteps,log_interval):
+    def train(self, train_iter, max_episodes, max_timesteps,log_interval,save_interval):
          # logging variables
         rewards = []
         lengths = []
@@ -249,14 +249,15 @@ class DDPGAgent(object):
                 ob=ob_new
                 if done or trunc: break
 
-            losses.extend(self.train_innerloop(train_iter))
+            l = self.train_innerloop(train_iter)
+            losses.extend(l)
 
             rewards.append(total_reward)
             lengths.append(t)
             if self.wandb_run : wandb.log({"actor_loss": np.array(losses)[:,0].mean() , "critic_loss": np.array(losses)[:1].mean() , "reward": total_reward, "length":t })
 
             # save every 500 episodes
-            if i_episode % 500 == 0:
+            if i_episode % save_interval == 0:
                 save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed,rewards,lengths, losses)
 
             # logging

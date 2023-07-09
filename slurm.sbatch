@@ -54,6 +54,6 @@
 # #sudo apt-get install python3-setuptools
 # pip3 install -r requirements_pip.txt 
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container.sif python3 main.py --algo ddpg --env lunarlander --wandb --maxepisodes 1000 --notes 'run on cluster' --tags 'test'
+singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container2.sif python3 main.py --algo ddpg --env hockey-train-defence --wandb --maxepisodes 100000 --notes 'run on cluster' --tags 'defence only'
 
 echo DONE!
