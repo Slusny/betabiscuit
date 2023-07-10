@@ -19,7 +19,7 @@
 #SBATCH --gres=gpu:1
 #the job can use and see 1 GPUs (4 GPUs are available in total on one node) use SBATCH --gres=gpu:1080ti:1 to explicitly demand a Geforce 1080 Ti GPU. Use SBATCH --gres=gpu:A4000:1 to explicitly demand a RTX A4000 GPU
 
-#SBATCH --time=10:00:00
+#SBATCH --time=23:00:00
 # the maximum time the scripts needs to run
 # "minutes:seconds", "hours:minutes:seconds", "days-hours","days-hours:minutes" and "days-hours:minutes:seconds"
 
@@ -54,6 +54,6 @@
 # #sudo apt-get install python3-setuptools
 # pip3 install -r requirements_pip.txt 
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container2.sif python3 main.py --algo ddpg --env hockey-train-defense --wandb --maxepisodes 20000 --notes 'run on cluster' --tags 'defense only' --saveinterval 2000
+singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container2.sif python3 main.py --algo ddpg --env hockey --wandb --maxepisodes 80000 --notes 'run on cluster' --saveinterval 2000
 
 echo DONE!

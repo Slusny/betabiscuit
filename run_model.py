@@ -9,6 +9,7 @@ from DDPG import DDPGAgent
 import wandb
 import numpy as np
 import pyvirtualdisplay
+import time
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -19,6 +20,7 @@ parser.add_argument('-p','--project', type=str, default="hockey - ddpg")
 parser.add_argument('-r','--run_name', type=str, default="latest")
 parser.add_argument('--run_id', type=str, default="latest")
 parser.add_argument('-a','--artifact', type=str, default='model:v4')
+parser.add_argument('-s','--sleep', type=float, default=0., help="slow down simulation by sleep x seconds")
 
 run_args = parser.parse_args()
 
@@ -53,7 +55,7 @@ elif env_name == "hockey":
 elif env_name == "hockey-train-shooting":
     # reload(h_env)
     env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
-elif env_name == "hockey-train-defence":
+elif env_name == "hockey-train-defense":
     env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
 else:
     env = gym.make(env_name)
@@ -75,6 +77,7 @@ if args['algo'] == "ddpg":
         timestep = 0
         total_reward = 0
         for t in range(run_args.max_timesteps):
+            time.sleep(run_args.sleep)
             env.render()
             timestep += 1
             done = False
