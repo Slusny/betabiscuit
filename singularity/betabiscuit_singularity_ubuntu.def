@@ -1,0 +1,30 @@
+# singularity image based on ubuntu docker container
+# functioning version
+
+Bootstrap: docker
+From: ubuntu
+
+%setup
+cp -r /home/lenny/Downloads/laser-hockey-env ${SINGULARITY_ROOTFS}/laser-hockey-env
+
+%files
+
+%environment
+
+%post
+    apt-get update
+    apt-get upgrade -y
+    apt-get install swig -y
+    apt-get install python3 -y
+    python3 -V
+    apt-get install python3-pip -y
+    python3 -m pip install /laser-hockey-env
+    pip3 install wandb
+    pip3 install torch torchvision torchaudio
+
+
+
+%test
+    python3 -V
+    pip3 -V
+    cat /etc/os-release

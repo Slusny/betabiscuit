@@ -1,0 +1,25 @@
+# singularity container based on pytorch container ... can't build box2d
+# use betabiscuit_singularity_ubuntu.def instead
+
+Bootstrap: docker
+From: pytorch/pytorch
+
+%setup
+cp -r /home/lenny/Downloads/laser-hockey-env ${SINGULARITY_ROOTFS}/laser-hockey-env
+
+%files
+
+
+%environment
+
+%post
+    apt-get update
+    apt-get upgrade -y
+    apt-get install swig -y
+    pip install wandb
+    python -m pip install /laser-hockey-env
+
+%test
+    python -V
+    pip -V
+    cat /etc/os-release
