@@ -1,4 +1,5 @@
 import torch
+import sys
 import torch.nn as nn
 from torch.distributions import MultivariateNormal
 import numpy as np
@@ -10,6 +11,8 @@ import os
 import wandb
 import memory as mem
 from feedforward import Feedforward
+sys.path.append('..')
+from utility import save_checkpoint
 
 import laserhockey.hockey_env as h_env
 
@@ -151,7 +154,7 @@ class DDPGAgent(object):
         self.train_iter = 0
 
         self.wandb_run = wandb_run
-        if(wandb_run):
+        if(wandb_run): # log gradients to W&B
             wandb.watch(self.Q, log_freq=100)
             wandb.watch(self.policy, log_freq=100)
 
@@ -220,8 +223,7 @@ class DDPGAgent(object):
 
         return losses
 
-    def train(self, train_iter, max_episodes, max_timesteps,log_interval, env):
-        print("hello")
+    def train(self, train_iter, max_episodes, max_timesteps,log_interval,save_interval):
          # logging variables
         rewards = []
         lengths = []
@@ -230,25 +232,12 @@ class DDPGAgent(object):
         lr = self._config['learning_rate_actor']
         update_target_every=self._config['update_target_every']
 
-
-        def save_statistics():
-            with open(os.path.join(self.savepath,f"DDPG_{self.env_name}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}-stat.pkl"), 'wb') as f:
-                pickle.dump({"rewards" : rewards, "lengths": lengths, "eps": self._eps, "train": train_iter,
-                            "lr": lr, "update_every":update_target_every , "losses": losses}, f)
-
-        def wandb_save_model(savepath):
-            artifact = wandb.Artifact('model', type='model')
-            artifact.add_file(savepath)
-            self.wandb_run.log_artifact(artifact)
-
         # training loop
         for i_episode in range(1, max_episodes+1):
             ob, _info = self.env.reset()
             self.reset()
             total_reward=0
             for t in range(max_timesteps):
-                if i_episode > 18000:
-                    env.render()
                 timestep += 1
                 done = False
                 a = self.act(ob)
@@ -260,31 +249,27 @@ class DDPGAgent(object):
                 ob=ob_new
                 if done or trunc: break
 
-            losses.extend(self.train_innerloop(train_iter))
+            l = self.train_innerloop(train_iter)
+            losses.extend(l)
 
             rewards.append(total_reward)
             lengths.append(t)
-            if self.wandb_run : wandb.log({"actor_loss": np.array(losses)[:,0].mean() , "critic_loss": np.array(losses)[:1].mean() , "reward": total_reward, "length":t })
+            if self.wandb_run :
+                loss_mean_innerloop = np.array(l).mean(axis=0)
+                wandb.log({"actor_loss": loss_mean_innerloop[1] , "critic_loss": loss_mean_innerloop[0] , "reward": total_reward, "length":t })
 
             # save every 500 episodes
-            if i_episode % 500 == 0:
-                print("########## Saving a checkpoint... ##########")
-                savepath = os.path.join(self.savepath,f'DDPG_{self.env_name}_{i_episode}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}.pth')
-                torch.save(self.state(), savepath )
-                if self.wandb_run : wandb_save_model(savepath)
-                save_statistics()
+            if i_episode % save_interval == 0:
+                point(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed,rewards,lengths, losses)
 
             # logging
             if i_episode % log_interval == 0:
                 avg_reward = np.mean(rewards[-log_interval:])
                 avg_length = int(np.mean(lengths[-log_interval:]))
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
-        savepath = os.path.join(self.savepath,f'DDPG_{self.env_name}_{i_episode}-eps{self._eps}-t{train_iter}-l{lr}-s{self.seed}.pth')
-        save_statistics()
-        
-        if self.wandb_run : wandb_save_model(savepath)
 
-        env.close()
+        if i_episode % 500 != 0: save_checkpoint(self.state(),self.savepath,"DDPG",self.env_name, i_episode,True, self.wandb_run, self._eps, train_iter, lr, self.seed,rewards,lengths, losses)
+
         return losses
 
 
@@ -367,7 +352,7 @@ def main():
         #     ob=ob_new
         #     if done or trunc: break
 
-    testing_loss = ddpg.train(train_iter,max_episodes, max_timesteps, log_interval, env)
+    testing_loss = ddpg.train(train_iter,max_episodes, max_timesteps, log_interval)
     print(testing_loss)
 
 
