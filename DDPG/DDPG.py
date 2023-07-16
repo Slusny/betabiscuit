@@ -17,7 +17,6 @@ from utility import save_checkpoint
 import laserhockey.hockey_env as h_env
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-torch.set_num_threads(1)
 
 class UnsupportedSpace(Exception):
     """Exception raised when the Sensor or Action space are not compatible
