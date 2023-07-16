@@ -234,21 +234,33 @@ class DDPGAgent(object):
         lr = self._config['learning_rate_actor']
         update_target_every=self._config['update_target_every']
 
+        def rollrep(arr,arr2):
+            # roll and replace: roll the array and replace the first row with arr2
+            arr = np.roll(arr,axis=0, shift=1)
+            arr[0,:] = arr2
+            return arr 
+
         # training loop
         for i_episode in range(1, max_episodes+1):
             ob, _info = self.env.reset()
+            a2 = [0,0.,0,0]
+            past_obs = np.tile(ob,(self._config["past_states"],1)) # past_obs is a stack of past observations of shape (past_states, obs_dim)
+            for past in range(self._config["past_states"]-1):
+                a = self.act(past_obs.flatten())
+                ob_past, _info = self.env.step(np.hstack([a,a2]))
+                past_obs = rollrep(past_obs,ob_past)
             self.reset()
             total_reward=0
             for t in range(max_timesteps):
                 timestep += 1
                 done = False
-                a = self.act(ob)
-                a2 = [0,0.,0,0]
+                a = self.act(past_obs.flatten())
 
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
-                self.store_transition((ob, a, reward, ob_new, done))
-                ob=ob_new
+                self.store_transition((past_obs.flatten(), a, reward, rollrep(past_obs,ob_new).flatten(), done))
+                # ob=ob_new
+                past_obs = rollrep(past_obs,ob_new)
                 if done or trunc: break
 
             l = self.train_innerloop(train_iter)
