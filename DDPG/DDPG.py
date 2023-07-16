@@ -245,18 +245,19 @@ class DDPGAgent(object):
         for i_episode in range(1, max_episodes+1):
             ob, _info = self.env.reset()
             a2 = [0,0.,0,0]
+            done = False; trunc = False;
             past_obs = np.tile(ob,(self._config["past_states"],1)) # past_obs is a stack of past observations of shape (past_states, obs_dim)
             for past in range(self._config["past_states"]-1):
                 a = self.act(past_obs.flatten())
-                ob_past, _info = self.env.step(np.hstack([a,a2]))
+                (ob_past, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 past_obs = rollrep(past_obs,ob_past)
+                if done or trunc: break
             self.reset()
             total_reward=0
             for t in range(max_timesteps):
+                if done or trunc: break
                 timestep += 1
-                done = False
                 a = self.act(past_obs.flatten())
-
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
                 self.store_transition((past_obs.flatten(), a, reward, rollrep(past_obs,ob_new).flatten(), done))

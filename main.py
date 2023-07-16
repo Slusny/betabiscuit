@@ -38,10 +38,10 @@ parser.add_argument('-l', '--lr', type=float,
 parser.add_argument('-n', '--eps',action='store',  type=float,
                     dest='eps',default=0.1,
                     help='Policy noise')
-parser.add_argument('--maxepisodes', type=int,
+parser.add_argument('--max_episodes', type=int,
                     dest='max_episodes', default=2000,
                     help='number of episodes')
-parser.add_argument('--maxtimesteps', type=int,
+parser.add_argument('--max_timesteps', type=int,
                     dest='max_timesteps', default=2000,
                     help='max timesteps in one episode')
 parser.add_argument('-u', '--update', type=float,
@@ -74,10 +74,10 @@ parser.add_argument('--past_states', type=int,
 
 
 # Logging
-parser.add_argument('--loginterval', type=int,
+parser.add_argument('--log_interval', type=int,
                     dest='log_interval', default=20,
                     help='print avg reward in the interval')
-parser.add_argument('--saveinterval', type=int,
+parser.add_argument('--save_interval', type=int,
                     dest='save_interval', default=500,
                     help='when to save a backup of the model')
 parser.add_argument('--wandb', action='store_true',
