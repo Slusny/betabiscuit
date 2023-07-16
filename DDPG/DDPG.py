@@ -115,7 +115,8 @@ class DDPGAgent(object):
             "hidden_sizes_actor": [128,128],
             "hidden_sizes_critic": [128,128,64],
             "update_target_every": 100,
-            "use_target_net": True
+            "use_target_net": True,
+            "past_states": 1
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -125,26 +126,26 @@ class DDPGAgent(object):
         self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
         # Q Network
-        self.Q = QFunction(observation_dim=self._obs_dim,
+        self.Q = QFunction(observation_dim=self._obs_dim*self._config["past_states"],
                            action_dim=self._action_n,
                            hidden_sizes= self._config["hidden_sizes_critic"],
-                           learning_rate = self._config["learning_rate_critic"])
+                           learning_rate = self._config["learning_rate_critic"]).to(device)
         # target Q Network
-        self.Q_target = QFunction(observation_dim=self._obs_dim,
+        self.Q_target = QFunction(observation_dim=self._obs_dim*self._config["past_states"],
                                   action_dim=self._action_n,
                                   hidden_sizes= self._config["hidden_sizes_critic"],
-                                  learning_rate = 0)
+                                  learning_rate = 0).to(device)
 
-        self.policy = Feedforward(input_size=self._obs_dim,
+        self.policy = Feedforward(input_size=self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_actor"],
                                   output_size=self._action_n,
                                   activation_fun = torch.nn.ReLU(),
-                                  output_activation = torch.nn.Tanh())
-        self.policy_target = Feedforward(input_size=self._obs_dim,
+                                  output_activation = torch.nn.Tanh()).to(device)
+        self.policy_target = Feedforward(input_size=self._obs_dim*self._config["past_states"],
                                          hidden_sizes= self._config["hidden_sizes_actor"],
                                          output_size=self._action_n,
                                          activation_fun = torch.nn.ReLU(),
-                                         output_activation = torch.nn.Tanh())
+                                         output_activation = torch.nn.Tanh()).to(device)
 
         self._copy_nets()
 
@@ -172,6 +173,7 @@ class DDPGAgent(object):
         return action
 
     def store_transition(self, transition):
+        transition = transition.to(device) # cuda change
         self.buffer.add_transition(transition)
 
     def state(self):

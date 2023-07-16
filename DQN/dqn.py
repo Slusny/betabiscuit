@@ -8,9 +8,12 @@ import pylab as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import laserhockey.hockey_env as h_env
-
+import wandb
 import memory as mem
 from feedforward import Feedforward
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+torch.set_num_threads(1)
 
 def running_mean(x, N):
     cumsum = np.cumsum(np.insert(x, 0, 0))
@@ -49,14 +52,17 @@ class QFunction(Feedforward):
                                         eps=0.000001)
         self.loss = torch.nn.SmoothL1Loss() # MSELoss()
 
-    def fit(self, observations, actions, targets):
+    def fit(self, observations, actions, targets, weights = None):
         self.train() # put model in training mode
         self.optimizer.zero_grad()
         # Forward pass
         acts = torch.from_numpy(actions)
         pred = self.Q_value(torch.from_numpy(observations).float(), acts)
         # Compute Loss
-        loss = self.loss(pred, torch.from_numpy(targets).float())
+        if weights is None:
+            weights = torch.ones_like(pred)
+
+        loss = self.loss(pred*weights, torch.from_numpy(targets).float()*weights)
 
         # Backward pass
         loss.backward()
@@ -96,17 +102,28 @@ class DQNAgent(object):
             "batch_size": 128,
             "learning_rate": 0.0002,
             "update_target_every": 20,
-            "use_target_net":True
+            "tau": 0.01,
+            "use_hard_updates":True,
+            "double":False,
+            "priority": False,
+            "wandb": False
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
+        self.tau = self._config["tau"]
 
-        self.buffer = mem.Memory(max_size=self._config["buffer_size"])
+
+        if self._config['priority']:
+            self.buffer = mem.PrioritizedReplayBuffer(self._config["buffer_size"])
+        else:
+            self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
         # Q Network
         self.Q = QFunction(observation_dim=self._observation_space.shape[0],
                            action_dim=self._action_n,
                            learning_rate = self._config["learning_rate"])
+
+
         # Q Network
         self.Q_target = QFunction(observation_dim=self._observation_space.shape[0],
                                   action_dim=self._action_n,
@@ -114,8 +131,21 @@ class DQNAgent(object):
         self._update_target_net()
         self.train_iter = 0
 
+        if(self._config["wandb"]): # log gradients to W&B
+            # start a new wandb run to track this script
+            wandb.init(
+                # set the wandb project where this run will be logged
+                project="dqn-test",
+            )
+            wandb.watch(self.Q, log_freq=100)
+
+
     def _update_target_net(self):
         self.Q_target.load_state_dict(self.Q.state_dict())
+
+    def soft_update_target_net(self):
+        for target_param, param in zip(self.Q_target.parameters(), self.Q.parameters()):
+            target_param.data.copy_(self.tau * param + (1 - self.tau) * target_param)
 
     def act(self, observation, eps=None):
         if eps is None:
@@ -130,35 +160,58 @@ class DQNAgent(object):
     def store_transition(self, transition):
         self.buffer.add_transition(transition)
 
+
     def train(self, iter_fit=32):
         losses = []
         self.train_iter+=1
-        if self._config["use_target_net"] and self.train_iter % self._config["update_target_every"] == 0:
+
+        if self._config["use_hard_updates"] and self.train_iter % self._config["update_target_every"] == 0:
             self._update_target_net()
+
         for i in range(iter_fit):
 
             # sample from the replay buffer
-            data=self.buffer.sample(batch=self._config['batch_size'])
+            if isinstance(self.buffer, mem.PrioritizedReplayBuffer):
+                data, weights, tree_idxs = self.buffer.sample(self._config['batch_size'])
+            else:
+                data=self.buffer.sample(batch=self._config['batch_size'])
+
             s = np.stack(data[:,0]) # s_t
             a = np.stack(data[:,1]) # a_t
             rew = np.stack(data[:,2])[:,None] # rew  (batchsize,1)
             s_prime = np.stack(data[:,3]) # s_t+1
             done = np.stack(data[:,4])[:,None] # done signal  (batchsize,1)
 
-            if self._config["use_target_net"]:
-                v_prime = self.Q_target.maxQ(s_prime)
+            if self._config["double"]:
+                acts = torch.from_numpy(self.Q_target.greedyAction(s_prime))
+                v_prime = self.Q.Q_value(torch.from_numpy(s_prime).float(), acts).cpu().detach().numpy()
             else:
-                v_prime = self.Q.maxQ(s_prime)
+                v_prime = self.Q_target.maxQ(s_prime)
+
             # target
             gamma=self._config['discount']
             td_target = rew + gamma * (1.0-done) * v_prime
 
-            # optimize the lsq objective
-            fit_loss = self.Q.fit(s, a, td_target)
+            if isinstance(self.buffer, mem.PrioritizedReplayBuffer):
+
+                pred = self.Q.Q_value(torch.from_numpy(s).float(), torch.from_numpy(a)).detach().numpy()
+                # Compute TD error
+                td_error = np.abs(pred - td_target)
+                self.buffer.update_priorities(tree_idxs, td_error)
+
+                fit_loss = self.Q.fit(s, a, td_target, weights = weights)
+
+            else:
+                # optimize the lsq objective
+                fit_loss = self.Q.fit(s, a, td_target)
+
+            if not self._config["use_hard_updates"]:
+                self.soft_update_target_net()
 
             losses.append(fit_loss)
 
         return losses
+
 
 def discrete_to_continous_action(discrete_action, env):
     ''' converts discrete actions into continuous ones (for each player)
@@ -197,99 +250,110 @@ def continuous_to_discrete_action(continuous_action, map):
 
     return map[tuple(continuous_action)]
 
-def main():
+def run(ddqn=False, guided=False, exploration=False):
 
-
-
-    env_name = 'Pendulum-v1'
+    env_name = 'hockey'
     # env_name = 'CartPole-v0'
 
-    env = gym.make(env_name)
-    env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
-    # if isinstance(env.action_space, spaces.Box):
-    #     print("test")
-    #     env = DiscreteActionWrapper(env,5)
+    if env_name == "hockey":
+        env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
+        action_map = {}
+        for i in range(0,12):
+            action_map[tuple(discrete_to_continous_action(i, env))] = i
+        ac_space = spaces.Discrete(len(action_map))
+    else:
+        env = gym.make(env_name)
+        if isinstance(env.action_space, spaces.Box):
+            env = DiscreteActionWrapper(env,5)
+        ac_space = env.action_space
 
-    action_map = {}
-    for i in range(0,12):
-        action_map[tuple(discrete_to_continous_action(i, env))] = i
-
-
-
-    ac_space = spaces.Discrete(14)
-    # ac_space = env.action_space
     o_space = env.observation_space
     print(ac_space)
     print(o_space)
     print(list(zip(env.observation_space.low, env.observation_space.high)))
 
+    if ddqn:
+        hard_updates= False
+    else:
+        hard_updates = True
 
-    o, info = env.reset()
-    _ = env.render()
-
-    use_target = True
     target_update = 20
-    q_agent = DQNAgent(o_space, ac_space, discount=0.95, eps=0.1,
-                       use_target_net=use_target, update_target_every= target_update)
+    tau = 0.1
+    wandb = False
 
+    q_agent = DQNAgent(o_space, ac_space, discount=0.95, eps=0.1,
+                       use_hard_updates = hard_updates, tau = tau, update_target_every= target_update, double=True, priority=True,
+                        wandb = wandb)
 
     ob,_info = env.reset()
 
     stats = []
     losses = []
 
-    max_episodes=2000
+    max_episodes=1000
     max_steps=60
     for i in range(max_episodes):
         # print("Starting a new episode")
         total_reward = 0
         ob, _info = env.reset()
         for t in range(max_steps):
-            if i > 1600:
-                env.render()
-            done = False
-            if np.random.random() > .1:
-                a = q_agent.act(ob)
+            # if i > 2000:
+            #     env.render()
+            # done = False
+
+            a = q_agent.act(ob)
+            a_step = a
+            if env_name == "hockey":
+                # if np.random.random() > .1:
+
                 a1 = env.discrete_to_continous_action(a)
-            else:
-                pos = np.array((ob[0], ob[1]))
-                puck = np.array((ob[12], ob[13]))
+                # else:
+                #     pos = np.array((ob[0], ob[1]))
+                #     puck = np.array((ob[12], ob[13]))
+                #
+                #     vel = puck - pos
+                #
+                #     if vel[0] >= .3:
+                #         vel[0] = 1
+                #     elif vel[0] <= -.3:
+                #         vel[0] = -1
+                #     else:
+                #         vel[0] = 0
+                #
+                #     if vel[1] >= .3:
+                #         vel[1] = 1
+                #     elif vel[1] <= -.3:
+                #         vel[1] = -1
+                #     else:
+                #         vel[1] = 0
+                #
+                #
+                #     a1 = [vel[0], vel[1], 0, 0]
+                #
+                #     a = continuous_to_discrete_action(a1, action_map)
 
-                vel = puck - pos
+                    # print(continuous_to_discrete_action(a1))
+                a2 = [0,0.,0,0]
+                a_step = np.hstack([a1,a2])
 
-                if vel[0] >= .3:
-                    vel[0] = 1
-                elif vel[0] <= -.3:
-                    vel[0] = -1
-                else:
-                    vel[0] = 0
-
-                if vel[1] >= .3:
-                    vel[1] = 1
-                elif vel[1] <= -.3:
-                    vel[1] = -1
-                else:
-                    vel[1] = 0
-
-
-                a1 = [vel[0], vel[1], 0, 0]
-
-                a = continuous_to_discrete_action(a1, action_map)
-
-                # print(continuous_to_discrete_action(a1))
-            a2 = [0,0.,0,0]
-            a_step = np.hstack([a1,a2])
-            # a = q_agent.act(ob)
             (ob_new, reward, done, trunc, _info) = env.step(a_step)
-            obs_agent2 = env.obs_agent_two()
+
+            if env_name == "hockey":
+                obs_agent2 = env.obs_agent_two()
+
             total_reward+= reward
-            q_agent.store_transition((ob, a, reward, ob_new, done))
+            q_agent.store_transition((ob, a, reward, ob_new, done, True))
             ob=ob_new
             if done: break
-        losses.extend(q_agent.train(32))
+        loss = q_agent.train(32)
+        losses.extend(loss)
         stats.append([i,total_reward,t+1])
 
+        if wandb:
+            wandb.log({"loss": loss[len(loss)-1] , "reward": total_reward, "length":t })
+
         if ((i-1)%20==0):
+            print("{}: Done after {} steps. Loss: {}".format(i, t+1, loss[len(loss)-1]))
             print("{}: Done after {} steps. Reward: {}".format(i, t+1, total_reward))
 
     print(stats)
@@ -297,7 +361,7 @@ def main():
     losses_np = np.asarray(losses)
     fig=plt.figure(figsize=(6,3.8))
     plt.plot(stats_np[:,1], label="return")
-    plt.plot(running_mean(stats_np[:,1],500), label="smoothed-return")
+    plt.plot(running_mean(stats_np[:,1],200), label="smoothed-return")
     plt.legend()
     plt.show()
 
@@ -306,7 +370,8 @@ def main():
     env.close()
 
 
-
+def main():
+    run(ddqn=True)
 
 
 if __name__ == '__main__':
