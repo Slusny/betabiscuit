@@ -173,7 +173,7 @@ class DDPGAgent(object):
         return action
 
     def store_transition(self, transition):
-        transition = transition.to(device) # cuda change
+        transition = transition
         self.buffer.add_transition(transition)
 
     def state(self):
@@ -188,7 +188,7 @@ class DDPGAgent(object):
         self.action_noise.reset()
 
     def train_innerloop(self, iter_fit=32):
-        to_torch = lambda x: torch.from_numpy(x.astype(np.float32))
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
         losses = []
         self.train_iter+=1
         if self._config["use_target_net"] and self.train_iter % self._config["update_target_every"] == 0:
