@@ -23,4 +23,4 @@ class Feedforward(torch.nn.Module):
 
     def predict(self, x):
         with torch.no_grad():
-            return self.forward(torch.from_numpy(x.astype(np.float32))).numpy()
+            return self.forward(x).numpy()

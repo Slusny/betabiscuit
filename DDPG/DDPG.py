@@ -167,6 +167,7 @@ class DDPGAgent(object):
         if eps is None:
             eps = self._eps
         #
+        observation = torch.from_numpy(observation.astype(np.float32)).to(device) 
         action = self.policy.predict(observation) + eps*self.action_noise()  # action in -1 to 1 (+ noise)
         action = self._action_space.low + (action + 1.0) / 2.0 * (self._action_space.high - self._action_space.low)
         return action
@@ -254,7 +255,7 @@ class DDPGAgent(object):
             for t in range(max_timesteps):
                 timestep += 1
                 done = False
-                a = self.act(to_torch(past_obs.flatten())).numpy()
+                a = self.act(past_obs.flatten())
 
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
