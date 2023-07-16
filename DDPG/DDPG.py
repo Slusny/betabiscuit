@@ -225,6 +225,7 @@ class DDPGAgent(object):
         return losses
 
     def train(self, train_iter, max_episodes, max_timesteps,log_interval,save_interval):
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
          # logging variables
         rewards = []
         lengths = []
@@ -253,7 +254,7 @@ class DDPGAgent(object):
             for t in range(max_timesteps):
                 timestep += 1
                 done = False
-                a = self.act(past_obs.flatten())
+                a = self.act(to_torch(past_obs.flatten()))
 
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
