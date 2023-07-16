@@ -254,7 +254,7 @@ class DDPGAgent(object):
             for t in range(max_timesteps):
                 timestep += 1
                 done = False
-                a = self.act(to_torch(past_obs.flatten()))
+                a = self.act(to_torch(past_obs.flatten())).numpy()
 
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
