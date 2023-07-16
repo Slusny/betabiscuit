@@ -69,6 +69,8 @@ parser.add_argument('--learning_rate_actor', type=float,
                     default=0.00001)
 parser.add_argument('--learning_rate_critic', type=float,
                     default=0.0001)
+parser.add_argument('--past_states', type=int,
+                    default=1)
 
 
 # Logging
@@ -123,7 +125,8 @@ if __name__ == "__main__":
         agent = DDPGAgent(env, env_name, args.seed, args.savepath, wandb_run,
                         eps = args.eps, 
                         learning_rate_actor = args.lr,
-                        update_target_every = args.update_every)
+                        update_target_every = args.update_every,
+                        past_states = args.past_states)
     
     if args.run:
         print("infer")

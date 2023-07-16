@@ -17,12 +17,12 @@ def wandb_save_model(wandb_run,savepath):
     artifact.add_file(savepath)
     wandb_run.log_artifact(artifact)
 
-def save_checkpoint(torch_state,savepath,algo,env_name,i_episode,wandb=True,wandb_run=None,eps="Nan",train_iter="Nan",lr="Nan",seed="Nan",rewards=None,lengths=None, losses=None):
+def save_checkpoint(torch_state,savepath,algo,env_name,i_episode,wandb_run=None,eps="Nan",train_iter="Nan",lr="Nan",seed="Nan",rewards=None,lengths=None, losses=None):
     print("########## Saving a checkpoint... ##########")
     date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
     savepath_checkpoint = os.path.join(savepath,f'{algo}_{env_name}_{i_episode}-eps{eps}-t{train_iter}-l{lr}-s{seed}-{date_str}.pth')
     torch.save(torch_state, savepath_checkpoint)
-    if wandb : wandb_save_model(wandb_run,savepath_checkpoint)
+    if wandb_run : wandb_save_model(wandb_run,savepath_checkpoint)
     save_statistics(savepath,algo,env_name,i_episode,rewards,lengths,train_iter, losses, eps,lr,seed)
 
 def restore_from_wandb(str):
