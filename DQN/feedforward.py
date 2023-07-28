@@ -12,14 +12,27 @@ class Feedforward(torch.nn.Module):
         layer_sizes = [self.input_size] + self.hidden_sizes
         self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
         self.activations = [ torch.nn.Tanh() for l in  self.layers ]
-        self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
+        # self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
+
+        self.feauture_layer = torch.nn.Sequential(
+            torch.nn.Linear(self.input_size, 256),
+            torch.nn.Tanh(),
+            torch.nn.Linear(256, 128),
+            torch.nn.Tanh(),
+            torch.nn.Linear(128, 128),
+            torch.nn.Tanh()
+        )
+
+        self.readout = torch.nn.Linear(128, self.output_size)
 
         self.adv_output_size = 1
         self.adv_readout = torch.nn.Linear(self.hidden_sizes[-1], self.adv_output_size)
 
     def forward(self, x):
-        for layer,activation_fun in zip(self.layers, self.activations):
-            x = activation_fun(layer(x))
+        # for layer,activation_fun in zip(self.layers, self.activations):
+        #     x = activation_fun(layer(x))
+
+        x = self.feauture_layer(x)
 
         return self.readout(x)
 
@@ -35,10 +48,12 @@ class DuelingDQN(torch.nn.Module):
         self.output_dim = output_size
 
         self.feauture_layer = torch.nn.Sequential(
-            torch.nn.Linear(self.input_dim, 128),
-            torch.nn.ReLU(),
+            torch.nn.Linear(self.input_dim, 256),
+            torch.nn.Tanh(),
+            torch.nn.Linear(256, 128),
+            torch.nn.Tanh(),
             torch.nn.Linear(128, 128),
-            torch.nn.ReLU()
+            torch.nn.Tanh()
         )
 
         self.value_stream = torch.nn.Sequential(
