@@ -77,7 +77,7 @@ class OUNoise():
     def reset(self) -> None:
         self.noise_prev = np.zeros(self._shape)
 
-class DDPGAgent(object):
+class TD3Agent(object):
     """
     Agent implementing Q-learning with NN function approximation.
     """
@@ -240,20 +240,11 @@ class DDPGAgent(object):
             arr = np.roll(arr,axis=0, shift=1)
             arr[0,:] = arr2
             return arr 
-        
-        if (self.env_name == "hockey"):
-            self.player = h_env.BasicOpponent()
-
-        def opponent_action(obs):
-            if (self.env_name == "hockey"):
-                return self.player.act(obs)
-            else:
-                return np.array([0,0.,0,0])
 
         # training loop
         for i_episode in range(1, max_episodes+1):
             ob, _info = self.env.reset()
-            a2 = opponent_action(ob)
+            a2 = [0,0.,0,0]
             done = False; trunc = False;
             past_obs = np.tile(ob,(self._config["past_states"],1)) # past_obs is a stack of past observations of shape (past_states, obs_dim)
             for past in range(self._config["past_states"]-1):
@@ -267,7 +258,6 @@ class DDPGAgent(object):
                 if done or trunc: break
                 timestep += 1
                 a = self.act(past_obs.flatten())
-                a2 = opponent_action(past_obs[-1])
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
                 self.store_transition((past_obs.flatten(), a, reward, rollrep(past_obs,ob_new).flatten(), done))
