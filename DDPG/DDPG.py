@@ -235,7 +235,6 @@ class DDPGAgent(object):
         losses = []
         timestep = 0
         lr = self._config['learning_rate_actor']
-        update_target_every=self._config['update_target_every']
 
         # def rollrep(arr,arr2):
         #     # roll and replace: roll the array and replace the first row with arr2
@@ -243,9 +242,9 @@ class DDPGAgent(object):
         #     arr[0,:] = arr2
         #     return arr 
 
-        def add_acceleration(obs,pastobs):
-            filter_index = [3,4,5,9,10,11,14,15]
-            return np.append(obs,(obs-pastobs)[filter_index])
+        def add_derivative(obs,pastobs):
+            # filter_index = [3,4,5,9,10,11,14,15]
+            return np.append(obs,(obs-pastobs)[self._config["derivative_indices"]])
         
         if (self.env_name == "hockey"):
             self.player = h_env.BasicOpponent()
@@ -277,8 +276,8 @@ class DDPGAgent(object):
             for t in range(max_timesteps):
                 # if done or trunc: break
                 timestep += 1
-                if self._config["acceleration_variables"] > 0:  a = self.act(add_acceleration(ob,past_obs))
-                else :                                          a = self.act(ob)
+                if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
+                else :                          a = self.act(ob)
                 a2 = opponent_action(ob)
                 # a = self.act(past_obs.flatten())
                 # a2 = opponent_action(past_obs[-1])
