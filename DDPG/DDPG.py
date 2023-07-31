@@ -285,7 +285,8 @@ class DDPGAgent(object):
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
                 
-                self.store_transition((ob, a, reward, ob_new, done))
+                self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
+                past_obs = ob
                 ob=ob_new
 
                 # self.store_transition((past_obs.flatten(), a, reward, rollrep(past_obs,ob_new).flatten(), done))
