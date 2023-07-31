@@ -85,7 +85,7 @@ architecture.add_argument('--hidden_sizes_critic', type=str,
                     default='[128,128,64]')
 # architecture.add_argument('--past_states', type=int,
 #                     default=1)
-architecture.add_argument('--use_derivative',action='store',  type=float,
+architecture.add_argument('--use_derivative',action='store_true', 
                     help='calculate the derivative of the state variables. If the velocity is available this will calculate the acceleration')
 
 
