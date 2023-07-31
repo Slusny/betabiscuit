@@ -275,7 +275,7 @@ class DDPGAgent(object):
             self.reset()
             total_reward=0
             for t in range(max_timesteps):
-                if done or trunc: break
+                # if done or trunc: break
                 timestep += 1
                 if self._config["acceleration_variables"] > 0:  a = self.act(add_acceleration(ob,past_obs))
                 else :                                          a = self.act(ob)
