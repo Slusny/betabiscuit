@@ -2,18 +2,21 @@ import torch
 import numpy as np
 
 class Feedforward(torch.nn.Module):
-    def __init__(self, input_size, hidden_sizes, output_size, activation_fun=torch.nn.Tanh(), output_activation=None):
+    def __init__(self, input_size, hidden_sizes, output_size, activation_fun=torch.nn.Tanh(), output_activation=None, batchnorm=False):
         super(Feedforward, self).__init__()
         self.input_size = input_size
         self.hidden_sizes  = hidden_sizes
         self.output_size  = output_size
+        self.use_batchnorm = batchnorm
         self.output_activation = output_activation
         layer_sizes = [self.input_size] + self.hidden_sizes
         self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
         self.activations = [ activation_fun for l in  self.layers ]
         self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
+        self.batchnorm = torch.nn.BatchNorm1d(input_size)
 
     def forward(self, x):
+        if self.batchnorm: x = self.batchnorm(x)
         for layer,activation_fun in zip(self.layers, self.activations):
             x = activation_fun(layer(x))
         if self.output_activation is not None:

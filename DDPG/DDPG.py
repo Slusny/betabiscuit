@@ -115,7 +115,8 @@ class DDPGAgent(object):
             "hidden_sizes_critic": [128,128,64],
             "update_target_every": 100,
             "use_target_net": True,
-            "past_states": 1
+            # "past_states": 1,
+            "acceleration_variables": 8
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -125,22 +126,22 @@ class DDPGAgent(object):
         self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
         # Q Network
-        self.Q = QFunction(observation_dim=self._obs_dim*self._config["past_states"],
+        self.Q = QFunction(observation_dim=self._obs_dim+self._config["acceleration_variables"],#self._obs_dim*self._config["past_states"],
                            action_dim=self._action_n,
                            hidden_sizes= self._config["hidden_sizes_critic"],
                            learning_rate = self._config["learning_rate_critic"]).to(device)
         # target Q Network
-        self.Q_target = QFunction(observation_dim=self._obs_dim*self._config["past_states"],
+        self.Q_target = QFunction(observation_dim=self._obs_dim+self._config["acceleration_variables"],#self._obs_dim*self._config["past_states"],
                                   action_dim=self._action_n,
                                   hidden_sizes= self._config["hidden_sizes_critic"],
                                   learning_rate = 0).to(device)
 
-        self.policy = Feedforward(input_size=self._obs_dim*self._config["past_states"],
+        self.policy = Feedforward(input_size=self._obs_dim+self._config["acceleration_variables"],#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_actor"],
                                   output_size=self._action_n,
                                   activation_fun = torch.nn.ReLU(),
                                   output_activation = torch.nn.Tanh()).to(device)
-        self.policy_target = Feedforward(input_size=self._obs_dim*self._config["past_states"],
+        self.policy_target = Feedforward(input_size=self._obs_dim+self._config["acceleration_variables"],#self._obs_dim*self._config["past_states"],
                                          hidden_sizes= self._config["hidden_sizes_actor"],
                                          output_size=self._action_n,
                                          activation_fun = torch.nn.ReLU(),
@@ -235,11 +236,15 @@ class DDPGAgent(object):
         lr = self._config['learning_rate_actor']
         update_target_every=self._config['update_target_every']
 
-        def rollrep(arr,arr2):
-            # roll and replace: roll the array and replace the first row with arr2
-            arr = np.roll(arr,axis=0, shift=1)
-            arr[0,:] = arr2
-            return arr 
+        # def rollrep(arr,arr2):
+        #     # roll and replace: roll the array and replace the first row with arr2
+        #     arr = np.roll(arr,axis=0, shift=1)
+        #     arr[0,:] = arr2
+        #     return arr 
+
+        def add_acceleration(obs,pastobs):
+            filter_index = [3,4,5,9,10,11,14,15]
+            return np.append(obs,(obs-pastobs)[filter_index])
         
         if (self.env_name == "hockey"):
             self.player = h_env.BasicOpponent()
@@ -253,26 +258,38 @@ class DDPGAgent(object):
         # training loop
         for i_episode in range(1, max_episodes+1):
             ob, _info = self.env.reset()
-            a2 = opponent_action(ob)
-            done = False; trunc = False;
-            past_obs = np.tile(ob,(self._config["past_states"],1)) # past_obs is a stack of past observations of shape (past_states, obs_dim)
-            for past in range(self._config["past_states"]-1):
-                a = self.act(past_obs.flatten())
-                (ob_past, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
-                past_obs = rollrep(past_obs,ob_past)
-                if done or trunc: break
+            # Incorporate  Acceleration
+            past_obs = ob.copy()
+            # if self._config["acceleration"]: past_obs.append([0]*8)
+
+            # Old way of adding old frames
+            # a2 = opponent_action(ob)
+            # done = False; trunc = False;
+            # past_obs = np.tile(ob,(self._config["past_states"],1)) # past_obs is a stack of past observations of shape (past_states, obs_dim)
+            # for past in range(self._config["past_states"]-1):
+            #     a = self.act(past_obs.flatten())
+            #     (ob_past, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
+            #     past_obs = rollrep(past_obs,ob_past)
+            #     if done or trunc: break
             self.reset()
             total_reward=0
             for t in range(max_timesteps):
                 if done or trunc: break
                 timestep += 1
-                a = self.act(past_obs.flatten())
-                a2 = opponent_action(past_obs[-1])
+                if self._config["acceleration_variables"] > 0:  a = self.act(add_acceleration(ob,past_obs))
+                else :                                          a = self.act(ob)
+                a2 = opponent_action(ob)
+                # a = self.act(past_obs.flatten())
+                # a2 = opponent_action(past_obs[-1])
+
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
-                self.store_transition((past_obs.flatten(), a, reward, rollrep(past_obs,ob_new).flatten(), done))
-                # ob=ob_new
-                past_obs = rollrep(past_obs,ob_new)
+                
+                self.store_transition((ob, a, reward, ob_new, done))
+                ob=ob_new
+
+                # self.store_transition((past_obs.flatten(), a, reward, rollrep(past_obs,ob_new).flatten(), done))
+                # past_obs = rollrep(past_obs,ob_new)
                 if done or trunc: break
 
             l = self.train_innerloop(train_iter)

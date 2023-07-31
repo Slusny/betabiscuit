@@ -28,63 +28,81 @@ parser.add_argument('--algo', type=str, required=True,
 parser.add_argument('-r', '--run', action='store_true',
                     help='Do you wish to run/infer and not train')
 
-# Training parameters
-parser.add_argument('--train_iter', type=int,
+# Training parameters DDPG
+training = parser.add_argument_group('training parameters')
+training.add_argument('--buffer_size', type=int,
+                    default=int(1e6))
+training.add_argument('--discount', type=float,
+                    default=0.95)
+training.add_argument('--batch_size', type=int,
+                    default=128)
+training.add_argument('--train_iter', type=int,
                     default=32,
                     help='number of training batches per episode')
-parser.add_argument('-l', '--lr', type=float,
+training.add_argument('-l', '--lr', type=float,
                     default=0.0001,
                     help='learning rate for actor/policy')
-parser.add_argument('-n', '--eps',action='store',  type=float,
-                    dest='eps',default=0.1,
-                    help='Policy noise')
-parser.add_argument('--max_episodes', type=int,
+training.add_argument('--max_episodes', type=int,
                     dest='max_episodes', default=2000,
                     help='number of episodes')
-parser.add_argument('--max_timesteps', type=int,
+training.add_argument('--max_timesteps', type=int,
                     dest='max_timesteps', default=2000,
                     help='max timesteps in one episode')
-parser.add_argument('-u', '--update', type=float,
+training.add_argument('-u', '--update', type=float,
                     dest='update_every',default=100,
                     help='number of episodes between target network updates')
-parser.add_argument('-s', '--seed', type=int,
+training.add_argument('-s', '--seed', type=int,
                     default=None,
                     help='random seed')
-parser.add_argument('--savepath', type=str,
-                    default='results',
-                    help='random seed')
+
+# Training parameters DDPG
+ddpg = parser.add_argument_group('DDPG')
+ddpg.add_argument('--learning_rate_actor', type=float,
+                    default=0.00001)
+ddpg.add_argument('--learning_rate_critic', type=float,
+                    default=0.0001)
+ddpg.add_argument('-n', '--eps',action='store',  type=float,
+                    dest='eps',default=0.1,
+                    help='Exploration noise')
+
+# Training parameters TD3
+td3 = parser.add_argument_group('TD3')
+td3.add_argument('--policy_noise', type=float,
+                    default=0.2,
+                    help='noise on policy, used for policy smoothing')
+td3.add_argument('--noise_clip', type=float,
+                    default=0.2,
+                    help='noise on policy, used for policy smoothing')
+td3.add_argument('--policy_freq', type=float,
+                    default=0.2,
+                    help='noise on policy, used for policy smoothing')
 
 # Architecture
-parser.add_argument('--hidden_sizes_actor', type=str,
+architecture = parser.add_argument_group('Architecture')
+architecture.add_argument('--hidden_sizes_actor', type=str,
                     default='[128,128]')
-parser.add_argument('--hidden_sizes_critic', type=str,
+architecture.add_argument('--hidden_sizes_critic', type=str,
                     default='[128,128,64]')
-parser.add_argument('--buffer_size', type=int,
-                    default=int(1e6))
-parser.add_argument('--discount', type=float,
-                    default=0.95)
-parser.add_argument('--batch_size', type=int,
-                    default=128)
-parser.add_argument('--learning_rate_actor', type=float,
-                    default=0.00001)
-parser.add_argument('--learning_rate_critic', type=float,
-                    default=0.0001)
-parser.add_argument('--past_states', type=int,
+architecture.add_argument('--past_states', type=int,
                     default=1)
 
 
 # Logging
-parser.add_argument('--log_interval', type=int,
+logging = parser.add_argument_group('Logging')
+logging.add_argument('--log_interval', type=int,
                     dest='log_interval', default=20,
                     help='print avg reward in the interval')
-parser.add_argument('--save_interval', type=int,
+logging.add_argument('--save_interval', type=int,
                     dest='save_interval', default=500,
                     help='when to save a backup of the model')
-parser.add_argument('--wandb', action='store_true',
+logging.add_argument('--savepath', type=str,
+                    default='results',
+                    help='random seed')
+logging.add_argument('--wandb', action='store_true',
                     help='use weights and biases')
-parser.add_argument('--notes', type=str, default="",
+logging.add_argument('--notes', type=str, default="",
                     help='any notes to add in logging')
-parser.add_argument('--tags', type=str, default="",
+logging.add_argument('--tags', type=str, default="",
                     help='any tags to add in logging')
 args = parser.parse_args()
 
