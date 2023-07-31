@@ -149,7 +149,7 @@ if __name__ == "__main__":
                         eps = args.eps, 
                         learning_rate_actor = args.lr,
                         update_target_every = args.update_every,
-                        past_states = args.past_states,
+                        # past_states = args.past_states,
                         derivative = args.use_derivative,
                         derivative_indices = derivative_indices)
     
