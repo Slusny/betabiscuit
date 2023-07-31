@@ -83,8 +83,10 @@ architecture.add_argument('--hidden_sizes_actor', type=str,
                     default='[128,128]')
 architecture.add_argument('--hidden_sizes_critic', type=str,
                     default='[128,128,64]')
-architecture.add_argument('--past_states', type=int,
-                    default=1)
+# architecture.add_argument('--past_states', type=int,
+#                     default=1)
+architecture.add_argument('--use_derivative',action='store',  type=float,
+                    help='calculate the derivative of the state variables. If the velocity is available this will calculate the acceleration')
 
 
 # Logging
@@ -115,13 +117,16 @@ if __name__ == "__main__":
     elif env_name == "pendulum":
         env = gym.make("Pendulum-v1")
     elif env_name == "hockey":
-        # reload(h_env)
         env = h_env.HockeyEnv()
+        # vx1, vy1, rot1, vx2, vy2, rot2, puck_vx, puck_vy
+        derivative_indices = [3,4,5,9,10,11,14,15]
     elif env_name == "hockey-train-shooting":
         # reload(h_env)
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
+        derivative_indices = [3,4,5,9,10,11,14,15]
     elif env_name == "hockey-train-defense":
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
+        derivative_indices = [3,4,5,9,10,11,14,15]
     else:
         env = gym.make(env_name)
 
@@ -144,7 +149,9 @@ if __name__ == "__main__":
                         eps = args.eps, 
                         learning_rate_actor = args.lr,
                         update_target_every = args.update_every,
-                        past_states = args.past_states)
+                        past_states = args.past_states,
+                        derivative = args.use_derivative,
+                        derivative_indices = derivative_indices)
     
     if args.run:
         print("infer")

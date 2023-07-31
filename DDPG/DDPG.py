@@ -116,7 +116,8 @@ class DDPGAgent(object):
             "update_target_every": 100,
             "use_target_net": True,
             # "past_states": 1,
-            "acceleration_variables": 8
+            "derivative": False,
+            "derivative_indices": []
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -126,22 +127,22 @@ class DDPGAgent(object):
         self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
         # Q Network
-        self.Q = QFunction(observation_dim=self._obs_dim+self._config["acceleration_variables"],#self._obs_dim*self._config["past_states"],
+        self.Q = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                            action_dim=self._action_n,
                            hidden_sizes= self._config["hidden_sizes_critic"],
                            learning_rate = self._config["learning_rate_critic"]).to(device)
         # target Q Network
-        self.Q_target = QFunction(observation_dim=self._obs_dim+self._config["acceleration_variables"],#self._obs_dim*self._config["past_states"],
+        self.Q_target = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   action_dim=self._action_n,
                                   hidden_sizes= self._config["hidden_sizes_critic"],
                                   learning_rate = 0).to(device)
 
-        self.policy = Feedforward(input_size=self._obs_dim+self._config["acceleration_variables"],#self._obs_dim*self._config["past_states"],
+        self.policy = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_actor"],
                                   output_size=self._action_n,
                                   activation_fun = torch.nn.ReLU(),
                                   output_activation = torch.nn.Tanh()).to(device)
-        self.policy_target = Feedforward(input_size=self._obs_dim+self._config["acceleration_variables"],#self._obs_dim*self._config["past_states"],
+        self.policy_target = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                          hidden_sizes= self._config["hidden_sizes_actor"],
                                          output_size=self._action_n,
                                          activation_fun = torch.nn.ReLU(),
