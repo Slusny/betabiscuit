@@ -314,11 +314,13 @@ class TD3Agent(object):
             for param, target_param in zip(self.policy.parameters(), self.policy_target.parameters()): # AAAAAAAAAAAAAAAAAAAAAAAAAAAAH
                 target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
 
-            for param, target_param in zip(self.Q.Q1.parameters(), self.Q_target.Q1.parameters()):
-                target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
+            # for param, target_param in zip(self.Q.Q1.parameters(), self.Q_target.Q1.parameters()):
+            #     target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
 
-            for param, target_param in zip(self.Q.Q2.parameters(), self.Q_target.Q2.parameters()):
-                target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
+            # for param, target_param in zip(self.Q.Q2.parameters(), self.Q_target.Q2.parameters()):
+            #     target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
+            for param, target_param in zip(self.Q.parameters(), self.Q_target.parameters()):
+                target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
 
     def act(self, observation, eps=None):
         if eps is None:
@@ -335,12 +337,14 @@ class TD3Agent(object):
         self.buffer.add_transition(transition)
 
     def state(self):
-        return (self.Q.Q1.state_dict(),self.Q.Q2.state_dict(), self.policy.state_dict())
+        # return (self.Q.Q1.state_dict(),self.Q.Q2.state_dict(), self.policy.state_dict())
+        return (self.Q.state_dict(), self.policy.state_dict())
 
     def restore_state(self, state):
-        self.Q.Q1.load_state_dict(state[0],strict=False)
-        self.Q.Q2.load_state_dict(state[1],strict=False)
-        self.policy.load_state_dict(state[2],strict=False)
+        # self.Q.Q1.load_state_dict(state[0],strict=False)
+        # self.Q.Q2.load_state_dict(state[1],strict=False)
+        self.Q.load_state_dict(state[0])
+        self.policy.load_state_dict(state[1])
         self._copy_nets()
 
     def reset(self):
