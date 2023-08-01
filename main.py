@@ -12,7 +12,7 @@ import wandb
 
 # Available arguments for program
 environments_implemented=['pendulum', 'lunarlander', 'hockey', 'hockey-train-defense', "hockey-train-shooting"]
-algorithms_implemented = ['ddpg']
+algorithms_implemented = ['ddpg','td3']
 
 # Loggin
 log_interval = 20           # print avg reward in the interval
