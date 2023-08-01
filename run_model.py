@@ -81,7 +81,12 @@ else :
 
 if not "use_derivative" in args:
     args["use_derivative"] = False
-
+    derivative_indices = []
+else:
+    if(args["use_derivative"]):
+        derivative_indices = [3,4,5,9,10,11,14,15]
+    else:
+        derivative_indices = []
 def opponent_action(obs):
     if (env_name == "hockey"):
         return player.act(obs)
@@ -92,8 +97,7 @@ def opponent_action(obs):
 savepath = 'results_run'
 Path().mkdir(parents=True, exist_ok=True)
 
-action_n = 4
-derivative_indices = []
+action_n = 8
 
 # #test
 player_normal = h_env.BasicOpponent(weak=False)

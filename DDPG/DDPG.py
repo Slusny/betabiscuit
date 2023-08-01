@@ -81,7 +81,7 @@ class DDPGAgent(object):
     """
     Agent implementing Q-learning with NN function approximation.
     """
-    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, **userconfig):
+    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, bootstrap, **userconfig):
 
         observation_space = env.observation_space
         action_space = env.action_space
@@ -121,6 +121,7 @@ class DDPGAgent(object):
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
+        print("Config: ", self._config)
 
         self.action_noise = OUNoise((self._action_n))
 
@@ -148,6 +149,12 @@ class DDPGAgent(object):
                                          activation_fun = torch.nn.ReLU(),
                                          output_activation = torch.nn.Tanh()).to(device)
 
+        if(bootstrap):
+            api = wandb.Api()
+            art = api.artifact(bootstrap, type='model')
+            state = torch.load(art.file())
+            self.restore_state(state)
+        
         self._copy_nets()
 
         self.optimizer=torch.optim.Adam(self.policy.parameters(),
@@ -193,7 +200,7 @@ class DDPGAgent(object):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
         losses = []
         self.train_iter+=1
-        if self._config["use_target_net"] and self.train_iter % self._config["update_target_every"] == 0:
+        if self._config["use_target_net"] and self.train_iter % self._config["update_target_every"] == 0:  # using 100 update interval this means 3200 updates to Q networks
             self._copy_nets()
         for i in range(iter_fit):
 
@@ -227,7 +234,7 @@ class DDPGAgent(object):
 
         return losses
 
-    def train(self, train_iter, max_episodes, max_timesteps,log_interval,save_interval):
+    def train(self, iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
          # logging variables
         rewards = []
@@ -293,7 +300,7 @@ class DDPGAgent(object):
                 # past_obs = rollrep(past_obs,ob_new)
                 if done or trunc: break
 
-            l = self.train_innerloop(train_iter)
+            l = self.train_innerloop(iter_fit)
             losses.extend(l)
 
             rewards.append(total_reward)

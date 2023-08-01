@@ -5,6 +5,7 @@ from pathlib import Path
 import laserhockey.hockey_env as h_env
 sys.path.insert(0,'./DDPG')
 from DDPG import DDPGAgent
+from TD3 import TD3Agent
 from importlib import reload
 import wandb
 
@@ -46,11 +47,11 @@ training.add_argument('--max_episodes', type=int,
                     dest='max_episodes', default=2000,
                     help='number of episodes')
 training.add_argument('--max_timesteps', type=int,
-                    dest='max_timesteps', default=2000,
+                    dest='max_timesteps', default=200,
                     help='max timesteps in one episode')
 training.add_argument('-u', '--update', type=float,
                     dest='update_every',default=100,
-                    help='number of episodes between target network updates')
+                    help='number of episodes between target network updates. Default 100 for DDPG, 2 for TD3')
 training.add_argument('-s', '--seed', type=int,
                     default=None,
                     help='random seed')
@@ -68,14 +69,17 @@ ddpg.add_argument('-n', '--eps',action='store',  type=float,
 # Training parameters TD3
 td3 = parser.add_argument_group('TD3')
 td3.add_argument('--policy_noise', type=float,
-                    default=0.2,
+                    default=0.1,                                            # in TD3 paper 0.4
                     help='noise on policy, used for policy smoothing')
 td3.add_argument('--noise_clip', type=float,
-                    default=0.2,
-                    help='noise on policy, used for policy smoothing')
+                    default=0.3,                                            # in TD3 paper 0.5
+                    help='range to clip the policy noise')
 td3.add_argument('--policy_freq', type=float,
                     default=0.2,
                     help='noise on policy, used for policy smoothing')
+td3.add_argument('--tau', type=float,
+                    default=0.005,
+                    help='weight for convex update of target weights')
 
 # Architecture
 architecture = parser.add_argument_group('Architecture')
@@ -87,6 +91,8 @@ architecture.add_argument('--hidden_sizes_critic', type=str,
 #                     default=1)
 architecture.add_argument('--use_derivative',action='store_true', 
                     help='calculate the derivative of the state variables. If the velocity is available this will calculate the acceleration')
+architecture.add_argument('--bootstrap',action='store', type=str, default=None,
+                    help='wandb path ("betabiscuit/project/artifact") to model artifacts')
 
 
 # Logging
@@ -163,9 +169,23 @@ if __name__ == "__main__":
                         learning_rate_critics=args.learning_rate_critic,
                         hidden_sizes_actor=eval(args.hidden_sizes_actor),
                         hidden_sizes_critic=eval(args.hidden_sizes_critic),
-                        
                         )
-   
+    elif args.algo == "td3":
+        agent = TD3Agent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
+                        eps = args.eps, 
+                        learning_rate_actor = args.lr,
+                        update_target_every = args.update_every,
+                        # past_states = args.past_states,
+                        derivative = args.use_derivative,
+                        derivative_indices = derivative_indices,
+                        buffer_size=args.buffer_size,
+                        discount=args.discount,
+                        batch_size=args.batch_size,
+                        learning_rate_critics=args.learning_rate_critic,
+                        hidden_sizes_actor=eval(args.hidden_sizes_actor),
+                        hidden_sizes_critic=eval(args.hidden_sizes_critic),
+                        tau=args.tau,
+                        )
     
     if args.run:
         print("infer")
