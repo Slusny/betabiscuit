@@ -119,10 +119,10 @@ if args['algo'] == "ddpg":
             env.render()
             timestep += 1
             done = False
-            # a = agent.act(ob)
-            # a = a[:4]
-            # a=np.array([0,0.,0,0])
-            # print("a: ",a)
+            a = agent.act(ob)
+            a = a[:4]
+            a=np.array([0,0.,0,0])
+            print("a: ",a)
             a2 = opponent_action(ob)
             # print("a2: ",a)
             a = player_normal.act(ob)
