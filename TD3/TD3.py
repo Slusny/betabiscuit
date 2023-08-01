@@ -220,7 +220,7 @@ class TD3Agent(object):
             eps = self._eps
         #
         observation = torch.from_numpy(observation.astype(np.float32)).to(device) 
-        action = (self.policy.predict(observation) + eps*self.action_noise()).clamp(-1,1)  # action in -1 to 1 (+ noise)
+        action = (self.policy.predict(observation) + eps*self.action_noise()).clip(-1,1)  # action in -1 to 1 (+ noise)
         # action = self.policy.predict(observation) + eps*self.action_noise()  # action in -1 to 1 (+ noise)
         # action = self._action_space.low + (action + 1.0) / 2.0 * (self._action_space.high - self._action_space.low)
         return action
