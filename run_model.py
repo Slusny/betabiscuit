@@ -121,11 +121,11 @@ if args['algo'] == "ddpg":
             done = False
             a = agent.act(ob)
             a = a[:4]
-            a=np.array([0,0.,0,0])
+            # a=np.array([0,0.,0,0])
             print("a: ",a)
             a2 = opponent_action(ob)
             # print("a2: ",a)
-            a = player_normal.act(ob)
+            # a = player_normal.act(ob)
             (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
             total_reward+= reward
             ob=ob_new
