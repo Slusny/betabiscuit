@@ -114,18 +114,23 @@ if __name__ == "__main__":
     env_name = args.env_name
     if env_name == "lunarlander":
         env = gym.make("LunarLander-v2", continuous = True)
+        action_n = env.action_space.shape[0]
     elif env_name == "pendulum":
         env = gym.make("Pendulum-v1")
+        action_n = env.action_space.shape[0]
     elif env_name == "hockey":
         env = h_env.HockeyEnv()
+        action_n = 4
         # vx1, vy1, rot1, vx2, vy2, rot2, puck_vx, puck_vy
         derivative_indices = [3,4,5,9,10,11,14,15]
     elif env_name == "hockey-train-shooting":
         # reload(h_env)
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
         derivative_indices = [3,4,5,9,10,11,14,15]
+        action_n = 4
     elif env_name == "hockey-train-defense":
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
+        action_n = 4
         derivative_indices = [3,4,5,9,10,11,14,15]
     else:
         env = gym.make(env_name)
@@ -145,7 +150,7 @@ if __name__ == "__main__":
     Path(args.savepath).mkdir(parents=True, exist_ok=True)
 
     if args.algo == "ddpg":
-        agent = DDPGAgent(env, env_name, args.seed, args.savepath, wandb_run,
+        agent = DDPGAgent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
                         eps = args.eps, 
                         learning_rate_actor = args.lr,
                         update_target_every = args.update_every,

@@ -13,7 +13,7 @@ def save_statistics(savepath,algo,env_name,i_episode,rewards=None,lengths=None,t
                 
 def wandb_save_model(wandb_run,savepath):
     #print("----------- Writing Model to W&B -----------")
-    artifact = wandb.Artifact('model', type='model')
+    artifact = wandb.Artifact(wandb_run.name + '_model', type='model')
     artifact.add_file(savepath)
     wandb_run.log_artifact(artifact)
 
@@ -49,7 +49,7 @@ def transform_obs(obs,help=False):
             'x vel puck',
             'y vel puck',
             'time left player has puck',
-            'time left other player has puck']
+            'time left other player has puck'] # 18 with acceleration 24
     limits = np.array([[-3,0], #[4,0] can go behind barrier
                       [-2,2],  #[3,3]
                       [-1,1],  #[-1.25,1.25] can overshoot with momentum

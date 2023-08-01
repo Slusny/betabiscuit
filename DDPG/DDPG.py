@@ -81,7 +81,7 @@ class DDPGAgent(object):
     """
     Agent implementing Q-learning with NN function approximation.
     """
-    def __init__(self, env, env_name, seed, savepath, wandb_run, **userconfig):
+    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, **userconfig):
 
         observation_space = env.observation_space
         action_space = env.action_space
@@ -103,7 +103,7 @@ class DDPGAgent(object):
         self._observation_space = observation_space
         self._obs_dim=self._observation_space.shape[0]
         self._action_space = action_space
-        self._action_n = action_space.shape[0]
+        self._action_n = action_n
         self._config = {
             "eps": 0.1,            # Epsilon: noise strength to add to policy
             "discount": 0.95,

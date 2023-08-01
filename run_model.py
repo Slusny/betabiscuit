@@ -33,8 +33,15 @@ if run_args.vir :
 
 api = wandb.Api()
 runs = api.runs(entity + "/" + run_args.project)
-# run = api.runs(entity + "/" + project + "/" + args.run_id)
-args = runs[0].config
+if (run_args.run_name == "latest"):
+    args = runs[0].config
+else:
+    for run in runs:
+        if (run.name == run_args.run_name):
+            args = run.config
+            break
+    print("counld find run " + run_args.run_name)
+    exit(1)
 
 art = api.artifact(entity + "/" + run_args.project + "/" + run_args.artifact, type='model')
 print(art.file())
@@ -64,11 +71,17 @@ else:
 savepath = 'results_run'
 Path().mkdir(parents=True, exist_ok=True)
 
+action_n = 8
+derivative_indices = []
+
 if args['algo'] == "ddpg":
-    agent = DDPGAgent(env, env_name, args['seed'], savepath, wandb_run=False,
-                    eps = args['eps'], 
-                    learning_rate_actor = args['lr'],
-                    update_target_every = args['update_every'])
+    agent = DDPGAgent(env, env_name, action_n, args.seed, args.savepath, False,
+            eps = args.eps, 
+            learning_rate_actor = args.lr,
+            update_target_every = args.update_every,
+            # past_states = args.past_states,
+            derivative = args.use_derivative,
+            derivative_indices = derivative_indices)
     agent.restore_state(state)
     
 
@@ -82,6 +95,7 @@ if args['algo'] == "ddpg":
             timestep += 1
             done = False
             a = agent.act(ob)
+            a = a[:4]
             a2 = [0,0.,0,0]
             (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
             total_reward+= reward
