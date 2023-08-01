@@ -44,7 +44,8 @@ class QFunction():
         self.optimizerQ2=torch.optim.Adam(self.Q2.parameters(),
                                         lr=learning_rate,
                                         eps=0.000001)
-        self.loss = nn.MSELoss() #torch.nn.SmoothL1Loss()
+        self.loss1 = nn.MSELoss() #torch.nn.SmoothL1Loss()
+        self.loss2 = nn.MSELoss()
 
     def fit(self, observations, actions, targets): # all arguments should be torch tensors
         self.Q1.train() # put model in training mode
@@ -56,8 +57,8 @@ class QFunction():
         pred1, pred2 = self.Q_value(observations,actions)
 
         # Optimize both critics -> combined loss
-        lossQ1 = self.loss(pred1, targets)
-        lossQ2 = self.loss(pred2, targets)
+        lossQ1 = self.loss1(pred1, targets)
+        lossQ2 = self.loss2(pred2, targets)
 
         # Backward pass
         lossQ1.backward()
