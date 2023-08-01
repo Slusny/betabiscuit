@@ -95,9 +95,9 @@ Path().mkdir(parents=True, exist_ok=True)
 action_n = 8
 derivative_indices = []
 
-#test
-player_normal = h_env.BasicOpponent(weak=False)
-player_weak = h_env.BasicOpponent(weak=True)
+# #test
+# player_normal = h_env.BasicOpponent(weak=False)
+# player_weak = h_env.BasicOpponent(weak=True)
 
 if args['algo'] == "ddpg":
     agent = DDPGAgent(env, env_name, action_n, None, args["savepath"], False,
@@ -119,9 +119,8 @@ if args['algo'] == "ddpg":
             env.render()
             timestep += 1
             done = False
-            # a = agent.act(ob)
-            # a = a[:4]
-            a = player_normal.act(ob)
+            a = agent.act(ob)
+            a = a[:4]
             a2 = opponent_action(ob)
             (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
             total_reward+= reward
