@@ -287,7 +287,9 @@ class TD3Agent(object):
             state = torch.load(art.file())
             self.restore_state(state)
         
-        self._copy_nets()
+        # copy initialized weights
+        self.Q_target.load_state_dict(self.Q.state_dict())
+        self.policy_target.load_state_dict(self.policy.state_dict())
 
         self.optimizer=torch.optim.Adam(self.policy.parameters(),
                                         lr=self._config["learning_rate_actor"],
@@ -320,7 +322,7 @@ class TD3Agent(object):
             # for param, target_param in zip(self.Q.Q2.parameters(), self.Q_target.Q2.parameters()):
             #     target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
             for param, target_param in zip(self.Q.parameters(), self.Q_target.parameters()):
-                target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
+                target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
 
     def act(self, observation, eps=None):
         if eps is None:
