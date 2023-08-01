@@ -192,10 +192,12 @@ if __name__ == "__main__":
                         buffer_size=args.buffer_size,
                         discount=args.discount,
                         batch_size=args.batch_size,
-                        learning_rate_critics=args.learning_rate_critic,
+                        learning_rate_critic=args.learning_rate_critic,
                         hidden_sizes_actor=eval(args.hidden_sizes_actor),
                         hidden_sizes_critic=eval(args.hidden_sizes_critic),
                         tau=args.tau,
+                        policy_noise=args.policy_noise,
+                        noise_clip=args.noise_clip,
                         bootstrap=args.bootstrap,
                         )
     
