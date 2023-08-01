@@ -92,7 +92,7 @@ def opponent_action(obs):
 savepath = 'results_run'
 Path().mkdir(parents=True, exist_ok=True)
 
-action_n = 8
+action_n = 4
 derivative_indices = []
 
 # #test
@@ -121,11 +121,7 @@ if args['algo'] == "ddpg":
             done = False
             a = agent.act(ob)
             a = a[:4]
-            # a=np.array([0,0.,0,0])
-            print("a: ",a)
             a2 = opponent_action(ob)
-            # print("a2: ",a)
-            # a = player_normal.act(ob)
             (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
             total_reward+= reward
             ob=ob_new

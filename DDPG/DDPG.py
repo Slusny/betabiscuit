@@ -182,8 +182,8 @@ class DDPGAgent(object):
         return (self.Q.state_dict(), self.policy.state_dict())
 
     def restore_state(self, state):
-        self.Q.load_state_dict(state[0])
-        self.policy.load_state_dict(state[1])
+        self.Q.load_state_dict(state[0],strict=False)
+        self.policy.load_state_dict(state[1],strict=False)
         self._copy_nets()
 
     def reset(self):
