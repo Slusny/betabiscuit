@@ -129,16 +129,25 @@ if __name__ == "__main__":
         env = h_env.HockeyEnv()
         action_n = 4
         # vx1, vy1, rot1, vx2, vy2, rot2, puck_vx, puck_vy
-        derivative_indices = [3,4,5,9,10,11,14,15]
+        if args.use_derivative:
+            derivative_indices = [3,4,5,9,10,11,14,15]
+        else:
+            derivative_indices = []
     elif env_name == "hockey-train-shooting":
         # reload(h_env)
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
-        derivative_indices = [3,4,5,9,10,11,14,15]
+        if args.use_derivative:
+            derivative_indices = [3,4,5,9,10,11,14,15]
+        else:
+            derivative_indices = []
         action_n = 4
     elif env_name == "hockey-train-defense":
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
         action_n = 4
-        derivative_indices = [3,4,5,9,10,11,14,15]
+        if args.use_derivative:
+            derivative_indices = [3,4,5,9,10,11,14,15]
+        else:
+            derivative_indices = []
     else:
         env = gym.make(env_name)
 
