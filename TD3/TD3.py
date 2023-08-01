@@ -361,7 +361,6 @@ class TD3Agent(object):
         actor_loss = 0
         
         for i in range(iter_fit):
-            self.train_iter+=1
             # sample from the replay buffer
             data=self.buffer.sample(batch=self._config['batch_size'])
             s = to_torch(np.stack(data[:,0])) # s_t
@@ -398,6 +397,7 @@ class TD3Agent(object):
 
                 self._copy_nets() # with a update_frequency of 2 and a tau of 0.005 a "full" update is done every 400 steps
 
+            self.train_iter+=1
             losses.append((fit_loss, actor_loss.item()))
 
         return losses
