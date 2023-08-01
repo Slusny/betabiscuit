@@ -79,6 +79,9 @@ if (run_args.weak_opponent):
 else :
     player = h_env.BasicOpponent(weak=False)
 
+if not "use_derivative" in args:
+    args.use_derivative = False
+
 def opponent_action(obs):
     if (env_name == "hockey"):
         return player.act(obs)
