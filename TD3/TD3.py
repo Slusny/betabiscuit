@@ -32,10 +32,10 @@ class QFunction():
     def __init__(self, observation_dim, action_dim, hidden_sizes=[100,100],
                  learning_rate = 0.0002):
         self.Q1 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
-                                output_size=1,activation_fun=torch.nn.Tanh())
+                                output_size=1,activation_fun=torch.nn.Tanh()).to(device)
         
         self.Q2 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
-                                output_size=1,activation_fun=torch.nn.Tanh())
+                                output_size=1,activation_fun=torch.nn.Tanh()).to(device)
 
         self.optimizerQ1=torch.optim.Adam(self.Q1.parameters(),
                                         lr=learning_rate,
@@ -157,12 +157,12 @@ class TD3Agent(object):
         self.Q = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                            action_dim=self._action_n,
                            hidden_sizes= self._config["hidden_sizes_critic"],
-                           learning_rate = self._config["learning_rate_critic"]).to(device)
+                           learning_rate = self._config["learning_rate_critic"])
         # target Q Network
         self.Q_target = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   action_dim=self._action_n,
                                   hidden_sizes= self._config["hidden_sizes_critic"],
-                                  learning_rate = 0).to(device)
+                                  learning_rate = 0)
 
         self.policy = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_actor"],
