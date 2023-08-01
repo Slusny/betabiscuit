@@ -103,8 +103,9 @@ class QFunction(torch.nn.Module):
         
         self.loss = nn.MSELoss() #torch.nn.SmoothL1Loss()
 
-    def forward(self, x):
-        # Q1
+    def forward(self, input):
+        # 
+        x = input.copy()
         for layer,activation_fun in zip(self.layersQ1, self.activationsQ1):
             x = activation_fun(layer(x))
         if self.output_activation is not None:
@@ -113,6 +114,7 @@ class QFunction(torch.nn.Module):
             Q1 = self.readoutQ1(x)
 
         # Q2
+        x = input.copy()
         for layer,activation_fun in zip(self.layersQ2, self.activationsQ2):
             x = activation_fun(layer(x))
         if self.output_activation is not None:
