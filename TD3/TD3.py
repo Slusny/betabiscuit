@@ -28,57 +28,57 @@ class UnsupportedSpace(Exception):
         self.message = message
         super().__init__(self.message)
 
-class QFunction():
-    def __init__(self, observation_dim, action_dim, hidden_sizes=[100,100],
-                 learning_rate = 0.0002):
-        self.Q1 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
-                                output_size=1,activation_fun=torch.nn.Tanh()).to(device)
+# class QFunction():
+#     def __init__(self, observation_dim, action_dim, hidden_sizes=[100,100],
+#                  learning_rate = 0.0002):
+#         self.Q1 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
+#                                 output_size=1,activation_fun=torch.nn.Tanh()).to(device)
         
-        self.Q2 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
-                                output_size=1,activation_fun=torch.nn.Tanh()).to(device)
+#         self.Q2 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
+#                                 output_size=1,activation_fun=torch.nn.Tanh()).to(device)
 
-        self.optimizerQ1=torch.optim.Adam(self.Q1.parameters(),
-                                        lr=learning_rate,
-                                        eps=0.000001)
+#         self.optimizerQ1=torch.optim.Adam(self.Q1.parameters(),
+#                                         lr=learning_rate,
+#                                         eps=0.000001)
         
-        self.optimizerQ2=torch.optim.Adam(self.Q2.parameters(),
-                                        lr=learning_rate,
-                                        eps=0.000001)
-        self.loss1 = nn.MSELoss() #torch.nn.SmoothL1Loss()
-        self.loss2 = nn.MSELoss() # not nessessary
+#         self.optimizerQ2=torch.optim.Adam(self.Q2.parameters(),
+#                                         lr=learning_rate,
+#                                         eps=0.000001)
+#         self.loss1 = nn.MSELoss() #torch.nn.SmoothL1Loss()
+#         self.loss2 = nn.MSELoss() # not nessessary
 
-    def fit(self, observations, actions, targets): # all arguments should be torch tensors
-        self.Q1.train() # put model in training mode
-        self.Q2.train()
-        self.optimizerQ1.zero_grad()
-        self.optimizerQ2.zero_grad()
-        # Forward pass
+#     def fit(self, observations, actions, targets): # all arguments should be torch tensors
+#         self.Q1.train() # put model in training mode
+#         self.Q2.train()
+#         self.optimizerQ1.zero_grad()
+#         self.optimizerQ2.zero_grad()
+#         # Forward pass
 
-        # pred1, pred2 = self.Q_value(observations,actions)
-        pred1 = self.Q1.forward(torch.hstack([observations,actions]))
-        pred2 = self.Q2.forward(torch.hstack([observations,actions]))
+#         # pred1, pred2 = self.Q_value(observations,actions)
+#         pred1 = self.Q1.forward(torch.hstack([observations,actions]))
+#         pred2 = self.Q2.forward(torch.hstack([observations,actions]))
 
-        # Optimize both critics -> combined loss
-        lossQ1 = self.loss1(pred1, targets)
-        lossQ2 = self.loss2(pred2, targets)
+#         # Optimize both critics -> combined loss
+#         lossQ1 = self.loss1(pred1, targets)
+#         lossQ2 = self.loss2(pred2, targets)
 
-        # Backward pass
-        lossQ1.backward()
-        lossQ2.backward()
-        self.optimizerQ1.step()
-        self.optimizerQ2.step()
-        return lossQ1.item()
+#         # Backward pass
+#         lossQ1.backward()
+#         lossQ2.backward()
+#         self.optimizerQ1.step()
+#         self.optimizerQ2.step()
+#         return lossQ1.item()
 
-    def Q_value(self, observations, actions):
-        # hstack: concatenation along the first axis for 1-D tensors
-        x = torch.hstack([observations,actions])
-        return (self.Q1.forward(x),
-                self.Q2.forward(x))
+#     def Q_value(self, observations, actions):
+#         # hstack: concatenation along the first axis for 1-D tensors
+#         x = torch.hstack([observations,actions])
+#         return (self.Q1.forward(x),
+#                 self.Q2.forward(x))
     
-    def Q1_value(self, observations, actions):
-        # hstack: concatenation along the first axis for 1-D tensors
-        x = torch.hstack([observations,actions])
-        return (self.Q1.forward(x))
+#     def Q1_value(self, observations, actions):
+#         # hstack: concatenation along the first axis for 1-D tensors
+#         x = torch.hstack([observations,actions])
+#         return (self.Q1.forward(x))
     
     ##################
 
@@ -97,7 +97,7 @@ class QFunction(torch.nn.Module):
         self.readoutQ1 = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
         self.readoutQ2 = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
 
-        self.optimizer=torch.optim.Adam(self.Q1parameters(),
+        self.optimizer=torch.optim.Adam(self.parameters(),
                                         lr=learning_rate,
                                         eps=0.000001)
         
@@ -108,17 +108,17 @@ class QFunction(torch.nn.Module):
         for layer,activation_fun in zip(self.layersQ1, self.activationsQ1):
             x = activation_fun(layer(x))
         if self.output_activation is not None:
-            Q1 = self.output_activation(self.readout(x))
+            Q1 = self.output_activation(self.readoutQ1(x))
         else:
-            Q1 = self.readout(x)
+            Q1 = self.readoutQ1(x)
 
         # Q2
         for layer,activation_fun in zip(self.layersQ2, self.activationsQ2):
             x = activation_fun(layer(x))
         if self.output_activation is not None:
-            Q2 = self.output_activation(self.readout(x))
+            Q2 = self.output_activation(self.readoutQ2(x))
         else:
-            Q2 = self.readout(x)
+            Q2 = self.readoutQ2(x)
 
         return Q1, Q2
 
@@ -148,35 +148,35 @@ class QFunction(torch.nn.Module):
         for layer,activation_fun in zip(self.layersQ1, self.activationsQ1):
             x = activation_fun(layer(x))
         if self.output_activation is not None:
-            Q1 = self.output_activation(self.readout(x))
+            Q1 = self.output_activation(self.readoutQ(x))
         else:
-            Q1 = self.readout(x)
+            Q1 = self.readoutQ1(x)
         return Q1
     
 ####################################
 
-        def __init__(self, input_size, hidden_sizes, output_size, activation_fun=torch.nn.Tanh(), output_activation=None):
-        super(Feedforward, self).__init__()
-        self.input_size = input_size
-        self.hidden_sizes  = hidden_sizes
-        self.output_size  = output_size
-        self.output_activation = output_activation
-        layer_sizes = [self.input_size] + self.hidden_sizes
-        self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
-        self.activations = [ activation_fun for l in  self.layers ]
-        self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
+    #     def __init__(self, input_size, hidden_sizes, output_size, activation_fun=torch.nn.Tanh(), output_activation=None):
+    #     super(Feedforward, self).__init__()
+    #     self.input_size = input_size
+    #     self.hidden_sizes  = hidden_sizes
+    #     self.output_size  = output_size
+    #     self.output_activation = output_activation
+    #     layer_sizes = [self.input_size] + self.hidden_sizes
+    #     self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
+    #     self.activations = [ activation_fun for l in  self.layers ]
+    #     self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
 
-    def forward(self, x):
-        for layer,activation_fun in zip(self.layers, self.activations):
-            x = activation_fun(layer(x))
-        if self.output_activation is not None:
-            return self.output_activation(self.readout(x))
-        else:
-            return self.readout(x)
+    # def forward(self, x):
+    #     for layer,activation_fun in zip(self.layers, self.activations):
+    #         x = activation_fun(layer(x))
+    #     if self.output_activation is not None:
+    #         return self.output_activation(self.readout(x))
+    #     else:
+    #         return self.readout(x)
 
-    def predict(self, x):
-        with torch.no_grad():
-            return self.forward(x).cpu().numpy()
+    # def predict(self, x):
+    #     with torch.no_grad():
+    #         return self.forward(x).cpu().numpy()
         
 
         #########################
