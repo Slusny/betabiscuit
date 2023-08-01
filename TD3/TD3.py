@@ -37,25 +37,34 @@ class QFunction():
         self.Q2 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
                                 output_size=1,activation_fun=torch.nn.Tanh())
 
-        self.optimizer=torch.optim.Adam(self.parameters(),
+        self.optimizerQ1=torch.optim.Adam(self.Q1.parameters(),
                                         lr=learning_rate,
                                         eps=0.000001)
-        self.loss = nn.MSE() #torch.nn.SmoothL1Loss()
+        
+        self.optimizerQ2=torch.optim.Adam(self.Q2.parameters(),
+                                        lr=learning_rate,
+                                        eps=0.000001)
+        self.loss = nn.MSELoss() #torch.nn.SmoothL1Loss()
 
     def fit(self, observations, actions, targets): # all arguments should be torch tensors
-        self.train() # put model in training mode
-        self.optimizer.zero_grad()
+        self.Q1.train() # put model in training mode
+        self.Q1.train()
+        self.optimizerQ1.zero_grad()
+        self.optimizerQ2.zero_grad()
         # Forward pass
 
         pred1, pred2 = self.Q_value(observations,actions)
 
         # Optimize both critics -> combined loss
-        loss = self.loss(pred1, targets) + self.loss(pred2, targets)
+        lossQ1 = self.loss(pred1, targets)
+        lossQ2 = self.loss(pred2, targets)
 
         # Backward pass
-        loss.backward()
-        self.optimizer.step()
-        return loss.item()
+        lossQ1.backward()
+        lossQ2.backward()
+        self.optimizerQ1.step()
+        self.optimizerQ2.step()
+        return lossQ1.item()
 
     def Q_value(self, observations, actions):
         # hstack: concatenation along the first axis for 1-D tensors
