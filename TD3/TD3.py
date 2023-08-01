@@ -83,11 +83,11 @@ class UnsupportedSpace(Exception):
     ##################
 
 class QFunction(torch.nn.Module):
-    def __init__(self, input_size, hidden_sizes, output_size, learning_rate, activation_fun=torch.nn.Tanh(), output_activation=None):
+    def __init__(self, input_size, hidden_sizes, learning_rate, activation_fun=torch.nn.Tanh(), output_activation=None):
         super(QFunction, self).__init__()
         self.input_size = input_size
         self.hidden_sizes  = hidden_sizes
-        self.output_size  = output_size
+        self.output_size  = 1
         self.output_activation = output_activation
         layer_sizes = [self.input_size] + self.hidden_sizes
         self.layersQ1 = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
@@ -257,14 +257,14 @@ class TD3Agent(object):
 
         self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
+
+
         # Q Network
         self.Q = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
-                           action_dim=self._action_n,
                            hidden_sizes= self._config["hidden_sizes_critic"],
                            learning_rate = self._config["learning_rate_critic"]).to(device)
         # target Q Network
         self.Q_target = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
-                                  action_dim=self._action_n,
                                   hidden_sizes= self._config["hidden_sizes_critic"],
                                   learning_rate = 0).to(device)
 
