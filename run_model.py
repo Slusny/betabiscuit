@@ -84,7 +84,7 @@ if not "use_derivative" in args:
 
 def opponent_action(obs):
     if (env_name == "hockey"):
-        return player.act(obs)
+        return np.array([0,0.,0,0])#player.act(obs)
     else:
         return np.array([0,0.,0,0])
 
