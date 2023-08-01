@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 import laserhockey.hockey_env as h_env
 sys.path.insert(0,'./DDPG')
+sys.path.insert(0,'./TD3')
 from DDPG import DDPGAgent
 from TD3 import TD3Agent
 from importlib import reload
@@ -169,11 +170,12 @@ if __name__ == "__main__":
                         learning_rate_critics=args.learning_rate_critic,
                         hidden_sizes_actor=eval(args.hidden_sizes_actor),
                         hidden_sizes_critic=eval(args.hidden_sizes_critic),
+                        bootstrap=args.bootstrap,
                         )
     elif args.algo == "td3":
         agent = TD3Agent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
                         eps = args.eps, 
-                        learning_rate_actor = args.lr,
+                        learning_rate_actor = args.learning_rate_actor,
                         update_target_every = args.update_every,
                         # past_states = args.past_states,
                         derivative = args.use_derivative,
@@ -185,6 +187,7 @@ if __name__ == "__main__":
                         hidden_sizes_actor=eval(args.hidden_sizes_actor),
                         hidden_sizes_critic=eval(args.hidden_sizes_critic),
                         tau=args.tau,
+                        bootstrap=args.bootstrap,
                         )
     
     if args.run:
