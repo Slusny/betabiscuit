@@ -42,6 +42,9 @@ else:
             args = run.config
             break
     print("counld find run " + run_args.run_name)
+    print("available runs:")
+    for run in runs:
+        print(run.name)
     _display.stop()
     exit(1)
 
