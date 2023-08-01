@@ -50,13 +50,13 @@ class QFunction():
     def fit(self, observations, actions, targets): # all arguments should be torch tensors
         self.Q1.train() # put model in training mode
         self.Q2.train()
-        self.optimizerQ1.zero_grad(torch.hstack([observations,actions]))
-        self.optimizerQ2.zero_grad(torch.hstack([observations,actions]))
+        self.optimizerQ1.zero_grad()
+        self.optimizerQ2.zero_grad()
         # Forward pass
 
         # pred1, pred2 = self.Q_value(observations,actions)
-        pred1 = self.Q1.forward(x)
-        pred2 = self.Q2.forward(x)
+        pred1 = self.Q1.forward(torch.hstack([observations,actions]))
+        pred2 = self.Q2.forward(torch.hstack([observations,actions]))
 
         # Optimize both critics -> combined loss
         lossQ1 = self.loss1(pred1, targets)
