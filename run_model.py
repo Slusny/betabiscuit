@@ -42,6 +42,7 @@ else:
             args = run.config
             break
     print("counld find run " + run_args.run_name)
+    _display.stop()
     exit(1)
 
 art = api.artifact(entity + "/" + run_args.project + "/" + run_args.artifact, type='model')
