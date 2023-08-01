@@ -45,11 +45,11 @@ class QFunction():
                                         lr=learning_rate,
                                         eps=0.000001)
         self.loss1 = nn.MSELoss() #torch.nn.SmoothL1Loss()
-        self.loss2 = nn.MSELoss()
+        self.loss2 = nn.MSELoss() # not nessessary
 
     def fit(self, observations, actions, targets): # all arguments should be torch tensors
         self.Q1.train() # put model in training mode
-        self.Q1.train()
+        self.Q2.train()
         self.optimizerQ1.zero_grad()
         self.optimizerQ2.zero_grad()
         # Forward pass
