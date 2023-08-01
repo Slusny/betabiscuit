@@ -58,7 +58,7 @@ training.add_argument('-s', '--seed', type=int,
 # Training parameters DDPG
 ddpg = parser.add_argument_group('DDPG')
 ddpg.add_argument('--learning_rate_actor', type=float,
-                    default=0.00001)
+                    default=0.0001)
 ddpg.add_argument('--learning_rate_critic', type=float,
                     default=0.0001)
 ddpg.add_argument('-n', '--eps',action='store',  type=float,
@@ -156,7 +156,16 @@ if __name__ == "__main__":
                         update_target_every = args.update_every,
                         # past_states = args.past_states,
                         derivative = args.use_derivative,
-                        derivative_indices = derivative_indices)
+                        derivative_indices = derivative_indices,
+                        buffer_size=args.buffer_size,
+                        discount=args.discount,
+                        batch_size=args.batch_size,
+                        learning_rate_critics=args.learning_rate_critic,
+                        hidden_sizes_actor=eval(args.hidden_sizes_actor),
+                        hidden_sizes_critic=eval(args.hidden_sizes_critic),
+                        
+                        )
+   
     
     if args.run:
         print("infer")
