@@ -13,10 +13,10 @@ class Feedforward(torch.nn.Module):
         self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
         self.activations = [ activation_fun for l in  self.layers ]
         self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
-        self.batchnorm = torch.nn.BatchNorm1d(input_size)
+        self.batchnorm_layer = torch.nn.BatchNorm1d(input_size)
 
     def forward(self, x):
-        if self.batchnorm: x = self.batchnorm(x)
+        if self.use_batchnorm: x = self.batchnorm_layer(x)
         for layer,activation_fun in zip(self.layers, self.activations):
             x = activation_fun(layer(x))
         if self.output_activation is not None:
