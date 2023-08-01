@@ -75,9 +75,9 @@ else:
     env = gym.make(env_name)
 
 if (run_args.weak_opponent):
-    player = h_env.BasicOpponent(mode=h_env.BasicOpponent.WEAK)
+    player = h_env.BasicOpponent(weak=True)
 else :
-    player = h_env.BasicOpponent(mode=h_env.BasicOpponent.NORMAL)
+    player = h_env.BasicOpponent(weak=False)
 
 def opponent_action(obs):
     if (env_name == "hockey"):
