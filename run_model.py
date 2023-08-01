@@ -93,7 +93,7 @@ action_n = 8
 derivative_indices = []
 
 if args['algo'] == "ddpg":
-    agent = DDPGAgent(env, env_name, action_n, args.seed, args.savepath, False,
+    agent = DDPGAgent(env, env_name, action_n, None, args.savepath, False,
             eps = args.eps, 
             learning_rate_actor = args.lr,
             update_target_every = args.update_every,
