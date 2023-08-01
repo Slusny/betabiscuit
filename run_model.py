@@ -21,6 +21,7 @@ parser.add_argument('-r','--run_name', type=str, default="latest")
 parser.add_argument('--run_id', type=str, default="latest")
 parser.add_argument('-a','--artifact', type=str, default='model:v4')
 parser.add_argument('-s','--sleep', type=float, default=0., help="slow down simulation by sleep x seconds")
+parser.add_argument('-w','--weak_opponent', action='store_true')
 
 run_args = parser.parse_args()
 
@@ -67,6 +68,17 @@ elif env_name == "hockey-train-defense":
 else:
     env = gym.make(env_name)
 
+if (run_args.weak_opponent):
+    player = h_env.BasicOpponent(mode=h_env.BasicOpponent.WEAK)
+else :
+    player = h_env.BasicOpponent(mode=h_env.BasicOpponent.NORMAL)
+
+def opponent_action(obs):
+    if (env_name == "hockey"):
+        return player.act(obs)
+    else:
+        return np.array([0,0.,0,0])
+
 #create save path
 savepath = 'results_run'
 Path().mkdir(parents=True, exist_ok=True)
@@ -96,7 +108,7 @@ if args['algo'] == "ddpg":
             done = False
             a = agent.act(ob)
             a = a[:4]
-            a2 = [0,0.,0,0]
+            a2 = opponent_action(ob)
             (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
             total_reward+= reward
             ob=ob_new
