@@ -81,7 +81,7 @@ class DDPGAgent(object):
     """
     Agent implementing Q-learning with NN function approximation.
     """
-    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, bootstrap, **userconfig):
+    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, **userconfig):
 
         observation_space = env.observation_space
         action_space = env.action_space
@@ -117,7 +117,8 @@ class DDPGAgent(object):
             "use_target_net": True,
             # "past_states": 1,
             "derivative": False,
-            "derivative_indices": []
+            "derivative_indices": [],
+            "bootstrap": None,
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -149,7 +150,7 @@ class DDPGAgent(object):
                                          activation_fun = torch.nn.ReLU(),
                                          output_activation = torch.nn.Tanh()).to(device)
 
-        if(bootstrap):
+        if(self._config["bootstrap"] is not None):
             api = wandb.Api()
             art = api.artifact(bootstrap, type='model')
             state = torch.load(art.file())

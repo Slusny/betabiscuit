@@ -130,6 +130,7 @@ class TD3Agent(object):
             # "past_states": 1,
             "derivative": False,
             "derivative_indices": [],
+            "bootstrap": None,
             "tau": 0.005,
             "policy_noise": 0.4, 
             "noise_clip": 0.5,
@@ -167,7 +168,7 @@ class TD3Agent(object):
         
         # To resume training from a saved model.
         # Models get saved in weights-and-biases and loaded from there.
-        if(bootstrap):
+        if(self._config["bootstrap"] is not None):
             api = wandb.Api()
             art = api.artifact(bootstrap, type='model')
             state = torch.load(art.file())
