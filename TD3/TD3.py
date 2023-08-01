@@ -79,6 +79,107 @@ class QFunction():
         # hstack: concatenation along the first axis for 1-D tensors
         x = torch.hstack([observations,actions])
         return (self.Q1.forward(x))
+    
+    ##################
+
+class QFunction(torch.nn.Module):
+    def __init__(self, input_size, hidden_sizes, output_size, learning_rate, activation_fun=torch.nn.Tanh(), output_activation=None):
+        super(QFunction, self).__init__()
+        self.input_size = input_size
+        self.hidden_sizes  = hidden_sizes
+        self.output_size  = output_size
+        self.output_activation = output_activation
+        layer_sizes = [self.input_size] + self.hidden_sizes
+        self.layersQ1 = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
+        self.layersQ2 = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
+        self.activationsQ1 = [ activation_fun for l in  self.layersQ1 ]
+        self.activationsQ2 = [ activation_fun for l in  self.layersQ2 ]
+        self.readoutQ1 = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
+        self.readoutQ2 = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
+
+        self.optimizer=torch.optim.Adam(self.Q1parameters(),
+                                        lr=learning_rate,
+                                        eps=0.000001)
+        
+        self.loss = nn.MSELoss() #torch.nn.SmoothL1Loss()
+
+    def forward(self, x):
+        # Q1
+        for layer,activation_fun in zip(self.layersQ1, self.activationsQ1):
+            x = activation_fun(layer(x))
+        if self.output_activation is not None:
+            Q1 = self.output_activation(self.readout(x))
+        else:
+            Q1 = self.readout(x)
+
+        # Q2
+        for layer,activation_fun in zip(self.layersQ2, self.activationsQ2):
+            x = activation_fun(layer(x))
+        if self.output_activation is not None:
+            Q2 = self.output_activation(self.readout(x))
+        else:
+            Q2 = self.readout(x)
+
+        return Q1, Q2
+
+    def fit(self, observations, actions, targets): # all arguments should be torch tensors
+        self.train() # put model in training mode
+        self.optimizer.zero_grad()
+        # Forward pass
+        pred1, pred2 = self.forward(torch.hstack([observations,actions]))
+
+        # Optimize both critics -> combined loss
+        loss = self.loss(pred1, targets) + self.loss(pred2, targets)
+
+        # Backward pass
+        loss.backward()
+        self.optimizer.step()
+        return loss.item()
+
+    # def Q_value(self, observations, actions):
+    #     # hstack: concatenation along the first axis for 1-D tensors
+    #     x = torch.hstack([observations,actions])
+    #     return (self.Q1.forward(x),
+    #             self.Q2.forward(x))
+    
+    def Q1_value(self, observations, actions):
+        # hstack: concatenation along the first axis for 1-D tensors
+        x = torch.hstack([observations,actions])
+        for layer,activation_fun in zip(self.layersQ1, self.activationsQ1):
+            x = activation_fun(layer(x))
+        if self.output_activation is not None:
+            Q1 = self.output_activation(self.readout(x))
+        else:
+            Q1 = self.readout(x)
+        return Q1
+    
+####################################
+
+        def __init__(self, input_size, hidden_sizes, output_size, activation_fun=torch.nn.Tanh(), output_activation=None):
+        super(Feedforward, self).__init__()
+        self.input_size = input_size
+        self.hidden_sizes  = hidden_sizes
+        self.output_size  = output_size
+        self.output_activation = output_activation
+        layer_sizes = [self.input_size] + self.hidden_sizes
+        self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
+        self.activations = [ activation_fun for l in  self.layers ]
+        self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
+
+    def forward(self, x):
+        for layer,activation_fun in zip(self.layers, self.activations):
+            x = activation_fun(layer(x))
+        if self.output_activation is not None:
+            return self.output_activation(self.readout(x))
+        else:
+            return self.readout(x)
+
+    def predict(self, x):
+        with torch.no_grad():
+            return self.forward(x).cpu().numpy()
+        
+
+        #########################
 
 # Orstein-Uhlenbeck noise
 class OUNoise():
@@ -160,12 +261,12 @@ class TD3Agent(object):
         self.Q = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                            action_dim=self._action_n,
                            hidden_sizes= self._config["hidden_sizes_critic"],
-                           learning_rate = self._config["learning_rate_critic"])
+                           learning_rate = self._config["learning_rate_critic"]).to(device)
         # target Q Network
         self.Q_target = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   action_dim=self._action_n,
                                   hidden_sizes= self._config["hidden_sizes_critic"],
-                                  learning_rate = 0)
+                                  learning_rate = 0).to(device)
 
         self.policy = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_actor"],
@@ -203,13 +304,14 @@ class TD3Agent(object):
     def _copy_nets(self):
         # Full copy
         if self._config["tau"] == 1:
-            self.Q_target.Q1.load_state_dict(self.Q.Q1.state_dict())
-            self.Q_target.Q2.load_state_dict(self.Q.Q2.state_dict())
+            # self.Q_target.Q1.load_state_dict(self.Q.Q1.state_dict())
+            # self.Q_target.Q2.load_state_dict(self.Q.Q2.state_dict())
+            self.Q_target.load_state_dict(self.Q.state_dict())
             self.policy_target.load_state_dict(self.policy.state_dict())
         
         # Convex update
         else:
-            for param, target_param in zip(self.policy.parameters(), self.policy_target.parameters()):
+            for param, target_param in zip(self.policy.parameters(), self.policy_target.parameters()): # AAAAAAAAAAAAAAAAAAAAAAAAAAAAH
                 target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
 
             for param, target_param in zip(self.Q.Q1.parameters(), self.Q_target.Q1.parameters()):
@@ -267,7 +369,7 @@ class TD3Agent(object):
 
             # Clipped Double Q-Learning (TD3 paper 4.2)
             # To combat overestimation bias, we use the minimum of the two Q functions
-            q_prime_1, q_prime_2 = self.Q_target.Q_value(s_prime, next_action)
+            q_prime_1, q_prime_2 = self.Q_target(torch.hstack([s_prime,next_action]))
             q_prime = torch.min(q_prime_1, q_prime_2)
             
             # target
