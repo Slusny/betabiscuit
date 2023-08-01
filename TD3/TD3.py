@@ -220,8 +220,9 @@ class TD3Agent(object):
             eps = self._eps
         #
         observation = torch.from_numpy(observation.astype(np.float32)).to(device) 
-        action = self.policy.predict(observation) + eps*self.action_noise()  # action in -1 to 1 (+ noise)
-        action = self._action_space.low + (action + 1.0) / 2.0 * (self._action_space.high - self._action_space.low)
+        action = (self.policy.predict(observation) + eps*self.action_noise()).clamp(-1,1)  # action in -1 to 1 (+ noise)
+        # action = self.policy.predict(observation) + eps*self.action_noise()  # action in -1 to 1 (+ noise)
+        # action = self._action_space.low + (action + 1.0) / 2.0 * (self._action_space.high - self._action_space.low)
         return action
 
     def store_transition(self, transition):
@@ -258,7 +259,8 @@ class TD3Agent(object):
             # Target Policy Smoothing (TD3 paper 5.3)
             # adding noise to the target action smooths the value estimate
             policy_noise = (torch.randn_like(a) * self._config["policy_noise"]).clamp(-self._config["noise_clip"], self._config["noise_clip"])
-            next_action = (self.policy_target.forward(s_prime) + policy_noise).clamp(self._action_space.low,self._action_space.high)
+            next_action = (self.policy_target.forward(s_prime) + policy_noise).clamp(-1,1)
+            # next_action = (self.policy_target.forward(s_prime) + policy_noise).clamp(self._action_space.low,self._action_space.high)
 
             # Clipped Double Q-Learning (TD3 paper 4.2)
             # To combat overestimation bias, we use the minimum of the two Q functions
