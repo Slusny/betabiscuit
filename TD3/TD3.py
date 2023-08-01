@@ -260,11 +260,11 @@ class TD3Agent(object):
 
 
         # Q Network
-        self.Q = QFunction(input_size=self._obs_dim+self.action_n+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
+        self.Q = QFunction(input_size=self._obs_dim+self._action_n+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                            hidden_sizes= self._config["hidden_sizes_critic"],
                            learning_rate = self._config["learning_rate_critic"]).to(device)
         # target Q Network
-        self.Q_target = QFunction(input_size=self._obs_dim+self.action_n+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
+        self.Q_target = QFunction(input_size=self._obs_dim+self._action_n+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_critic"],
                                   learning_rate = 0).to(device)
 
