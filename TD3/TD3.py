@@ -358,6 +358,7 @@ class TD3Agent(object):
     def train_innerloop(self, iter_fit=32):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
         losses = []
+        actor_loss = 0
         
         for i in range(iter_fit):
             self.train_iter+=1
