@@ -13,6 +13,7 @@ import memory as mem
 from feedforward import Feedforward
 sys.path.append('..')
 from utility import save_checkpoint
+from cpprb import PrioritizedReplayBuffer, ReplayBuffer
 
 import laserhockey.hockey_env as h_env
 
@@ -119,6 +120,9 @@ class DDPGAgent(object):
             "derivative": False,
             "derivative_indices": [],
             "bootstrap": None,
+            "per": False,
+            "dense_reward": False,
+            "legacy": False,
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -126,7 +130,20 @@ class DDPGAgent(object):
 
         self.action_noise = OUNoise((self._action_n))
 
-        self.buffer = mem.Memory(max_size=self._config["buffer_size"])
+        if self._config["per"]:
+            self.buffer = PrioritizedReplayBuffer(self._config["buffer_size"], {
+                "obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "act": {"shape": (self._action_n)},
+                "rew": {},
+                "next_obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "done": {}
+                }
+            )
+        else:
+            self.buffer = mem.Memory(max_size=self._config["buffer_size"])
+
+        if self._config["legacy"]:
+            self._action_n = 8
 
         # Q Network
         self.Q = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
@@ -150,9 +167,11 @@ class DDPGAgent(object):
                                          activation_fun = torch.nn.ReLU(),
                                          output_activation = torch.nn.Tanh()).to(device)
 
+        # To resume training from a saved model.
+        # Models get saved in weights-and-biases and loaded from there.
         if(self._config["bootstrap"] is not None):
             api = wandb.Api()
-            art = api.artifact(bootstrap, type='model')
+            art = api.artifact(self._config["bootstrap"], type='model')
             state = torch.load(art.file())
             self.restore_state(state)
         
@@ -163,8 +182,9 @@ class DDPGAgent(object):
                                         eps=0.000001)
         self.train_iter = 0
 
+        # log gradients to W&B
         self.wandb_run = wandb_run
-        if(wandb_run): # log gradients to W&B
+        if(wandb_run):
             wandb.watch(self.Q, log_freq=100)
             wandb.watch(self.policy, log_freq=100)
 
@@ -184,7 +204,10 @@ class DDPGAgent(object):
 
     def store_transition(self, transition):
         transition = transition
-        self.buffer.add_transition(transition)
+        if self._config["per"]:
+            self.buffer.add(obs=transition[0], act=transition[1], rew=transition[2], next_obs=transition[3], done=transition[4])
+        else:
+            self.buffer.add_transition(transition)
 
     def state(self):
         return (self.Q.state_dict(), self.policy.state_dict())
@@ -197,6 +220,24 @@ class DDPGAgent(object):
     def reset(self):
         self.action_noise.reset()
 
+    def sample_replaybuffer(self):
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
+        if self._config["per"]:
+            data = self.buffer.sample(self._config['batch_size'])
+            s, a, rew = data['obs'], data['act'], data['rew']
+            #actions_h, rewards = data['intervene'], data['acte']
+            s_prime, done, idxs = data['next_obs'], data['done'], data['indexes']
+        else:
+            data=self.buffer.sample(batch=self._config['batch_size'])
+            s = np.stack(data[:,0]) # s_t
+            a = np.stack(data[:,1]) # a_t
+            rew = np.stack(data[:,2])[:,None] # rew  (batchsize,1)
+            s_prime = np.stack(data[:,3]) # s_t+1
+            done = np.stack(data[:,4])[:,None] # done signal  (batchsize,1)
+            idxs = None
+        return to_torch(s),to_torch(a),to_torch(rew),to_torch(s_prime),to_torch(done),idxs
+
+    # inner training loop where we fit the Actor and Critic
     def train_innerloop(self, iter_fit=32):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
         losses = []
@@ -206,12 +247,7 @@ class DDPGAgent(object):
         for i in range(iter_fit):
 
             # sample from the replay buffer
-            data=self.buffer.sample(batch=self._config['batch_size'])
-            s = to_torch(np.stack(data[:,0])) # s_t
-            a = to_torch(np.stack(data[:,1])) # a_t
-            rew = to_torch(np.stack(data[:,2])[:,None]) # rew  (batchsize,1)
-            s_prime = to_torch(np.stack(data[:,3])) # s_t+1
-            done = to_torch(np.stack(data[:,4])[:,None]) # done signal  (batchsize,1)
+            s,a,rew,s_prime,done,idxs = self.sample_replaybuffer()
 
             if self._config["use_target_net"]:
                 q_prime = self.Q_target.Q_value(s_prime, self.policy_target.forward(s_prime))
@@ -220,6 +256,12 @@ class DDPGAgent(object):
             # target
             gamma=self._config['discount']
             td_target = rew + gamma * (1.0-done) * q_prime
+
+            # prediction for priotized replay buffer
+            if self._config["per"]:
+                q = self.Q.Q_value(s, a)
+                td_error = abs(td_target - q).detach().cpu().numpy()
+                self.buffer.update_priorities(idxs, td_error)
 
             # optimize the Q objective
             fit_loss = self.Q.fit(s, a, td_target)
@@ -251,15 +293,15 @@ class DDPGAgent(object):
         #     return arr 
 
         def add_derivative(obs,pastobs):
-            # filter_index = [3,4,5,9,10,11,14,15]
             return np.append(obs,(obs-pastobs)[self._config["derivative_indices"]])
         
         if (self.env_name == "hockey"):
             self.player = h_env.BasicOpponent()
 
-        def opponent_action(obs):
+        def opponent_action():
             if (self.env_name == "hockey"):
-                return self.player.act(obs)
+                obs_agent2 = self.env.obs_agent_two()
+                return self.player.act(obs_agent2)
             else:
                 return np.array([0,0.,0,0])
 
@@ -286,7 +328,7 @@ class DDPGAgent(object):
                 timestep += 1
                 if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
                 else :                          a = self.act(ob)
-                a2 = opponent_action(ob)
+                a2 = opponent_action()
                 # a = self.act(past_obs.flatten())
                 # a2 = opponent_action(past_obs[-1])
 

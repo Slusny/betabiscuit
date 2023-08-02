@@ -124,7 +124,7 @@ class TD3Agent(object):
     """
     Agent implementing Q-learning with NN function approximation.
     """
-    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, bootstrap, **userconfig):
+    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, **userconfig):
 
         observation_space = env.observation_space
         action_space = env.action_space
@@ -354,9 +354,10 @@ class TD3Agent(object):
         if (self.env_name == "hockey"):
             self.player = h_env.BasicOpponent(weak=False)
 
-        def opponent_action(obs):
+        def opponent_action():
             if (self.env_name == "hockey"):
-                return self.player.act(obs)
+                obs_agent2 = self.env.obs_agent_two()
+                return self.player.act(obs_agent2)
             else:
                 return np.array([0,0.,0,0])
 
@@ -371,7 +372,8 @@ class TD3Agent(object):
                 timestep += 1
                 if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
                 else :                          a = self.act(ob)
-                a2 = opponent_action(ob)
+                
+                a2 = opponent_action()
 
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 if(self._config["dense_reward"]): 

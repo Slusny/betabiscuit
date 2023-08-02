@@ -97,6 +97,7 @@ architecture.add_argument('--use_derivative',action='store_true',
 architecture.add_argument('--per', action='store_true',help='use prioritized experience replay')
 architecture.add_argument('--bootstrap',action='store', type=str, default=None,
                     help='wandb path ("betabiscuit/project/artifact") to model artifacts')
+architecture.add_argument('-l', '--legacy', action='store_true',help='use outdated architecture')
 
 
 # Logging
@@ -185,6 +186,7 @@ if __name__ == "__main__":
                         per=args.per,
                         dense_reward=args.dense_reward,
                         bootstrap=args.bootstrap,
+                        legacy=args.legacy,
                         )
     elif args.algo == "td3":
         agent = TD3Agent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
