@@ -10,16 +10,16 @@
 #SBATCH --cpus-per-task=2
 # the job can use and see 4 CPUs (from max 24).
 
-#SBATCH --partition=test
+#SBATCH --partition=week
 # the slurm partition the job is queued to.
 
-#SBATCH --mem-per-cpu=3G
+#SBATCH --mem-per-cpu=8G
 # the job will need 12GB of memory equally distributed on 4 cpus.(251GB are available in total on one node)
 
 #SBATCH --gres=gpu:1
 #the job can use and see 1 GPUs (4 GPUs are available in total on one node) use SBATCH --gres=gpu:1080ti:1 to explicitly demand a Geforce 1080 Ti GPU. Use SBATCH --gres=gpu:A4000:1 to explicitly demand a RTX A4000 GPU
 
-#SBATCH --time=1:00:00
+#SBATCH --time=3-3
 # the maximum time the scripts needs to run
 # "minutes:seconds", "hours:minutes:seconds", "days-hours","days-hours:minutes" and "days-hours:minutes:seconds"
 
@@ -54,7 +54,9 @@
 # #sudo apt-get install python3-setuptools
 # pip3 install -r requirements_pip.txt 
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container2.sif python3 main.py --algo td3 --env hockey-train-shooting --max_episodes 1000000 --notes "shooting teacher" --batch_size 512 --hidden_sizes_actor [300,300] --hidden_sizes_critic [300,300] -u 2 --discount 0.95 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --lr 0.0001 --save_interval 5000 --wandb
+singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container2.sif python3 python main.py --algo ddpg --env hockey --max_episodes 1000000 --notes "run on pc" --save_interval 4000 --batch_size 512 --hidden_sizes_actor [128,128] --hidden_sizes_critic [128,128,64] --legacy --bootstrap "betabiscuit/hockey - ddpg/model:v54" --wandb_resume "lqcmv838"
+
+#main.py --algo td3 --env hockey-train-shooting --max_episodes 1000000 --notes "shooting teacher" --batch_size 512 --hidden_sizes_actor [300,300] --hidden_sizes_critic [300,300] -u 2 --discount 0.95 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --lr 0.0001 --save_interval 5000 --wandb
 
 
 

@@ -15,10 +15,12 @@ export WANDB_API_KEY=acba70ec360a08475069be2222a9e630966d3e55
 %post
     apt-get update
     apt-get upgrade -y
+    sudo apt install gcc-9 g++-9 -y
     apt-get install swig -y
     apt-get install python3 -y
     python3 -V
     apt-get install python3-pip -y
+    pip3 install cpprb
     apt-get install tigervnc-standalone-server -y # to be able to vnc it
     pip3 install pyvirtualdisplay               # virtual display for vnc
     python3 -m pip install /laser-hockey-env
