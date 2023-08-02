@@ -29,7 +29,7 @@ class UnsupportedSpace(Exception):
         self.message = message
         super().__init__(self.message)
 
-# class QFunction():
+## class QFunction():
 #     def __init__(self, observation_dim, action_dim, hidden_sizes=[100,100],
 #                  learning_rate = 0.0002):
 #         self.Q1 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
