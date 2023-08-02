@@ -29,15 +29,14 @@ obs, info = env.reset()
 
 env.render()
 time.sleep(1)
-obs_agent2 = env.obs_agent_two()
 for j in range(100000):
     time.sleep(0.3)
     env.render()
     a1 = player1.act(obs) 
+    obs_agent2 = env.obs_agent_two()
     a2 = player2.act(obs_agent2)
     obs_next, r, d, _, info = env.step(np.hstack([a1,a2]))   
     replay_buffer.add(obs=obs, act=a1, rew=r, next_obs=obs_next, done=d, info=[info["reward_closeness_to_puck"],info["reward_touch_puck"],info["reward_puck_direction"]])
-    obs_agent2 = env.obs_agent_two()
     obs=obs_next
     if d or _: env.reset()
     if j % 200 == 0:

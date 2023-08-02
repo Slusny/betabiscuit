@@ -164,9 +164,10 @@ for i_episode in range(1, run_args.max_episodes+1):
         env.render()
         timestep += 1
         done = False
+        obs_agent2 = env.obs_agent_two()
+        a2 = opponent_action(obs_agent2)
         a = agent.act(ob)
         a = a[:4]
-        a2 = opponent_action(ob)
         (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
         total_reward+= reward
         ob=ob_new
