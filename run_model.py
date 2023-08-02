@@ -118,7 +118,7 @@ player_weak = h_env.BasicOpponent(weak=True)
 #             derivative_indices = derivative_indices)
 #     agent.restore_state(state)
 if args['algo'] == "ddpg":
-    agent = DDPGAgent(env, env_name, action_n, args.seed, "/home/lenny", False,
+    agent = DDPGAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
                     eps = args["eps"], 
                     learning_rate_actor = args["lr"],
                     update_target_every = args["update_every"],
@@ -134,7 +134,7 @@ if args['algo'] == "ddpg":
                     bootstrap=args["bootstrap"],
                     )
 elif args['algo'] == "td3":
-    agent = TD3Agent(env, env_name, action_n, args.seed, "/home/lenny", False,
+    agent = TD3Agent(env, env_name, action_n, args["seed"], "/home/lenny", False,
                     eps = args["eps"], 
                     learning_rate_actor = args["lr"],
                     update_target_every = args["update_every"],
