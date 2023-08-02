@@ -24,6 +24,7 @@ parser.add_argument('--run_id', type=str, default="latest")
 parser.add_argument('-a','--artifact', type=str, default='model:v4')
 parser.add_argument('-s','--sleep', type=float, default=0., help="slow down simulation by sleep x seconds")
 parser.add_argument('-w','--weak_opponent', action='store_true')
+parser.add_argument('-l','--legacy', action='store_true')
 parser.add_argument('--action_n', action='store', default=4)
 
 run_args = parser.parse_args()
@@ -108,14 +109,14 @@ action_n = run_args.action_n
 player_normal = h_env.BasicOpponent(weak=False)
 player_weak = h_env.BasicOpponent(weak=True)
 
-# if args['algo'] == "ddpg":
-#     agent = DDPGAgent(env, env_name, action_n, None, args["savepath"], False,
-#             eps = args["eps"], 
-#             learning_rate_actor = args["lr"],
-#             update_target_every = args["update_every"],
-#             # past_states = args.past_states,
-#             derivative = args["use_derivative"],
-#             derivative_indices = derivative_indices)
+if run_args.legacy :
+    agent = DDPGAgent(env, env_name, action_n, None, args["savepath"], False,
+            eps = args["eps"], 
+            learning_rate_actor = args["lr"],
+            update_target_every = args["update_every"],
+            # past_states = args.past_states,
+            derivative = args["use_derivative"],
+            derivative_indices = derivative_indices)
 #     agent.restore_state(state)
 if args['algo'] == "ddpg":
     agent = DDPGAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
