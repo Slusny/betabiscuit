@@ -40,10 +40,10 @@ for j in range(100000):
     obs_agent2 = env.obs_agent_two()
     obs=obs_next
     if d or _: env.reset()
-    if j % 10 == 0:
+    if j % 200 == 0:
         print("End this? Press 'q' to quit")
         x = input()
         if x == 'q':
             break
 date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
-replay_buffer.save_transitions("recorded_dataset_{date_str}")
+replay_buffer.save_transitions(f'recorded_dataset_{date_str}')
