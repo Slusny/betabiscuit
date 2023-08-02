@@ -97,7 +97,7 @@ architecture.add_argument('--use_derivative',action='store_true',
 architecture.add_argument('--per', action='store_true',help='use prioritized experience replay')
 architecture.add_argument('--bootstrap',action='store', type=str, default=None,
                     help='wandb path ("betabiscuit/project/artifact") to model artifacts')
-architecture.add_argument('-l', '--legacy', action='store_true',help='use outdated architecture')
+architecture.add_argument('--legacy', action='store_true',help='use outdated architecture')
 
 
 # Logging
