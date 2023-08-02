@@ -183,6 +183,7 @@ if __name__ == "__main__":
                         hidden_sizes_actor=eval(args.hidden_sizes_actor),
                         hidden_sizes_critic=eval(args.hidden_sizes_critic),
                         per=args.per,
+                        dense_reward=args.dense_reward,
                         bootstrap=args.bootstrap,
                         )
     elif args.algo == "td3":
@@ -203,6 +204,7 @@ if __name__ == "__main__":
                         policy_noise=args.policy_noise,
                         noise_clip=args.noise_clip,
                         per=args.per,
+                        dense_reward=args.dense_reward,
                         bootstrap=args.bootstrap,
                         )
     
