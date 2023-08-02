@@ -282,13 +282,13 @@ class TD3Agent(object):
             s_prime, done, idxs = data['next_obs'], data['done'], data['indexes']
         else:
             data=self.buffer.sample(batch=self._config['batch_size'])
-            s = to_torch(np.stack(data[:,0])) # s_t
-            a = to_torch(np.stack(data[:,1])) # a_t
-            rew = to_torch(np.stack(data[:,2])[:,None]) # rew  (batchsize,1)
-            s_prime = to_torch(np.stack(data[:,3])) # s_t+1
-            done = to_torch(np.stack(data[:,4])[:,None]) # done signal  (batchsize,1)
+            s = np.stack(data[:,0]) # s_t
+            a = np.stack(data[:,1]) # a_t
+            rew = np.stack(data[:,2])[:,None] # rew  (batchsize,1)
+            s_prime = np.stack(data[:,3]) # s_t+1
+            done = np.stack(data[:,4])[:,None] # done signal  (batchsize,1)
             idxs = None
-        return s,a,rew,s_prime,done,idxs
+        return to_torch(s),to_torch(a),to_torch(rew),to_torch(s_prime),to_torch(done),idxs
 
     # inner training loop where we fit the Actor and Critic
     def train_innerloop(self, iter_fit=32):
