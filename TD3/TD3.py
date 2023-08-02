@@ -13,6 +13,7 @@ import memory as mem
 from feedforward import Feedforward
 sys.path.append('..')
 from utility import save_checkpoint
+from cpprb import PrioritizedReplayBuffer, ReplayBuffer
 
 import laserhockey.hockey_env as h_env
 
@@ -144,6 +145,7 @@ class QFunction(torch.nn.Module):
     #     return (self.Q1.forward(x),
     #             self.Q2.forward(x))
     
+    # Extra function for Q1 value, saves computation on Q2
     def Q1_value(self, observations, actions):
         # hstack: concatenation along the first axis for 1-D tensors
         x = torch.hstack([observations,actions])
@@ -249,6 +251,7 @@ class TD3Agent(object):
             "tau": 0.005,
             "policy_noise": 0.4, 
             "noise_clip": 0.5,
+            "per": False,
 
         }
         self._config.update(userconfig)
@@ -257,7 +260,17 @@ class TD3Agent(object):
 
         self.action_noise = OUNoise((self._action_n))
 
-        self.buffer = mem.Memory(max_size=self._config["buffer_size"])
+        if self._config["per"]:
+            self.buffer = PrioritizedReplayBuffer(self._config["buffer_size"], {
+                "obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "act": {"shape": (self._action_n)},
+                "rew": {},
+                "next_obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "done": {}
+                }
+            )
+        else:
+            self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
 
 
@@ -338,7 +351,11 @@ class TD3Agent(object):
 
     def store_transition(self, transition):
         transition = transition
-        self.buffer.add_transition(transition)
+        if self._config["per"]:
+            transition["error"] = 0
+            self.buffer.add(obs=transition[0], act=transition[1], rew=transition[2], next_obs=transition[3], done=transition[4])
+        else:
+            self.buffer.add_transition(transition)
 
     def state(self):
         # return (self.Q.Q1.state_dict(),self.Q.Q2.state_dict(), self.policy.state_dict())
@@ -353,22 +370,33 @@ class TD3Agent(object):
 
     def reset(self):
         self.action_noise.reset()
-
-    # inner training loop where we fit the Actor and Critic
-    def train_innerloop(self, iter_fit=32):
+    
+    def sample_replaybuffer(self):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
-        losses = []
-        actor_loss = 0
-        
-        for i in range(iter_fit):
-            # sample from the replay buffer
+        if self._config["per"]:
+            self.replay_buffer.sample(self._config['batch_size'])
+            s, a, r = data['obs'], data['act'], data['rew']
+            #actions_h, rewards = data['intervene'], data['acte']
+            s_prime, done, idxs = data['next_obs'], data['done'], data['indexes']
+        else:
             data=self.buffer.sample(batch=self._config['batch_size'])
             s = to_torch(np.stack(data[:,0])) # s_t
             a = to_torch(np.stack(data[:,1])) # a_t
             rew = to_torch(np.stack(data[:,2])[:,None]) # rew  (batchsize,1)
             s_prime = to_torch(np.stack(data[:,3])) # s_t+1
             done = to_torch(np.stack(data[:,4])[:,None]) # done signal  (batchsize,1)
+            idxs = None
+        return s,a,rew,s_prime,done,idxs
 
+    # inner training loop where we fit the Actor and Critic
+    def train_innerloop(self, iter_fit=32):
+        losses = []
+        actor_loss = 0
+        
+        for i in range(iter_fit):
+
+            # sample from the replay buffer
+            s,a,rew,s_prime,done,idxs = self.sample_replaybuffer()
             # Target Policy Smoothing (TD3 paper 5.3)
             # adding noise to the target action smooths the value estimate
             policy_noise = (torch.randn_like(a) * self._config["policy_noise"]).clamp(-self._config["noise_clip"], self._config["noise_clip"])
@@ -383,6 +411,12 @@ class TD3Agent(object):
             # target
             gamma=self._config['discount']
             td_target = rew + gamma * (1.0-done) * q_prime
+
+            # prediction for priotized replay buffer
+            if self._config["per"]:
+                pred1 = self.Q.Q1_value(s,a)
+                priorities = abs(td_target - pred1).detach().cpu().numpy()
+                self.replay_buffer.update_priorities(idxs, priorities) 
 
             # optimize the Q objective ( Critic )
             fit_loss = self.Q.fit(s, a, td_target)
