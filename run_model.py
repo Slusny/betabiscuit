@@ -102,7 +102,7 @@ def opponent_action(obs):
 savepath = 'results_run'
 Path().mkdir(parents=True, exist_ok=True)
 
-action_n = args["action_n"]
+action_n = run_args.action_n
 
 # #test
 player_normal = h_env.BasicOpponent(weak=False)
