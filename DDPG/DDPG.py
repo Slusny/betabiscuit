@@ -127,6 +127,8 @@ class DDPGAgent(object):
         self._config.update(userconfig)
         self._eps = self._config['eps']
         print("Config: ", self._config)
+        if self._config["legacy"]:
+            self._action_n = 8
 
         self.action_noise = OUNoise((self._action_n))
 
@@ -142,8 +144,6 @@ class DDPGAgent(object):
         else:
             self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
-        if self._config["legacy"]:
-            self._action_n = 8
 
         # Q Network
         self.Q = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
