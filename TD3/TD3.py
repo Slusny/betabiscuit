@@ -29,59 +29,6 @@ class UnsupportedSpace(Exception):
         self.message = message
         super().__init__(self.message)
 
-## class QFunction():
-#     def __init__(self, observation_dim, action_dim, hidden_sizes=[100,100],
-#                  learning_rate = 0.0002):
-#         self.Q1 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
-#                                 output_size=1,activation_fun=torch.nn.Tanh()).to(device)
-        
-#         self.Q2 = Feedforward(input_size=observation_dim + action_dim, hidden_sizes=hidden_sizes,
-#                                 output_size=1,activation_fun=torch.nn.Tanh()).to(device)
-
-#         self.optimizerQ1=torch.optim.Adam(self.Q1.parameters(),
-#                                         lr=learning_rate,
-#                                         eps=0.000001)
-        
-#         self.optimizerQ2=torch.optim.Adam(self.Q2.parameters(),
-#                                         lr=learning_rate,
-#                                         eps=0.000001)
-#         self.loss1 = nn.MSELoss() #torch.nn.SmoothL1Loss()
-#         self.loss2 = nn.MSELoss() # not nessessary
-
-#     def fit(self, observations, actions, targets): # all arguments should be torch tensors
-#         self.Q1.train() # put model in training mode
-#         self.Q2.train()
-#         self.optimizerQ1.zero_grad()
-#         self.optimizerQ2.zero_grad()
-#         # Forward pass
-
-#         # pred1, pred2 = self.Q_value(observations,actions)
-#         pred1 = self.Q1.forward(torch.hstack([observations,actions]))
-#         pred2 = self.Q2.forward(torch.hstack([observations,actions]))
-
-#         # Optimize both critics -> combined loss
-#         lossQ1 = self.loss1(pred1, targets)
-#         lossQ2 = self.loss2(pred2, targets)
-
-#         # Backward pass
-#         lossQ1.backward()
-#         lossQ2.backward()
-#         self.optimizerQ1.step()
-#         self.optimizerQ2.step()
-#         return lossQ1.item()
-
-#     def Q_value(self, observations, actions):
-#         # hstack: concatenation along the first axis for 1-D tensors
-#         x = torch.hstack([observations,actions])
-#         return (self.Q1.forward(x),
-#                 self.Q2.forward(x))
-    
-#     def Q1_value(self, observations, actions):
-#         # hstack: concatenation along the first axis for 1-D tensors
-#         x = torch.hstack([observations,actions])
-#         return (self.Q1.forward(x))
-    
-    ##################
 
 class QFunction(torch.nn.Module):
     def __init__(self, input_size, hidden_sizes, learning_rate, activation_fun=torch.nn.Tanh(), output_activation=None):
@@ -102,7 +49,7 @@ class QFunction(torch.nn.Module):
                                         lr=learning_rate,
                                         eps=0.000001)
         
-        self.loss = nn.MSELoss() #torch.nn.SmoothL1Loss()
+        self.loss = nn.MSELoss() # or use torch.nn.SmoothL1Loss()?
 
     def forward(self, input):
         # 
@@ -138,12 +85,6 @@ class QFunction(torch.nn.Module):
         loss.backward()
         self.optimizer.step()
         return loss.item()
-
-    # def Q_value(self, observations, actions):
-    #     # hstack: concatenation along the first axis for 1-D tensors
-    #     x = torch.hstack([observations,actions])
-    #     return (self.Q1.forward(x),
-    #             self.Q2.forward(x))
     
     # Extra function for Q1 value, saves computation on Q2
     def Q1_value(self, observations, actions):
@@ -156,34 +97,7 @@ class QFunction(torch.nn.Module):
         else:
             Q1 = self.readoutQ1(x)
         return Q1
-    
-####################################
-
-    #     def __init__(self, input_size, hidden_sizes, output_size, activation_fun=torch.nn.Tanh(), output_activation=None):
-    #     super(Feedforward, self).__init__()
-    #     self.input_size = input_size
-    #     self.hidden_sizes  = hidden_sizes
-    #     self.output_size  = output_size
-    #     self.output_activation = output_activation
-    #     layer_sizes = [self.input_size] + self.hidden_sizes
-    #     self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
-    #     self.activations = [ activation_fun for l in  self.layers ]
-    #     self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
-
-    # def forward(self, x):
-    #     for layer,activation_fun in zip(self.layers, self.activations):
-    #         x = activation_fun(layer(x))
-    #     if self.output_activation is not None:
-    #         return self.output_activation(self.readout(x))
-    #     else:
-    #         return self.readout(x)
-
-    # def predict(self, x):
-    #     with torch.no_grad():
-    #         return self.forward(x).cpu().numpy()
-        
-
-        #########################
+  
 
 # Orstein-Uhlenbeck noise
 class OUNoise():
@@ -321,21 +235,14 @@ class TD3Agent(object):
     def _copy_nets(self):
         # Full copy
         if self._config["tau"] == 1:
-            # self.Q_target.Q1.load_state_dict(self.Q.Q1.state_dict())
-            # self.Q_target.Q2.load_state_dict(self.Q.Q2.state_dict())
             self.Q_target.load_state_dict(self.Q.state_dict())
             self.policy_target.load_state_dict(self.policy.state_dict())
         
         # Convex update
         else:
-            for param, target_param in zip(self.policy.parameters(), self.policy_target.parameters()): # AAAAAAAAAAAAAAAAAAAAAAAAAAAAH
+            for param, target_param in zip(self.policy.parameters(), self.policy_target.parameters()): 
                 target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
 
-            # for param, target_param in zip(self.Q.Q1.parameters(), self.Q_target.Q1.parameters()):
-            #     target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
-
-            # for param, target_param in zip(self.Q.Q2.parameters(), self.Q_target.Q2.parameters()):
-            #     target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
             for param, target_param in zip(self.Q.parameters(), self.Q_target.parameters()):
                 target_param.data.copy_(self._config["tau"] * param.data + (1 - self._config["tau"]) * target_param.data)
 
@@ -345,8 +252,6 @@ class TD3Agent(object):
         #
         observation = torch.from_numpy(observation.astype(np.float32)).to(device) 
         action = (self.policy.predict(observation) + eps*self.action_noise()).clip(-1,1)  # action in -1 to 1 (+ noise)
-        # action = self.policy.predict(observation) + eps*self.action_noise()  # action in -1 to 1 (+ noise)
-        # action = self._action_space.low + (action + 1.0) / 2.0 * (self._action_space.high - self._action_space.low)
         return action
 
     def store_transition(self, transition):
@@ -358,12 +263,9 @@ class TD3Agent(object):
             self.buffer.add_transition(transition)
 
     def state(self):
-        # return (self.Q.Q1.state_dict(),self.Q.Q2.state_dict(), self.policy.state_dict())
         return (self.Q.state_dict(), self.policy.state_dict())
 
     def restore_state(self, state):
-        # self.Q.Q1.load_state_dict(state[0],strict=False)
-        # self.Q.Q2.load_state_dict(state[1],strict=False)
         self.Q.load_state_dict(state[0])
         self.policy.load_state_dict(state[1])
         self._copy_nets()
@@ -446,14 +348,7 @@ class TD3Agent(object):
         timestep = 0
         lr = self._config['learning_rate_actor']
 
-        # def rollrep(arr,arr2):
-        #     # roll and replace: roll the array and replace the first row with arr2
-        #     arr = np.roll(arr,axis=0, shift=1)
-        #     arr[0,:] = arr2
-        #     return arr 
-
         def add_derivative(obs,pastobs):
-            # filter_index = [3,4,5,9,10,11,14,15]
             return np.append(obs,(obs-pastobs)[self._config["derivative_indices"]])
         
         if (self.env_name == "hockey"):
@@ -470,27 +365,13 @@ class TD3Agent(object):
             ob, _info = self.env.reset()
             # Incorporate  Acceleration
             past_obs = ob.copy()
-            # if self._config["acceleration"]: past_obs.append([0]*8)
-
-            # Old way of adding old frames
-            # a2 = opponent_action(ob)
-            # done = False; trunc = False;
-            # past_obs = np.tile(ob,(self._config["past_states"],1)) # past_obs is a stack of past observations of shape (past_states, obs_dim)
-            # for past in range(self._config["past_states"]-1):
-            #     a = self.act(past_obs.flatten())
-            #     (ob_past, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
-            #     past_obs = rollrep(past_obs,ob_past)
-            #     if done or trunc: break
             self.reset()
             total_reward=0
             for t in range(max_timesteps):
-                # if done or trunc: break
                 timestep += 1
                 if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
                 else :                          a = self.act(ob)
                 a2 = opponent_action(ob)
-                # a = self.act(past_obs.flatten())
-                # a2 = opponent_action(past_obs[-1])
 
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
@@ -499,8 +380,6 @@ class TD3Agent(object):
                 past_obs = ob
                 ob=ob_new
 
-                # self.store_transition((past_obs.flatten(), a, reward, rollrep(past_obs,ob_new).flatten(), done))
-                # past_obs = rollrep(past_obs,ob_new)
                 if done or trunc: break
 
             l = self.train_innerloop(iter_fit)
@@ -525,77 +404,3 @@ class TD3Agent(object):
         if i_episode % 500 != 0: save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
             
         return losses
-
-
-def main():
-    optParser = optparse.OptionParser()
-    optParser.add_option('-e', '--env',action='store', type='string',
-                         dest='env_name',default="Pendulum-v1",
-                         help='Environment (default %default)')
-    optParser.add_option('-n', '--eps',action='store',  type='float',
-                         dest='eps',default=0.1,
-                         help='Policy noise (default %default)')
-    optParser.add_option('-t', '--train',action='store',  type='int',
-                         dest='train',default=32,
-                         help='number of training batches per episode (default %default)')
-    optParser.add_option('-l', '--lr',action='store',  type='float',
-                         dest='lr',default=0.0001,
-                         help='learning rate for actor/policy (default %default)')
-    optParser.add_option('-m', '--maxepisodes',action='store',  type='int',
-                         dest='max_episodes',default=2000,
-                         help='number of episodes (default %default)')
-    optParser.add_option('-u', '--update',action='store',  type='float',
-                         dest='update_every',default=100,
-                         help='number of episodes between target network updates (default %default)')
-    optParser.add_option('-s', '--seed',action='store',  type='int',
-                         dest='seed',default=None,
-                         help='random seed (default %default)')
-    opts, args = optParser.parse_args()
-    ############## Hyperparameters ##############
-    env_name = opts.env_name
-    # creating environment
-    # if env_name == "LunarLander-v2":
-    #     env = gym.make(env_name, continuous = True)
-    # else:
-    #     env = gym.make(env_name)
-
-    env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
-
-    render = False
-    log_interval = 20           # print avg reward in the interval
-    max_episodes = opts.max_episodes # max training episodes
-    max_timesteps = 2000         # max timesteps in one episode
-
-    train_iter = opts.train      # update networks for given batched after every episode
-    eps = opts.eps               # noise of DDPG policy
-    lr  = opts.lr                # learning rate of DDPG policy
-
-    #############################################
-
-    random_seed = opts.seed
-    if random_seed is not None:
-        torch.manual_seed(random_seed)
-        np.random.seed(random_seed)
-
-    TD3 = TD3Agent(env, env_name, opts.seed, "test", False, eps = eps, learning_rate_actor = lr,
-                     update_target_every = opts.update_every)
-
-    # logging variables
-    rewards = []
-    lengths = []
-    losses = []
-    timestep = 0
-
-    def save_statistics():
-        with open(f"./results/TD3_{env_name}-eps{eps}-t{train_iter}-l{lr}-s{random_seed}-stat.pkl", 'wb') as f:
-            pickle.dump({"rewards" : rewards, "lengths": lengths, "eps": eps, "train": train_iter,
-                         "lr": lr, "update_every": opts.update_every, "losses": losses}, f)
-
-
-    testing_loss = TD3.train(train_iter,max_episodes, max_timesteps, log_interval)
-    print(testing_loss)
-
-
-
-if __name__ == '__main__':
-    main()
