@@ -5,7 +5,9 @@ from pathlib import Path
 import laserhockey.hockey_env as h_env
 import torch
 sys.path.insert(0,'./DDPG')
+sys.path.insert(0,'./TD3')
 from DDPG import DDPGAgent
+from TD3 import TD3Agent
 import wandb
 import numpy as np
 import pyvirtualdisplay
@@ -22,6 +24,7 @@ parser.add_argument('--run_id', type=str, default="latest")
 parser.add_argument('-a','--artifact', type=str, default='model:v4')
 parser.add_argument('-s','--sleep', type=float, default=0., help="slow down simulation by sleep x seconds")
 parser.add_argument('-w','--weak_opponent', action='store_true')
+parser.add_argument('--action_n', action='store', default=4)
 
 run_args = parser.parse_args()
 
@@ -87,6 +90,8 @@ else:
         derivative_indices = [3,4,5,9,10,11,14,15]
     else:
         derivative_indices = []
+
+
 def opponent_action(obs):
     if (env_name == "hockey"):
         return player.act(obs)
@@ -97,39 +102,73 @@ def opponent_action(obs):
 savepath = 'results_run'
 Path().mkdir(parents=True, exist_ok=True)
 
-action_n = 8
+action_n = args.action_n
 
 # #test
 player_normal = h_env.BasicOpponent(weak=False)
 player_weak = h_env.BasicOpponent(weak=True)
 
-if args['algo'] == "ddpg":
-    agent = DDPGAgent(env, env_name, action_n, None, args["savepath"], False,
-            eps = args["eps"], 
-            learning_rate_actor = args["lr"],
-            update_target_every = args["update_every"],
-            # past_states = args.past_states,
-            derivative = args["use_derivative"],
-            derivative_indices = derivative_indices)
-    agent.restore_state(state)
-    
+# if args['algo'] == "ddpg":
+#     agent = DDPGAgent(env, env_name, action_n, None, args["savepath"], False,
+#             eps = args["eps"], 
+#             learning_rate_actor = args["lr"],
+#             update_target_every = args["update_every"],
+#             # past_states = args.past_states,
+#             derivative = args["use_derivative"],
+#             derivative_indices = derivative_indices)
+#     agent.restore_state(state)
+if args.algo == "ddpg":
+    agent = DDPGAgent(env, env_name, action_n, args.seed, "/home/lenny", False,
+                    eps = args.eps, 
+                    learning_rate_actor = args.lr,
+                    update_target_every = args.update_every,
+                    # past_states = args.past_states,
+                    derivative = args.use_derivative,
+                    derivative_indices = derivative_indices,
+                    buffer_size=args.buffer_size,
+                    discount=args.discount,
+                    batch_size=args.batch_size,
+                    learning_rate_critics=args.learning_rate_critic,
+                    hidden_sizes_actor=eval(args.hidden_sizes_actor),
+                    hidden_sizes_critic=eval(args.hidden_sizes_critic),
+                    bootstrap=args.bootstrap,
+                    )
+elif args.algo == "td3":
+    agent = TD3Agent(env, env_name, action_n, args.seed, "/home/lenny", False,
+                    eps = args.eps, 
+                    learning_rate_actor = args.learning_rate_actor,
+                    update_target_every = args.update_every,
+                    # past_states = args.past_states,
+                    derivative = args.use_derivative,
+                    derivative_indices = derivative_indices,
+                    buffer_size=args.buffer_size,
+                    discount=args.discount,
+                    batch_size=args.batch_size,
+                    learning_rate_critic=args.learning_rate_critic,
+                    hidden_sizes_actor=eval(args.hidden_sizes_actor),
+                    hidden_sizes_critic=eval(args.hidden_sizes_critic),
+                    tau=args.tau,
+                    policy_noise=args.policy_noise,
+                    noise_clip=args.noise_clip,
+                    bootstrap=args.bootstrap,
+                    )
 
-    for i_episode in range(1, run_args.max_episodes+1):
-        ob, _info = env.reset()
-        timestep = 0
-        total_reward = 0
-        for t in range(run_args.max_timesteps):
-            time.sleep(run_args.sleep)
-            env.render()
-            timestep += 1
-            done = False
-            a = agent.act(ob)
-            a = a[:4]
-            a2 = opponent_action(ob)
-            (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
-            total_reward+= reward
-            ob=ob_new
-            if done: break
+for i_episode in range(1, run_args.max_episodes+1):
+    ob, _info = env.reset()
+    timestep = 0
+    total_reward = 0
+    for t in range(run_args.max_timesteps):
+        time.sleep(run_args.sleep)
+        env.render()
+        timestep += 1
+        done = False
+        a = agent.act(ob)
+        a = a[:4]
+        a2 = opponent_action(ob)
+        (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
+        total_reward+= reward
+        ob=ob_new
+        if done: break
 
 if run_args.vir :
     _display.stop()
