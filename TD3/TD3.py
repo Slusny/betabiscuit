@@ -258,7 +258,6 @@ class TD3Agent(object):
     def store_transition(self, transition):
         transition = transition
         if self._config["per"]:
-            transition["error"] = 0
             self.buffer.add(obs=transition[0], act=transition[1], rew=transition[2], next_obs=transition[3], done=transition[4])
         else:
             self.buffer.add_transition(transition)
