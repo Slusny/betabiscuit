@@ -110,6 +110,7 @@ player_normal = h_env.BasicOpponent(weak=False)
 player_weak = h_env.BasicOpponent(weak=True)
 
 if run_args.legacy :
+    action_n = 8
     agent = DDPGAgent(env, env_name, action_n, None, args["savepath"], False,
             eps = args["eps"], 
             learning_rate_actor = args["lr"],
