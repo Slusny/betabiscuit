@@ -166,7 +166,8 @@ class TD3Agent(object):
             "policy_noise": 0.4, 
             "noise_clip": 0.5,
             "per": False,
-            "dense_reward": False
+            "dense_reward": False,
+            "HiL": False,
 
         }
         self._config.update(userconfig)
@@ -213,7 +214,7 @@ class TD3Agent(object):
         # Models get saved in weights-and-biases and loaded from there.
         if(self._config["bootstrap"] is not None):
             api = wandb.Api()
-            art = api.artifact(bootstrap, type='model')
+            art = api.artifact(self._config["bootstrap"], type='model')
             state = torch.load(art.file())
             self.restore_state(state)
         
@@ -389,6 +390,95 @@ class TD3Agent(object):
                 if done or trunc: break
 
             fill_buffer_timesteps = max_timesteps
+
+            l = self.train_innerloop(iter_fit)
+            losses.extend(l)
+
+            rewards.append(total_reward)
+            lengths.append(t)
+            if self.wandb_run : 
+                loss_mean_innerloop = np.array(l).mean(axis=0)
+                wandb.log({"actor_loss": loss_mean_innerloop[1] , "critic_loss": loss_mean_innerloop[0] , "reward": total_reward, "length":t })
+
+            # save every 500 episodes
+            if i_episode % save_interval == 0:
+                save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
+
+            # logging
+            if i_episode % log_interval == 0:
+                avg_reward = np.mean(rewards[-log_interval:])
+                avg_length = int(np.mean(lengths[-log_interval:]))
+                print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
+
+        if i_episode % 500 != 0: save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
+            
+        return losses
+
+    def train_human_in_the_loop(self, iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
+         # logging variables
+        rewards = []
+        lengths = []
+        losses = []
+        timestep = 0
+        lr = self._config['learning_rate_actor']
+
+        def add_derivative(obs,pastobs):
+            return np.append(obs,(obs-pastobs)[self._config["derivative_indices"]])
+        
+        if (self.env_name == "hockey"):
+            self.player = h_env.BasicOpponent(weak=False)
+
+        def opponent_action():
+            if (self.env_name == "hockey"):
+                obs_agent2 = self.env.obs_agent_two()
+                return self.player.act(obs_agent2)
+            else:
+                return np.array([0,0.,0,0])
+
+        # training loop
+        for i_episode in range(1, max_episodes+1):
+            ob, _info = self.env.reset()
+            # Incorporate  Acceleration
+            past_obs = ob.copy()
+            self.reset()
+            total_reward=0
+
+            for t in range(max_timesteps):
+                timestep += 1
+                if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
+                else :                          a = self.act(ob)
+                
+                a2 = opponent_action()
+                
+                # Human Action
+                a_h = input()
+                human_scaling = 0.8
+                if (a_h == 'w'):
+                    a_h = np.array([0,1,0,0])
+                if (a_h == 's'):
+                    a_h = np.array([0,-1,0,0])
+                if (a_h == 'a'):
+                    a_h = np.array([-1,0,0,0])
+                if (a_h == 'd'):
+                    a_h = np.array([1,0,0,0])
+                if (a_h == 'r'):
+                    a_h = np.array([0,0,1,0])
+                if (a_h == 'f'):
+                    a_h = np.array([0,0,-1,0])
+                a_h = a_h * human_scaling
+
+                (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a_h,a2]))
+                if(self._config["dense_reward"]): 
+                    reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
+                total_reward+= reward
+                
+                self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
+                past_obs = ob
+                ob=ob_new
+
+                if done or trunc: break
+
 
             l = self.train_innerloop(iter_fit)
             losses.extend(l)

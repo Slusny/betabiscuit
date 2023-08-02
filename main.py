@@ -97,6 +97,7 @@ architecture.add_argument('--use_derivative',action='store_true',
 architecture.add_argument('--per', action='store_true',help='use prioritized experience replay')
 architecture.add_argument('--bootstrap',action='store', type=str, default=None,
                     help='wandb path ("betabiscuit/project/artifact") to model artifacts')
+architecture.add_argument('--hil', action='store_true',help='human in the loop training')
                     
 architecture.add_argument('--legacy', action='store_true',help='use outdated architecture')
 
@@ -219,6 +220,7 @@ if __name__ == "__main__":
                         per=args.per,
                         dense_reward=args.dense_reward,
                         bootstrap=args.bootstrap,
+                        HiL=args.hil,
                         )
     
     if args.run:
