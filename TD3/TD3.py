@@ -277,7 +277,7 @@ class TD3Agent(object):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
         if self._config["per"]:
             data = self.buffer.sample(self._config['batch_size'])
-            s, a, r = data['obs'], data['act'], data['rew']
+            s, a, rew = data['obs'], data['act'], data['rew']
             #actions_h, rewards = data['intervene'], data['acte']
             s_prime, done, idxs = data['next_obs'], data['done'], data['indexes']
         else:
