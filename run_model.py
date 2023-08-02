@@ -118,7 +118,7 @@ if run_args.legacy :
             derivative = args["use_derivative"],
             derivative_indices = derivative_indices)
 #     agent.restore_state(state)
-if args['algo'] == "ddpg":
+elif args['algo'] == "ddpg":
     agent = DDPGAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
                     eps = args["eps"], 
                     learning_rate_actor = args["lr"],
