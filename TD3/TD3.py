@@ -276,7 +276,7 @@ class TD3Agent(object):
     def sample_replaybuffer(self):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
         if self._config["per"]:
-            self.replay_buffer.sample(self._config['batch_size'])
+            self.buffer.sample(self._config['batch_size'])
             s, a, r = data['obs'], data['act'], data['rew']
             #actions_h, rewards = data['intervene'], data['acte']
             s_prime, done, idxs = data['next_obs'], data['done'], data['indexes']
@@ -318,7 +318,7 @@ class TD3Agent(object):
             if self._config["per"]:
                 pred1 = self.Q.Q1_value(s,a)
                 priorities = abs(td_target - pred1).detach().cpu().numpy()
-                self.replay_buffer.update_priorities(idxs, priorities) 
+                self.buffer.update_priorities(idxs, priorities) 
 
             # optimize the Q objective ( Critic )
             fit_loss = self.Q.fit(s, a, td_target)
