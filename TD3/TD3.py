@@ -368,7 +368,9 @@ class TD3Agent(object):
             past_obs = ob.copy()
             self.reset()
             total_reward=0
-            for t in range(max_timesteps):
+
+            fill_buffer_timesteps = self._config["buffer_size"] // 100
+            for t in range(fill_buffer_timesteps):
                 timestep += 1
                 if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
                 else :                          a = self.act(ob)
@@ -385,6 +387,8 @@ class TD3Agent(object):
                 ob=ob_new
 
                 if done or trunc: break
+
+            fill_buffer_timesteps = max_timesteps
 
             l = self.train_innerloop(iter_fit)
             losses.extend(l)

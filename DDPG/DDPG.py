@@ -323,7 +323,8 @@ class DDPGAgent(object):
             #     if done or trunc: break
             self.reset()
             total_reward=0
-            for t in range(max_timesteps):
+            fill_buffer_timesteps = self._config["buffer_size"] // 100
+            for t in range(fill_buffer_timesteps):
                 # if done or trunc: break
                 timestep += 1
                 if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
@@ -342,6 +343,8 @@ class DDPGAgent(object):
                 # self.store_transition((past_obs.flatten(), a, reward, rollrep(past_obs,ob_new).flatten(), done))
                 # past_obs = rollrep(past_obs,ob_new)
                 if done or trunc: break
+            
+            fill_buffer_timesteps = max_timesteps
 
             l = self.train_innerloop(iter_fit)
             losses.extend(l)

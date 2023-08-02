@@ -97,6 +97,7 @@ architecture.add_argument('--use_derivative',action='store_true',
 architecture.add_argument('--per', action='store_true',help='use prioritized experience replay')
 architecture.add_argument('--bootstrap',action='store', type=str, default=None,
                     help='wandb path ("betabiscuit/project/artifact") to model artifacts')
+                    
 architecture.add_argument('--legacy', action='store_true',help='use outdated architecture')
 
 
@@ -113,6 +114,8 @@ logging.add_argument('--savepath', type=str,
                     help='random seed')
 logging.add_argument('--wandb', action='store_true',
                     help='use weights and biases')
+logging.add_argument('--wandb_resume', action='store', default=None,
+                    type=str, help='use weights and biases')
 logging.add_argument('--notes', type=str, default="",
                     help='any notes to add in logging')
 logging.add_argument('--tags', type=str, default="",
@@ -160,11 +163,19 @@ if __name__ == "__main__":
         config_wandb = vars(args).copy()
         for key in ['notes','tags','wandb']:del config_wandb[key]
         del config_wandb
-        wandb_run = wandb.init(project=env_name + " - " +args.algo, 
-                               config=args,
-                               notes=args.notes,
-                               tags=args.tags)
-    else            : wandb_run = None
+        if args.wandb_resume is not None :
+            wandb_run = wandb.init(project=env_name + " - " +args.algo, 
+                config=args,
+                notes=args.notes,
+                tags=args.tags,
+                resume="must",
+                id=args.wandb_resume)
+        else:
+            wandb_run = wandb.init(project=env_name + " - " +args.algo, 
+                config=args,
+                notes=args.notes,
+                tags=args.tags)
+    else : wandb_run = None
 
     #create save path
     Path(args.savepath).mkdir(parents=True, exist_ok=True)
