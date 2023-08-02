@@ -423,7 +423,7 @@ class TD3Agent(object):
             return np.append(obs,(obs-pastobs)[self._config["derivative_indices"]])
         
         if (self.env_name == "hockey"):
-            self.player = h_env.BasicOpponent()
+            self.player = h_env.BasicOpponent(weak=False)
 
         def opponent_action(obs):
             if (self.env_name == "hockey"):
