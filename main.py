@@ -53,6 +53,8 @@ training.add_argument('--max_timesteps', type=int,
 training.add_argument('-u', '--update', type=float,
                     dest='update_every',default=100,
                     help='number of episodes between target network updates. Default 100 for DDPG, 2 for TD3')
+training.add_argument('--dense_reward',  action='store_true',
+                    help='using a dense reward, composed out of closeness to puck and puck direction')
 training.add_argument('-s', '--seed', type=int,
                     default=None,
                     help='random seed')
@@ -92,6 +94,7 @@ architecture.add_argument('--hidden_sizes_critic', type=str,
 #                     default=1)
 architecture.add_argument('--use_derivative',action='store_true', 
                     help='calculate the derivative of the state variables. If the velocity is available this will calculate the acceleration')
+architecture.add_argument('--per', action='store_true',help='use prioritized experience replay')
 architecture.add_argument('--bootstrap',action='store', type=str, default=None,
                     help='wandb path ("betabiscuit/project/artifact") to model artifacts')
 
@@ -179,6 +182,7 @@ if __name__ == "__main__":
                         learning_rate_critics=args.learning_rate_critic,
                         hidden_sizes_actor=eval(args.hidden_sizes_actor),
                         hidden_sizes_critic=eval(args.hidden_sizes_critic),
+                        per=args.per,
                         bootstrap=args.bootstrap,
                         )
     elif args.algo == "td3":
@@ -198,6 +202,7 @@ if __name__ == "__main__":
                         tau=args.tau,
                         policy_noise=args.policy_noise,
                         noise_clip=args.noise_clip,
+                        per=args.per,
                         bootstrap=args.bootstrap,
                         )
     

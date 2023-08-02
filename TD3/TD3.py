@@ -166,6 +166,7 @@ class TD3Agent(object):
             "policy_noise": 0.4, 
             "noise_clip": 0.5,
             "per": False,
+            "dense_reward": False
 
         }
         self._config.update(userconfig)
@@ -374,6 +375,8 @@ class TD3Agent(object):
                 a2 = opponent_action(ob)
 
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
+                if(self._config["dense_reward"]): 
+                    reward = reward + _info.reward_closeness_to_puck + _info.reward_touch_puck + _info.reward_puck_direction
                 total_reward+= reward
                 
                 self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
