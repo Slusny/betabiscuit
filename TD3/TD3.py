@@ -17,7 +17,6 @@ from cpprb import PrioritizedReplayBuffer, ReplayBuffer
 
 import laserhockey.hockey_env as h_env
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class UnsupportedSpace(Exception):
     """Exception raised when the Sensor or Action space are not compatible
@@ -192,27 +191,29 @@ class TD3Agent(object):
             self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
         if self._config["cpu"]:
-            device = torch.device("cpu")
+            self.device = torch.device("cpu")
+        else:
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         # Q Network
         self.Q = QFunction(input_size=self._obs_dim+self._action_n+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                            hidden_sizes= self._config["hidden_sizes_critic"],
-                           learning_rate = self._config["learning_rate_critic"]).to(device)
+                           learning_rate = self._config["learning_rate_critic"]).to(self.device)
         # target Q Network
         self.Q_target = QFunction(input_size=self._obs_dim+self._action_n+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_critic"],
-                                  learning_rate = 0).to(device)
+                                  learning_rate = 0).to(self.device)
 
         self.policy = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_actor"],
                                   output_size=self._action_n,
                                   activation_fun = torch.nn.ReLU(),
-                                  output_activation = torch.nn.Tanh()).to(device)
+                                  output_activation = torch.nn.Tanh()).to(self.device)
         self.policy_target = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                          hidden_sizes= self._config["hidden_sizes_actor"],
                                          output_size=self._action_n,
                                          activation_fun = torch.nn.ReLU(),
-                                         output_activation = torch.nn.Tanh()).to(device)
+                                         output_activation = torch.nn.Tanh()).to(self.device)
         
         # To resume training from a saved model.
         # Models get saved in weights-and-biases and loaded from there.
@@ -260,7 +261,7 @@ class TD3Agent(object):
         if eps is None:
             eps = self._eps
         #
-        observation = torch.from_numpy(observation.astype(np.float32)).to(device) 
+        observation = torch.from_numpy(observation.astype(np.float32)).to(self.device) 
         action = (self.policy.predict(observation) + eps*self.action_noise()).clip(-1,1)  # action in -1 to 1 (+ noise)
         return action
 
@@ -283,7 +284,7 @@ class TD3Agent(object):
         self.action_noise.reset()
     
     def sample_replaybuffer(self):
-        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
         if self._config["per"]:
             data = self.buffer.sample(self._config['batch_size'])
             s, a, rew = data['obs'], data['act'], data['rew']
@@ -303,7 +304,7 @@ class TD3Agent(object):
     def train_innerloop(self, iter_fit=32):
         losses = []
         actor_loss = 0
-        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
         for i in range(iter_fit):
 
             # sample from the replay buffer
@@ -355,7 +356,7 @@ class TD3Agent(object):
 
     # Outer loop where the replay buffer gets filled
     def train(self, iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
-        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
          # logging variables
         rewards = []
         lengths = []
@@ -429,7 +430,7 @@ class TD3Agent(object):
         return losses
 
     def train_human_in_the_loop(self, iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
-        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
          # logging variables
         rewards = []
         lengths = []
