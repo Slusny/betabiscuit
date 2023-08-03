@@ -485,7 +485,7 @@ def run(model, env_name="hockey"):
         ob, _info = env.reset()
         for t in range(max_steps):
             done = False
-            # env.render()
+            env.render()
             a = q_agent.act(ob)
             a_step = a
             if env_name == "hockey":
