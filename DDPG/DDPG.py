@@ -123,6 +123,8 @@ class DDPGAgent(object):
             "per": False,
             "dense_reward": False,
             "legacy": False,
+            "bc": False,
+            "bc_lambda":2.0,
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -174,6 +176,9 @@ class DDPGAgent(object):
             art = api.artifact(self._config["bootstrap"], type='model')
             state = torch.load(art.file())
             self.restore_state(state)
+
+        if self._config["bc"]:
+            self.teacher = h_env.BasicOpponent(weak=False)
         
         self._copy_nets()
 
@@ -268,8 +273,11 @@ class DDPGAgent(object):
 
             # optimize actor objective
             self.optimizer.zero_grad()
-            q = self.Q.Q_value(s, self.policy.forward(s))
+            a_policy =  self.policy.forward(s)
+            q = self.Q.Q_value(s,a_policy)
             actor_loss = -torch.mean(q)
+            if self._config["bc"]:
+                actor_loss += nn.Functional.mse_loss(a_policy,self.teacher.act(s))
             actor_loss.backward()
             self.optimizer.step()
 

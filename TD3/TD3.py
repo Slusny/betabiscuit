@@ -168,6 +168,8 @@ class TD3Agent(object):
             "per": False,
             "dense_reward": False,
             "HiL": False,
+            "bc": False,
+            "bc_lambda":2.0,
 
         }
         self._config.update(userconfig)
@@ -217,6 +219,9 @@ class TD3Agent(object):
             art = api.artifact(self._config["bootstrap"], type='model')
             state = torch.load(art.file())
             self.restore_state(state)
+        
+        if self._config["bc"]:
+            self.teacher = h_env.BasicOpponent(weak=False)
         
         # copy initialized weights
         self.Q_target.load_state_dict(self.Q.state_dict())
@@ -327,8 +332,13 @@ class TD3Agent(object):
             # Delay Polciy Updates (TD3 paper 5.2)
             if self.train_iter % self._config["update_target_every"] == 0:
                 self.optimizer.zero_grad()
-                q = self.Q.Q1_value(s, self.policy.forward(s))
-                actor_loss = -torch.mean(q)
+                a_policy = self.policy.forward(s)
+                q = self.Q.Q1_value(s, a_policy)
+                if self._config["bc"]:
+                    alpha = self._config["bc_lambda"]/q.abs().mean().detach()
+                    actor_loss += - alpha * torch.mean(q) + nn.Functional.mse_loss(a_policy,self.teacher.act(s))
+                else:
+                    actor_loss = -torch.mean(q)
                 actor_loss.backward()
                 self.optimizer.step()
 
