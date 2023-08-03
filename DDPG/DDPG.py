@@ -17,7 +17,6 @@ from cpprb import PrioritizedReplayBuffer, ReplayBuffer
 
 import laserhockey.hockey_env as h_env
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class UnsupportedSpace(Exception):
     """Exception raised when the Sensor or Action space are not compatible
@@ -125,6 +124,7 @@ class DDPGAgent(object):
             "legacy": False,
             "bc": False,
             "bc_lambda":2.0,
+            "cpu": False,
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -146,28 +146,32 @@ class DDPGAgent(object):
         else:
             self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
+        if self._config["cpu"]:
+            self.device = torch.device("cpu")
+        else:
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         # Q Network
         self.Q = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                            action_dim=self._action_n,
                            hidden_sizes= self._config["hidden_sizes_critic"],
-                           learning_rate = self._config["learning_rate_critic"]).to(device)
+                           learning_rate = self._config["learning_rate_critic"]).to(self.device)
         # target Q Network
         self.Q_target = QFunction(observation_dim=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   action_dim=self._action_n,
                                   hidden_sizes= self._config["hidden_sizes_critic"],
-                                  learning_rate = 0).to(device)
+                                  learning_rate = 0).to(self.device)
 
         self.policy = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_actor"],
                                   output_size=self._action_n,
                                   activation_fun = torch.nn.ReLU(),
-                                  output_activation = torch.nn.Tanh()).to(device)
+                                  output_activation = torch.nn.Tanh()).to(self.device)
         self.policy_target = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
                                          hidden_sizes= self._config["hidden_sizes_actor"],
                                          output_size=self._action_n,
                                          activation_fun = torch.nn.ReLU(),
-                                         output_activation = torch.nn.Tanh()).to(device)
+                                         output_activation = torch.nn.Tanh()).to(self.device)
 
         # To resume training from a saved model.
         # Models get saved in weights-and-biases and loaded from there.
@@ -202,7 +206,7 @@ class DDPGAgent(object):
         if eps is None:
             eps = self._eps
         #
-        observation = torch.from_numpy(observation.astype(np.float32)).to(device) 
+        observation = torch.from_numpy(observation.astype(np.float32)).to(self.device) 
         action = self.policy.predict(observation) + eps*self.action_noise()  # action in -1 to 1 (+ noise)
         action = self._action_space.low + (action + 1.0) / 2.0 * (self._action_space.high - self._action_space.low)
         return action
@@ -226,7 +230,7 @@ class DDPGAgent(object):
         self.action_noise.reset()
 
     def sample_replaybuffer(self):
-        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
         if self._config["per"]:
             data = self.buffer.sample(self._config['batch_size'])
             s, a, rew = data['obs'], data['act'], data['rew']
@@ -244,7 +248,7 @@ class DDPGAgent(object):
 
     # inner training loop where we fit the Actor and Critic
     def train_innerloop(self, iter_fit=32):
-        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
         losses = []
         self.train_iter+=1
         if self._config["use_target_net"] and self.train_iter % self._config["update_target_every"] == 0:  # using 100 update interval this means 3200 updates to Q networks
@@ -273,11 +277,14 @@ class DDPGAgent(object):
 
             # optimize actor objective
             self.optimizer.zero_grad()
-            a_policy =  self.policy.forward(s)
+            a_policy = self.policy.forward(s)
             q = self.Q.Q_value(s,a_policy)
-            actor_loss = -torch.mean(q)
             if self._config["bc"]:
-                actor_loss += nn.functional.mse_loss(a_policy,self.teacher.act(s))
+                alpha = self._config["bc_lambda"]/q.abs().mean().detach()
+                a_teacher = to_torch(np.array([self.teacher.act(s_elem.cpu().numpy()) for s_elem in s ])) # expensive copy back and forth
+                actor_loss += - alpha * torch.mean(q) + nn.functional.mse_loss(a_policy,a_teacher)
+            else:
+                actor_loss = -torch.mean(q)
             actor_loss.backward()
             self.optimizer.step()
 
@@ -286,7 +293,7 @@ class DDPGAgent(object):
         return losses
 
     def train(self, iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
-        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
          # logging variables
         rewards = []
         lengths = []

@@ -54,7 +54,7 @@
 # #sudo apt-get install python3-setuptools
 # pip3 install -r requirements_pip.txt 
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 main.py --algo ddpg --env hockey --max_episodes 1000000 --notes "run on pc" --save_interval 4000 --batch_size 512 --hidden_sizes_actor [128,128] --hidden_sizes_critic [128,128,64] --legacy --bootstrap "betabiscuit/hockey - ddpg/real_opponent:v0" --wandb_resume "lqcmv838" --train_iter 2 --wandb
+singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 main.py --algo ddpg --env hockey --max_episodes 1000000 --notes "bootstraped from dauntless-lake" --save_interval 4000 --batch_size 512 --hidden_sizes_actor [128,128] --hidden_sizes_critic [128,128,64] --legacy --bootstrap "betabiscuit/hockey - ddpg/real_opponent:v0" --wandb --per --dense_reward --discount 0.99
 
 #main.py --algo td3 --env hockey-train-shooting --max_episodes 1000000 --notes "shooting teacher" --batch_size 512 --hidden_sizes_actor [300,300] --hidden_sizes_critic [300,300] -u 2 --discount 0.95 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --lr 0.0001 --save_interval 5000 --wandb
 
