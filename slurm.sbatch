@@ -7,7 +7,7 @@
 
 #resources:
 
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=12
 # the job can use and see 4 CPUs (from max 24).
 
 #SBATCH --partition=week
