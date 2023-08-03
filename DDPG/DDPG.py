@@ -178,7 +178,10 @@ class DDPGAgent(object):
         if(self._config["bootstrap"] is not None):
             api = wandb.Api()
             art = api.artifact(self._config["bootstrap"], type='model')
-            state = torch.load(art.file())
+            if self._config["cpu"]:
+                state = torch.load(art.file(),map_location='cpu')
+            else:
+                state = torch.load(art.file())
             self.restore_state(state)
 
         if self._config["bc"]:
