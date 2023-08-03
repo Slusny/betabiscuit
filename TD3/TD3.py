@@ -300,7 +300,7 @@ class TD3Agent(object):
     def train_innerloop(self, iter_fit=32):
         losses = []
         actor_loss = 0
-        
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(device)
         for i in range(iter_fit):
 
             # sample from the replay buffer
@@ -336,7 +336,8 @@ class TD3Agent(object):
                 q = self.Q.Q1_value(s, a_policy)
                 if self._config["bc"]:
                     alpha = self._config["bc_lambda"]/q.abs().mean().detach()
-                    actor_loss += - alpha * torch.mean(q) + nn.functional.mse_loss(a_policy,self.teacher.act(s))
+                    a_teacher = to_torch(self.teacher.act(s.cpu().numpy())) # expensive copy back and forth
+                    actor_loss += - alpha * torch.mean(q) + nn.functional.mse_loss(a_policy,a_teacher)
                 else:
                     actor_loss = -torch.mean(q)
                 actor_loss.backward()
