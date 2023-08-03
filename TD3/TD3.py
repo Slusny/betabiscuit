@@ -170,6 +170,7 @@ class TD3Agent(object):
             "HiL": False,
             "bc": False,
             "bc_lambda":2.0,
+            "cpu": False,
 
         }
         self._config.update(userconfig)
@@ -222,6 +223,9 @@ class TD3Agent(object):
         
         if self._config["bc"]:
             self.teacher = h_env.BasicOpponent(weak=False)
+
+        if self._config["cpu"]:
+            device = torch.device("cpu")
         
         # copy initialized weights
         self.Q_target.load_state_dict(self.Q.state_dict())

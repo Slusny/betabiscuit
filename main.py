@@ -29,6 +29,8 @@ parser.add_argument('--algo', type=str, required=True,
                     help="specify algorithm, choose one of: " + str(algorithms_implemented))
 parser.add_argument('-r', '--run', action='store_true',
                     help='Do you wish to run/infer and not train')
+parser.add_argument('--cpu', action='store_true',
+                    help='Force to run on cpu')
 
 # Training parameters DDPG
 training = parser.add_argument_group('training parameters')
@@ -203,6 +205,7 @@ if __name__ == "__main__":
                         bootstrap=args.bootstrap,
                         legacy=args.legacy,
                         bc=args.bc,
+                        cpu=args.cpu,
                         )
     elif args.algo == "td3":
         agent = TD3Agent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
@@ -226,6 +229,7 @@ if __name__ == "__main__":
                         bootstrap=args.bootstrap,
                         HiL=args.hil,
                         bc=args.bc,
+                        cpu=args.cpu,
                         )
     
     if args.run:
