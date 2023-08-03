@@ -1,3 +1,5 @@
+# London Bielicke
+
 import numpy as np
 import random
 import torch
@@ -28,40 +30,51 @@ class Memory():
     def get_all_transitions(self):
         return self.transitions[0:self.size]
 
-
+# Prioritized experience replay
 class PrioritizedReplayBuffer:
-    def __init__(self, buffer_size, eps=1e-2, alpha=0.1, beta=0.1):
-        self.tree = SumTree(size=buffer_size)
+    def __init__(self, max_size = 100000, eps=1e-2, alpha=0.5, beta=0.5, alpha_decay = 0.99, beta_growth = 1.001):
+        self.tree = SumTree(max_size)
 
-        # PER params
-        self.eps = eps  # minimal priority, prevents zero probabilities
+        # params for prioritized replay
+        self.eps = eps  # prevents zero probabilities
         self.alpha = alpha  # determines how much prioritization is used, α = 0 corresponding to the uniform case
-        self.beta = beta  # determines the amount of importance-sampling correction, b = 1 fully compensate for the non-uniform probabilities
-        self.max_priority = eps  # priority for new samples, init as eps
+        self.beta = beta  # corrects for importance sampling, b = 1 fully compensate for the non-uniform probabilities
+        self.max_priority = eps  # priority for new samples, init as eps (zero)
+        self.alpha_decay = alpha_decay
+        self.beta_growth = beta_growth
 
         # transition: state, action, reward, next_state, done
         self.transitions = np.asarray([])
 
-        self.count = 0
-        self.real_size = 0
-        self.size = buffer_size
+        self.count = 0 # what index are we at
+        self.real_size = 0 # how many elems are in buffer
+        self.size = max_size # how many elems can the buffer hold
 
     def add_transition(self, transitions_new):
+
+        # if nothing in buffer, create bank buffer
         if self.real_size == 0:
             blank_buffer = [np.asarray(transitions_new, dtype=object)] * self.size
             self.transitions = np.asarray(blank_buffer)
 
         # store transition index with maximum priority in sum tree
+        # priority set as max_priority until sampled
         self.tree.add(self.max_priority, self.count)
 
         # store transition in the buffer
         self.transitions[self.count,:] = np.asarray(transitions_new, dtype=object)
 
-        # update counters
+        # our index
         self.count = (self.count + 1) % self.size
+        # wrap if buffer overflow
         self.real_size = min(self.size, self.real_size + 1)
 
     def sample(self, batch_size):
+        self.alpha *= self.alpha_decay
+        self.beta *= self.beta_growth
+        if self.beta > 1:
+            self.beta = 1
+        # pull all samples if batch size is bigger than the buffer size
         if batch_size > self.size:
             batch_size = self.size
 
@@ -123,7 +136,7 @@ class PrioritizedReplayBuffer:
 
 
 
-
+# data structure: 0(logn) - tracks priority
 class SumTree:
     def __init__(self, size):
         self.nodes = np.zeros(2*size-1)

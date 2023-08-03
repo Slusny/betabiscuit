@@ -15,3 +15,5 @@ wandb/
 
 artifacts/
 git_keyadd.sh
+DDPG/test/
+DDPG/test

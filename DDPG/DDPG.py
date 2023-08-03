@@ -193,7 +193,7 @@ class DDPGAgent(object):
 
         # log gradients to W&B
         self.wandb_run = wandb_run
-        if(wandb_run):
+        if(wandb_run): # log gradients to W&B
             wandb.watch(self.Q, log_freq=100)
             wandb.watch(self.policy, log_freq=100)
 

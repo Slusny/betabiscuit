@@ -1,3 +1,5 @@
+# London Bielicke
+
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
@@ -11,14 +13,17 @@ import laserhockey.hockey_env as h_env
 import wandb
 import memory as mem
 from feedforward import Feedforward
+from feedforward import DuelingDQN
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 torch.set_num_threads(1)
 
+# for plots
 def running_mean(x, N):
     cumsum = np.cumsum(np.insert(x, 0, 0))
     return (cumsum[N:] - cumsum[:-N]) / float(N)
 
+# discretize openAI env actions
 class DiscreteActionWrapper(gym.ActionWrapper):
     def __init__(self, env: gym.Env, bins = 5):
         """A wrapper for converting a 1D continuous actions into discrete ones.
@@ -41,6 +46,48 @@ class DiscreteActionWrapper(gym.ActionWrapper):
         """
         return self.orig_action_space.low + action/(self.bins-1.0)*(self.orig_action_space.high-self.orig_action_space.low)
 
+# Dueling net, probably could've implemented this better
+# because this is basically the same as the other class
+# other than the inheritance... whoops
+class DuelingQFunction(DuelingDQN):
+    def __init__(self, observation_dim, action_dim, hidden_sizes=[100,100],
+                 learning_rate = 0.0002):
+        super().__init__(input_size=observation_dim,
+                         output_size=action_dim)
+
+        self.optimizer=torch.optim.Adam(self.parameters(),
+                                        lr=learning_rate,
+                                        eps=0.000001)
+        self.loss = torch.nn.SmoothL1Loss() # MSELoss()
+
+    def fit(self, observations, actions, targets, weights = None):
+        self.train() # put model in training mode
+        self.optimizer.zero_grad()
+        # Forward pass
+        acts = torch.from_numpy(actions)
+        pred = self.Q_value(torch.from_numpy(observations).float(), acts)
+
+        # only used for PER
+        if weights is None:
+            weights = torch.ones_like(pred)
+
+        # Compute Loss
+        loss = self.loss(pred*weights, torch.from_numpy(targets).float()*weights)
+
+        # Backward pass
+        loss.backward()
+        self.optimizer.step()
+        return loss.item()
+
+    def Q_value(self, observations, actions):
+        return self.forward(observations).gather(1, actions[:,None])
+
+    def maxQ(self, observations):
+        return np.max(self.predict(observations), axis=-1, keepdims=True)
+
+    def greedyAction(self, observations):
+        return np.argmax(self.predict(observations), axis=-1)
+
 class QFunction(Feedforward):
     def __init__(self, observation_dim, action_dim, hidden_sizes=[100,100],
                  learning_rate = 0.0002):
@@ -58,10 +105,12 @@ class QFunction(Feedforward):
         # Forward pass
         acts = torch.from_numpy(actions)
         pred = self.Q_value(torch.from_numpy(observations).float(), acts)
-        # Compute Loss
+
+        # only used for PER
         if weights is None:
             weights = torch.ones_like(pred)
 
+        # Compute Loss
         loss = self.loss(pred*weights, torch.from_numpy(targets).float()*weights)
 
         # Backward pass
@@ -93,41 +142,57 @@ class DQNAgent(object):
 
         self._observation_space = observation_space
         self._action_space = action_space
-        print("action space", action_space.n)
         self._action_n = action_space.n
+
         self._config = {
-            "eps": 0.3,            # Epsilon in epsilon greedy policies
+            "eps": 1,            # Epsilon in epsilon greedy policies
+            "eps_decay":.9999,
+            "min_eps":.01,
             "discount": 0.95,
             "buffer_size": int(1e5),
             "batch_size": 128,
-            "learning_rate": 0.0002,
+            "learning_rate": 0.0001,
             "update_target_every": 20,
-            "tau": 0.01,
+            "tau": 0.001,            # rate for soft updates
             "use_hard_updates":True,
             "double":False,
             "priority": False,
-            "wandb": False
+            "dueling":False,
+            "wandb": False,
+            "beta": 0.4,
+            "alpha": 0.6,
+            "alpha_decay": 1,
+            "beta_growth": 1.0001
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
         self.tau = self._config["tau"]
 
-
+        # if using PER, memory uses PER class
         if self._config['priority']:
-            self.buffer = mem.PrioritizedReplayBuffer(self._config["buffer_size"])
+            self.buffer = mem.PrioritizedReplayBuffer(self._config["buffer_size"], alpha = self._config["alpha"], beta = self._config["beta"], alpha_decay = self._config["alpha_decay"], beta_growth= self._config["beta_growth"])
         else:
             self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
-        # Q Network
-        self.Q = QFunction(observation_dim=self._observation_space.shape[0],
-                           action_dim=self._action_n,
-                           learning_rate = self._config["learning_rate"])
 
+        # dueling nets alg inherits NN from different class
+        # note: target doesn't learn, rather updated with Q weights
+        if self._config['dueling']:
+            self.Q = DuelingQFunction(observation_dim=self._observation_space.shape[0],
+                               action_dim=self._action_n,
+                               learning_rate = self._config["learning_rate"])
+            self.Q_target = DuelingQFunction(observation_dim=self._observation_space.shape[0],
+                                      action_dim=self._action_n,
+                                      learning_rate = 0)
+        else:
+            self.Q = QFunction(observation_dim=self._observation_space.shape[0],
+                               action_dim=self._action_n,
+                               learning_rate = self._config["learning_rate"])
+            self.Q_target = QFunction(observation_dim=self._observation_space.shape[0],
+                                      action_dim=self._action_n,
+                                      learning_rate = 0)
 
-        # Q Network
-        self.Q_target = QFunction(observation_dim=self._observation_space.shape[0],
-                                  action_dim=self._action_n,
-                                  learning_rate = 0)
+        # init Q' weights = Q weights
         self._update_target_net()
         self.train_iter = 0
 
@@ -140,6 +205,21 @@ class DQNAgent(object):
             wandb.watch(self.Q, log_freq=100)
 
 
+        if(self._config["wandb"]): # log gradients to W&B
+            # start a new wandb run to track this script
+            wandb.init(
+                # set the wandb project where this run will be logged
+                project="dqn-test",
+            )
+            wandb.watch(self.Q, log_freq=100)
+            wandb.watch(self.Q_target, log_freq=100)
+
+
+    def get_config(self):
+        if self._config['priority']:
+            self._config["beta"] = self.buffer.beta
+        return self._config
+
     def _update_target_net(self):
         self.Q_target.load_state_dict(self.Q.state_dict())
 
@@ -150,11 +230,15 @@ class DQNAgent(object):
     def act(self, observation, eps=None):
         if eps is None:
             eps = self._eps
+            self._eps = max(self._config["eps_decay"]*eps, self._config["min_eps"])
+
+
         # epsilon greedy
         if np.random.random() > eps:
             action = self.Q.greedyAction(observation)
         else:
             action = self._action_space.sample()
+
         return action
 
     def store_transition(self, transition):
@@ -183,9 +267,13 @@ class DQNAgent(object):
             done = np.stack(data[:,4])[:,None] # done signal  (batchsize,1)
 
             if self._config["double"]:
-                acts = torch.from_numpy(self.Q_target.greedyAction(s_prime))
-                v_prime = self.Q.Q_value(torch.from_numpy(s_prime).float(), acts).cpu().detach().numpy()
+                # get Q values from frozen network for next state and chosen action
+                # Q(s',argmax(Q(s',a', theta_i), theta_i_frozen)) (argmax wrt a')
+                acts = torch.from_numpy(self.Q.greedyAction(s_prime))
+                v_prime = self.Q_target.Q_value(torch.from_numpy(s_prime).float(), acts).cpu().detach().numpy()
             else:
+                # get Q values from frozen network for next state (no argmax, just one max val)
+                # Q(s',a', theta_i_frozen))
                 v_prime = self.Q_target.maxQ(s_prime)
 
             # target
@@ -193,12 +281,13 @@ class DQNAgent(object):
             td_target = rew + gamma * (1.0-done) * v_prime
 
             if isinstance(self.buffer, mem.PrioritizedReplayBuffer):
-
+                # same pred as fit function for priority update
+                # probably also bad implementation whoops
                 pred = self.Q.Q_value(torch.from_numpy(s).float(), torch.from_numpy(a)).detach().numpy()
                 # Compute TD error
                 td_error = np.abs(pred - td_target)
                 self.buffer.update_priorities(tree_idxs, td_error)
-
+                # same as regular replay buffer but with weights
                 fit_loss = self.Q.fit(s, a, td_target, weights = weights)
 
             else:
@@ -212,7 +301,7 @@ class DQNAgent(object):
 
         return losses
 
-
+# added more actions
 def discrete_to_continous_action(discrete_action, env):
     ''' converts discrete actions into continuous ones (for each player)
         The actions allow only one operation each timestep, e.g. X or Y or angle change.
@@ -234,6 +323,7 @@ def discrete_to_continous_action(discrete_action, env):
 
     return action_cont
 
+# easy mapping
 def continuous_to_discrete_action(continuous_action, map):
     ''' converts discrete actions into continuous ones (for each player)
         The actions allow only one operation each timestep, e.g. X or Y or angle change.
@@ -250,19 +340,19 @@ def continuous_to_discrete_action(continuous_action, map):
 
     return map[tuple(continuous_action)]
 
-def run(ddqn=False, guided=False, exploration=False):
 
-    env_name = 'hockey'
-    # env_name = 'CartPole-v0'
+def training(ddqn=False, exploration=False, wandb_track=False, load_model = None, save_model= None, dueling = False, env_name = "hockey", epoch = 1000, discount = .95, hard_updates = True, target_update = 20, beta = .4, tau=.001, eps=1):
 
     if env_name == "hockey":
-        env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
+        env = h_env.HockeyEnv()
         action_map = {}
         for i in range(0,12):
             action_map[tuple(discrete_to_continous_action(i, env))] = i
         ac_space = spaces.Discrete(len(action_map))
+        player2 = h_env.BasicOpponent(weak=True)
+        obs_agent2 = env.obs_agent_two()
     else:
-        env = gym.make(env_name)
+        env = gym.make(env_name, render_mode="rgb_array")
         if isinstance(env.action_space, spaces.Box):
             env = DiscreteActionWrapper(env,5)
         ac_space = env.action_space
@@ -272,107 +362,176 @@ def run(ddqn=False, guided=False, exploration=False):
     print(o_space)
     print(list(zip(env.observation_space.low, env.observation_space.high)))
 
-    if ddqn:
-        hard_updates= False
-    else:
-        hard_updates = True
-
-    target_update = 20
-    tau = 0.1
-    wandb = False
-
-    q_agent = DQNAgent(o_space, ac_space, discount=0.95, eps=0.1,
-                       use_hard_updates = hard_updates, tau = tau, update_target_every= target_update, double=True, priority=True,
-                        wandb = wandb)
-
-    ob,_info = env.reset()
+    np.random.seed(0)
 
     stats = []
     losses = []
 
-    max_episodes=1000
-    max_steps=60
+
+
+    q_agent = DQNAgent(o_space, ac_space, discount=discount, eps=eps,
+                       use_hard_updates = hard_updates, tau = tau, update_target_every= target_update, double=ddqn, priority=exploration,
+                        wandb = wandb_track, load_model = load_model, dueling = dueling, beta = beta)
+
+    if load_model is not None:
+        q_agent.Q.load_state_dict(torch.load(load_model).state_dict())
+        stats = np.load('test.npy').tolist()
+
+    print(q_agent.get_config())
+
+
+    ob,_info = env.reset()
+
+    max_episodes=50000
+    max_steps=50
+    avg_total_reward = 0
     for i in range(max_episodes):
-        # print("Starting a new episode")
+        # if i == 1400:
+        #     env = gym.make(env_name, render_mode="human")
+        #     if isinstance(env.action_space, spaces.Box):
+        #         env = DiscreteActionWrapper(env,5)
+        #     ac_space = env.action_space
         total_reward = 0
         ob, _info = env.reset()
         for t in range(max_steps):
-            # if i > 2000:
-            #     env.render()
-            # done = False
-
+            done = False
+            # env.render()
             a = q_agent.act(ob)
             a_step = a
             if env_name == "hockey":
-                # if np.random.random() > .1:
-
                 a1 = env.discrete_to_continous_action(a)
-                # else:
-                #     pos = np.array((ob[0], ob[1]))
-                #     puck = np.array((ob[12], ob[13]))
-                #
-                #     vel = puck - pos
-                #
-                #     if vel[0] >= .3:
-                #         vel[0] = 1
-                #     elif vel[0] <= -.3:
-                #         vel[0] = -1
-                #     else:
-                #         vel[0] = 0
-                #
-                #     if vel[1] >= .3:
-                #         vel[1] = 1
-                #     elif vel[1] <= -.3:
-                #         vel[1] = -1
-                #     else:
-                #         vel[1] = 0
-                #
-                #
-                #     a1 = [vel[0], vel[1], 0, 0]
-                #
-                #     a = continuous_to_discrete_action(a1, action_map)
-
-                    # print(continuous_to_discrete_action(a1))
-                a2 = [0,0.,0,0]
+                a2 = player2.act(obs_agent2)
+                # a2 = [0,0.,0,0]
                 a_step = np.hstack([a1,a2])
-
-            (ob_new, reward, done, trunc, _info) = env.step(a_step)
-
-            if env_name == "hockey":
                 obs_agent2 = env.obs_agent_two()
-
-            total_reward+= reward
+            (ob_new, reward, done, trunc, _info) = env.step(a_step)
+            # reward = _info["winner"]*10
+            total_reward+=reward
             q_agent.store_transition((ob, a, reward, ob_new, done, True))
             ob=ob_new
             if done: break
         loss = q_agent.train(32)
         losses.extend(loss)
         stats.append([i,total_reward,t+1])
+        if wandb_track:
+            wandb.log({"loss": loss[len(loss)-1] , "reward": total_reward, "length":t })
+        avg_total_reward += total_reward
 
         if wandb:
             wandb.log({"loss": loss[len(loss)-1] , "reward": total_reward, "length":t })
 
         if ((i-1)%20==0):
+            if wandb_track:
+                wandb.log({"loss": loss[len(loss)-1] , "reward": avg_total_reward/100, "length":t })
+                avg_total_reward = 0
             print("{}: Done after {} steps. Loss: {}".format(i, t+1, loss[len(loss)-1]))
             print("{}: Done after {} steps. Reward: {}".format(i, t+1, total_reward))
 
-    print(stats)
+    # print(stats)
+    env.close()
     stats_np = np.asarray(stats)
     losses_np = np.asarray(losses)
-    fig=plt.figure(figsize=(6,3.8))
-    plt.plot(stats_np[:,1], label="return")
-    plt.plot(running_mean(stats_np[:,1],200), label="smoothed-return")
-    plt.legend()
-    plt.show()
+    # plt.plot(stats_np[:,1], label="return")
+    label="run"
+    if ddqn:
+        label+="_double"
+    if exploration:
+        label+="_priority"
+    # plt.plot(running_mean(stats_np[:,1],100), label=label)
+    # plt.legend()
 
-    print("hello")
+    if save_model is not None:
+        np.save('test.npy', stats)
+        torch.save(q_agent.Q, save_model)
 
+    print(q_agent.get_config())
+
+def run(model, env_name="hockey"):
+    if env_name == "hockey":
+        env = h_env.HockeyEnv()
+        action_map = {}
+        for i in range(0,12):
+            action_map[tuple(discrete_to_continous_action(i, env))] = i
+        ac_space = spaces.Discrete(len(action_map))
+        player2 = h_env.BasicOpponent(weak=False)
+        obs_agent2 = env.obs_agent_two()
+    else:
+        env = gym.make(env_name, render_mode="rgb_array")
+        if isinstance(env.action_space, spaces.Box):
+            env = DiscreteActionWrapper(env,5)
+        ac_space = env.action_space
+
+    o_space = env.observation_space
+
+    np.random.seed(0)
+
+    q_agent = DQNAgent(o_space, ac_space, discount=0, eps=0,
+                       use_hard_updates = False, tau = 0, update_target_every= 20, double=False, priority=False,
+                        wandb = False, load_model = model, dueling = True)
+
+    q_agent.Q.load_state_dict(torch.load(model).state_dict())
+
+    b,_info = env.reset()
+
+    stats = []
+
+    max_episodes=20000
+    max_steps=9999999999
+    avg_total_reward = 0
+    p2 = 0
+    p1 = 0
+    for i in range(max_episodes):
+        total_reward = 0
+        ob, _info = env.reset()
+        for t in range(max_steps):
+            done = False
+            # env.render()
+            a = q_agent.act(ob)
+            a_step = a
+            if env_name == "hockey":
+                a1 = env.discrete_to_continous_action(a)
+                a2 = player2.act(obs_agent2)
+                # a2 = [0,0.,0,0]
+                a_step = np.hstack([a1,a2])
+                obs_agent2 = env.obs_agent_two()
+            (ob_new, reward, done, trunc, _info) = env.step(a_step)
+            # print(_info)
+            total_reward+=reward
+            ob=ob_new
+            if done: break
+        stats.append([i,total_reward,t+1])
+        avg_total_reward += total_reward
+
+        if _info["winner"] == 1:
+            p1 += 1
+        if _info["winner"] == -1:
+            p2 += 1
+        if ((i-1)%200==0):
+            print(str(p1) + " vs " + str(p2))
+            print("{}: Done after {} steps. Reward: {}".format(i, t+1, _info["winner"]))
+
+    # print(stats)
     env.close()
 
-
 def main():
-    run(ddqn=True)
+    # fig=plt.figure(figsize=(6,3.8))
+    # # run(dueling = True, ddqn = True, exploration= True, wandb_track = False)
+    # training(dueling = False, ddqn = False, exploration= False, save_model="test_basic", wandb_track =True, hard_updates=False, tau = .001, discount = .95)
+    # # run(ddqn = False, exploration= False, wandb_track = False)
+    # run(ddqn = False, exploration= True, wandb_track = False)
+    # plt.show()
+
+    run("BEST")
+
 
 
 if __name__ == '__main__':
     main()
+
+
+# NOTES:
+    # next steps:
+    # - cmd swtiches
+    # - param testing
+    # - dueling nets?
+    # - run tests
