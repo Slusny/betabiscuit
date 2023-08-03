@@ -191,7 +191,8 @@ class TD3Agent(object):
         else:
             self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
-
+        if self._config["cpu"]:
+            device = torch.device("cpu")
 
         # Q Network
         self.Q = QFunction(input_size=self._obs_dim+self._action_n+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
@@ -224,8 +225,6 @@ class TD3Agent(object):
         if self._config["bc"]:
             self.teacher = h_env.BasicOpponent(weak=False)
 
-        if self._config["cpu"]:
-            device = torch.device("cpu")
         
         # copy initialized weights
         self.Q_target.load_state_dict(self.Q.state_dict())
