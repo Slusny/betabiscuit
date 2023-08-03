@@ -336,7 +336,7 @@ class TD3Agent(object):
                 q = self.Q.Q1_value(s, a_policy)
                 if self._config["bc"]:
                     alpha = self._config["bc_lambda"]/q.abs().mean().detach()
-                    actor_loss += - alpha * torch.mean(q) + nn.Functional.mse_loss(a_policy,self.teacher.act(s))
+                    actor_loss += - alpha * torch.mean(q) + nn.functional.mse_loss(a_policy,self.teacher.act(s))
                 else:
                     actor_loss = -torch.mean(q)
                 actor_loss.backward()

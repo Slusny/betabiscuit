@@ -277,7 +277,7 @@ class DDPGAgent(object):
             q = self.Q.Q_value(s,a_policy)
             actor_loss = -torch.mean(q)
             if self._config["bc"]:
-                actor_loss += nn.Functional.mse_loss(a_policy,self.teacher.act(s))
+                actor_loss += nn.functional.mse_loss(a_policy,self.teacher.act(s))
             actor_loss.backward()
             self.optimizer.step()
 
