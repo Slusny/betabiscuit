@@ -7,16 +7,16 @@
 
 #resources:
 
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=12
 # the job can use and see 4 CPUs (from max 24).
 
 #SBATCH --partition=week
 # the slurm partition the job is queued to.
 
-#SBATCH --mem-per-cpu=4G
+#SBATCH --mem-per-cpu=16G
 # the job will need 12GB of memory equally distributed on 4 cpus.(251GB are available in total on one node)
 
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:0
 #the job can use and see 1 GPUs (4 GPUs are available in total on one node) use SBATCH --gres=gpu:1080ti:1 to explicitly demand a Geforce 1080 Ti GPU. Use SBATCH --gres=gpu:A4000:1 to explicitly demand a RTX A4000 GPU
 
 #SBATCH --time=3-3
@@ -54,7 +54,7 @@
 # #sudo apt-get install python3-setuptools
 # pip3 install -r requirements_pip.txt 
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 main.py --algo ddpg --env hockey --max_episodes 1000000 --notes "bootstraped from dauntless-lake" --save_interval 4000 --batch_size 512 --hidden_sizes_actor [128,128] --hidden_sizes_critic [128,128,64] --legacy --bootstrap "betabiscuit/hockey - ddpg/real_opponent:v0" --wandb --per --discount 0.99 #--bc
+singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 main.py --algo ddpg --env hockey --max_episodes 1000000 --notes "bootstraped from dauntless-lake" --save_interval 4000 --batch_size 512 --hidden_sizes_actor [128,128] --hidden_sizes_critic [128,128,64] --legacy --bootstrap "betabiscuit/hockey - ddpg/real_opponent:v0" --wandb --per --discount 0.99 --bc --cpu
 
 #main.py --algo td3 --env hockey --max_episodes 1000000 --notes "resumed from divine ep 160k" --save_interval 5000 --batch_size 512 --hidden_sizes_actor [300,300] --hidden_sizes_critic [300,300] --bootstrap "betabiscuit/hockey - td3/divine-pond-9_model:v18" --train_iter 2 --update 2 --discount 0.99 --lr 0.0001 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --policy_noise 0.2 --noise_clip 0.5 --bc --per --cpu --wandb
 
