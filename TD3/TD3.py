@@ -389,26 +389,29 @@ class TD3Agent(object):
             total_reward=0
             added_transitions = 0
 
-            for t in range(fill_buffer_timesteps):
-                timestep += 1
-                if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
-                else :                          a = self.act(ob)
-                
-                a2 = opponent_action()
+            while True:
+                for t in range(max_timesteps):
+                    timestep += 1
+                    if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
+                    else :                          a = self.act(ob)
+                    
+                    a2 = opponent_action()
 
-                (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
-                if(self._config["dense_reward"]): 
-                    reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
-                total_reward+= reward
-                
-                self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
-                added_transitions += 1
-                past_obs = ob
-                ob=ob_new
+                    (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
+                    if(self._config["dense_reward"]): 
+                        reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
+                    total_reward+= reward
+                    
+                    self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
+                    added_transitions += 1
+                    past_obs = ob
+                    ob=ob_new
 
-                if done or trunc: break
-
-            fill_buffer_timesteps = max_timesteps
+                    if done or trunc: break
+                    
+                # To fill buffer once before training
+                if(timestep < fill_buffer_timesteps):
+                    break
 
             if(self._config["replay_ratio"] != 0):
                 iter_fit = int(added_transitions / self._config["replay_ratio"])    
