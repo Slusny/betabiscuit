@@ -209,6 +209,7 @@ if __name__ == "__main__":
                         legacy=args.legacy,
                         bc=args.bc,
                         cpu=args.cpu,
+                        replay_ratio=args.replay_ratio,
                         )
     elif args.algo == "td3":
         agent = TD3Agent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
@@ -233,6 +234,7 @@ if __name__ == "__main__":
                         HiL=args.hil,
                         bc=args.bc,
                         cpu=args.cpu,
+                        replay_ratio=args.replay_ratio
                         )
     
     if args.run:
