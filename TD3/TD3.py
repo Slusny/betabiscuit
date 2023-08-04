@@ -170,6 +170,7 @@ class TD3Agent(object):
             "bc": False,
             "bc_lambda":2.0,
             "cpu": False,
+            "replay_ratio": 0,
 
         }
         self._config.update(userconfig)
@@ -324,7 +325,7 @@ class TD3Agent(object):
             gamma=self._config['discount']
             td_target = rew + gamma * (1.0-done) * q_prime
 
-            # prediction for priotized replay buffer
+            # prediction for priotized replay buffer - needs copying back to cpu -> performance hit
             if self._config["per"]:
                 pred1 = self.Q.Q1_value(s,a)
                 priorities = abs(td_target - pred1).detach().cpu().numpy()
@@ -378,14 +379,15 @@ class TD3Agent(object):
                 return np.array([0,0.,0,0])
 
         # training loop
+        fill_buffer_timesteps = self._config["buffer_size"] // 100
         for i_episode in range(1, max_episodes+1):
             ob, _info = self.env.reset()
             # Incorporate  Acceleration
             past_obs = ob.copy()
             self.reset()
             total_reward=0
+            added_transitions = 0
 
-            fill_buffer_timesteps = self._config["buffer_size"] // 100
             for t in range(fill_buffer_timesteps):
                 timestep += 1
                 if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
@@ -399,12 +401,16 @@ class TD3Agent(object):
                 total_reward+= reward
                 
                 self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
+                added_transitions += 1
                 past_obs = ob
                 ob=ob_new
 
                 if done or trunc: break
 
             fill_buffer_timesteps = max_timesteps
+
+            if(self._config["replay_ratio"] != 0):
+                iter_fit = int(added_transitions / self._config["replay_ratio"])    
 
             l = self.train_innerloop(iter_fit)
             losses.extend(l)

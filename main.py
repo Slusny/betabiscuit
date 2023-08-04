@@ -60,6 +60,9 @@ training.add_argument('--dense_reward',  action='store_true',
 training.add_argument('-s', '--seed', type=int,
                     default=None,
                     help='random seed')
+training.add_argument('--replay_ratio', type=float,
+                    default=0.,
+                    help='how many gradient updates should be done per replay buffer update. Replaces train_iter')
 
 # Training parameters DDPG
 ddpg = parser.add_argument_group('DDPG')

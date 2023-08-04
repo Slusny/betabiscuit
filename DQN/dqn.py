@@ -15,6 +15,8 @@ import memory as mem
 from feedforward import Feedforward
 from feedforward import DuelingDQN
 
+from cpprb import PrioritizedReplayBuffer, ReplayBuffer
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 torch.set_num_threads(1)
 
@@ -143,6 +145,7 @@ class DQNAgent(object):
         self._observation_space = observation_space
         self._action_space = action_space
         self._action_n = action_space.n
+        self._obs_dim=self._observation_space.shape[0]
 
         self._config = {
             "eps": 1,            # Epsilon in epsilon greedy policies
@@ -156,21 +159,33 @@ class DQNAgent(object):
             "tau": 0.001,            # rate for soft updates
             "use_hard_updates":True,
             "double":False,
-            "priority": False,
+            "per_own_impl": False,
+            "per": False,
             "dueling":False,
             "wandb": False,
             "beta": 0.4,
             "alpha": 0.6,
             "alpha_decay": 1,
-            "beta_growth": 1.0001
+            "beta_growth": 1.0001,
+            "derivative_indices": [],
+            'use_derivatives': False,
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
         self.tau = self._config["tau"]
 
         # if using PER, memory uses PER class
-        if self._config['priority']:
+        if self._config['per_own_impl']:
             self.buffer = mem.PrioritizedReplayBuffer(self._config["buffer_size"], alpha = self._config["alpha"], beta = self._config["beta"], alpha_decay = self._config["alpha_decay"], beta_growth= self._config["beta_growth"])
+        elif self._config['per']:
+            self.buffer = PrioritizedReplayBuffer(self._config["buffer_size"], {
+                "obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "act": {"shape": (self._action_n)},
+                "rew": {},
+                "next_obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "done": {}
+                }
+            )
         else:
             self.buffer = mem.Memory(max_size=self._config["buffer_size"])
 
@@ -216,7 +231,7 @@ class DQNAgent(object):
 
 
     def get_config(self):
-        if self._config['priority']:
+        if self._config['per_own_impl']:
             self._config["beta"] = self.buffer.beta
         return self._config
 
