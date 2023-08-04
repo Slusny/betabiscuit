@@ -208,6 +208,7 @@ if __name__ == "__main__":
                         bootstrap=args.bootstrap,
                         legacy=args.legacy,
                         bc=args.bc,
+                        bc_lambda=args.bc_lambda,
                         cpu=args.cpu,
                         replay_ratio=args.replay_ratio,
                         )
@@ -233,6 +234,7 @@ if __name__ == "__main__":
                         bootstrap=args.bootstrap,
                         HiL=args.hil,
                         bc=args.bc,
+                        bc_lambda=args.bc_lambda,
                         cpu=args.cpu,
                         replay_ratio=args.replay_ratio
                         )
