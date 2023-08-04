@@ -304,7 +304,7 @@ class TD3Agent(object):
     # inner training loop where we fit the Actor and Critic
     def train_innerloop(self, iter_fit=32):
         losses = []
-        actor_loss = 0
+        actor_loss_value = 0
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
         for i in range(iter_fit):
 
@@ -347,11 +347,12 @@ class TD3Agent(object):
                     actor_loss = -torch.mean(q)
                 actor_loss.backward()
                 self.optimizer.step()
+                actor_loss_value = actor_loss.item()
 
                 self._copy_nets() # with a update_frequency of 2 and a tau of 0.005 a "full" update is done every 400 steps
 
             self.train_iter+=1
-            losses.append((fit_loss, actor_loss.item()))
+            losses.append((fit_loss, actor_loss_value))
 
         return losses
 
