@@ -350,14 +350,14 @@ class TD3Agent(object):
                     q_loss = - torch.mean(q)
                     actor_loss = q_loss + bc_loss
                     #logging
-                    actor_loss_value.append( q_loss + bc_loss)
-                    q_loss_value.append( q_loss)
-                    bc_loss_value.append( bc_loss)
+                    q_loss_value.append( q_loss.item())
+                    bc_loss_value.append( bc_loss.item())
                 else:
                     actor_loss = -torch.mean(q)
+                
+                actor_loss_value.append( actor_loss.item())
                 actor_loss.backward()
                 self.optimizer.step()
-                actor_loss_value = actor_loss.item()
 
                 self._copy_nets() # with a update_frequency of 2 and a tau of 0.005 a "full" update is done every 400 steps
 
