@@ -54,7 +54,9 @@
 # #sudo apt-get install python3-setuptools
 # pip3 install -r requirements_pip.txt 
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 main.py --algo td3 --env hockey --max_episodes 1000000 --notes "resumed from divine" --save_interval 5000 --batch_size 512 --hidden_sizes_actor [300,300] --hidden_sizes_critic [300,300] --bootstrap "betabiscuit/hockey - td3/divine-pond-9_model:v62" --train_iter 2 --update 2 --discount 0.99 --lr 0.0001 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --policy_noise 0.2 --noise_clip 0.5 --bc --per --cpu --wandb
+singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 main.py --algo td3 --env hockey --max_episodes 1000000 --notes "cluster" --tags "c" --batch_size 512 --hidden_sizes_actor [256,128,128] --hidden_sizes_critic [256,128,128] -u 2 --discount 0.99 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --lr 0.0001 --save_interval 5000 --wandb
+
+#main.py --algo td3 --env hockey --max_episodes 1000000 --notes "resumed from divine" --save_interval 5000 --batch_size 512 --hidden_sizes_actor [300,300] --hidden_sizes_critic [300,300] --bootstrap "betabiscuit/hockey - td3/divine-pond-9_model:v62" --train_iter 2 --update 2 --discount 0.99 --lr 0.0001 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --policy_noise 0.2 --noise_clip 0.5 --bc --per --cpu --wandb
 
 #devout-frog
 #main.py --algo ddpg --env hockey --max_episodes 1000000 --notes "bootstraped from dauntless-lake" --save_interval 4000 --batch_size 512 --hidden_sizes_actor [128,128] --hidden_sizes_critic [128,128,64] --legacy --bootstrap "betabiscuit/hockey - ddpg/real_opponent:v0" --wandb --per --discount 0.99 --bc --cpu
