@@ -412,9 +412,10 @@ class TD3Agent(object):
                     
                 # To fill buffer once before training
                 if(timestep > fill_buffer_timesteps):
+                    break
+                elif timestep == fill_buffer_timesteps:                  
                     print("Buffer filled")
                     added_transitions = 1
-                    break
 
             if(self._config["replay_ratio"] != 0):
                 iter_fit = int(added_transitions * self._config["replay_ratio"]) + 1  
