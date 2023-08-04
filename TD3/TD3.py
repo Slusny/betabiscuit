@@ -31,7 +31,7 @@ class UnsupportedSpace(Exception):
 
 
 class QFunction(torch.nn.Module):
-    def __init__(self, input_size, hidden_sizes, learning_rate, activation_fun=torch.nn.Tanh(), output_activation=None):
+    def __init__(self, input_size, hidden_sizes, learning_rate, activation_fun=torch.nn.ReLU(), output_activation=None):
         super(QFunction, self).__init__()
         self.input_size = input_size
         self.hidden_sizes  = hidden_sizes
