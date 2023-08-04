@@ -305,7 +305,9 @@ class TD3Agent(object):
     # inner training loop where we fit the Actor and Critic
     def train_innerloop(self, iter_fit=32):
         losses = []
-        actor_loss_value = 0
+        actor_loss_value = []
+        q_loss_value = []
+        bc_loss_value = []
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
         for i in range(iter_fit):
 
@@ -334,6 +336,7 @@ class TD3Agent(object):
 
             # optimize the Q objective ( Critic )
             fit_loss = self.Q.fit(s, a, td_target)
+            losses.append(fit_loss)
 
             # Delay Polciy Updates (TD3 paper 5.2)
             if self.train_iter % self._config["update_target_every"] == 0:
@@ -343,7 +346,13 @@ class TD3Agent(object):
                 if self._config["bc"]:
                     alpha = self._config["bc_lambda"]# * q.mean().detach()
                     a_teacher = to_torch(np.array([self.teacher.act(s_elem.cpu().numpy()) for s_elem in s ])) # expensive copy back and forth
-                    actor_loss = - torch.mean(q) + alpha *nn.functional.mse_loss(a_policy,a_teacher)
+                    bc_loss = alpha *nn.functional.mse_loss(a_policy,a_teacher)
+                    q_loss = - torch.mean(q)
+                    actor_loss = q_loss + bc_loss
+                    #logging
+                    actor_loss_value.append( q_loss + bc_loss)
+                    q_loss_value.append( q_loss)
+                    bc_loss_value.append( bc_loss)
                 else:
                     actor_loss = -torch.mean(q)
                 actor_loss.backward()
@@ -353,9 +362,10 @@ class TD3Agent(object):
                 self._copy_nets() # with a update_frequency of 2 and a tau of 0.005 a "full" update is done every 400 steps
 
             self.train_iter+=1
-            losses.append((fit_loss, actor_loss_value))
-
-        return losses
+        if self._config["bc"]:
+            return (losses,actor_loss_value,q_loss_value,bc_loss_value)
+        else:
+            return (losses,actor_loss_value)
 
     # Outer loop where the replay buffer gets filled
     def train(self, iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
@@ -421,13 +431,15 @@ class TD3Agent(object):
                 iter_fit = int(added_transitions * self._config["replay_ratio"]) + 1  
 
             l = self.train_innerloop(iter_fit)
-            losses.extend(l)
+            # losses.extend(l)
 
             rewards.append(total_reward)
             lengths.append(t)
             if self.wandb_run : 
-                loss_mean_innerloop = np.array(l).mean(axis=0)
-                wandb.log({"actor_loss": loss_mean_innerloop[1] , "critic_loss": loss_mean_innerloop[0] , "reward": total_reward, "length":t })
+                if self._config["bc"]:
+                    wandb.log({"actor_loss": np.array(l[1]).mean() , "critic_loss": np.array(l[0]).mean(axis=0) , "reward": total_reward, "length":t, "q_loss": np.array(l[2]).mean(), "bc_loss":np.array(l[3]).mean()})    
+                else:
+                    wandb.log({"actor_loss": np.array(l[1]).mean() , "critic_loss": np.array(l[0]).mean(axis=0) , "reward": total_reward, "length":t })
 
             # save every 500 episodes
             if i_episode % save_interval == 0:
