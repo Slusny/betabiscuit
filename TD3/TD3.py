@@ -416,7 +416,7 @@ class TD3Agent(object):
                     break
 
             if(self._config["replay_ratio"] != 0):
-                iter_fit = int(added_transitions / self._config["replay_ratio"])    
+                iter_fit = int(added_transitions * self._config["replay_ratio"]) + 1  
 
             l = self.train_innerloop(iter_fit)
             losses.extend(l)
