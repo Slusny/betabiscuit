@@ -411,7 +411,7 @@ class TD3Agent(object):
                     if done or trunc: break
                     
                 # To fill buffer once before training
-                if(timestep < fill_buffer_timesteps):
+                if(timestep > fill_buffer_timesteps):
                     print("Buffer filled")
                     break
 
