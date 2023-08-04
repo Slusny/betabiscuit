@@ -285,7 +285,7 @@ class DDPGAgent(object):
             if self._config["bc"]:
                 alpha = self._config["bc_lambda"]/q.abs().mean().detach()
                 a_teacher = to_torch(np.array([self.teacher.act(s_elem.cpu().numpy()) for s_elem in s ])) # expensive copy back and forth
-                if self._config["legacy"]: actor_loss = - alpha * torch.mean(q) + nn.functional.mse_loss(a_policy[:,4],a_teacher)
+                if self._config["legacy"]: actor_loss = - alpha * torch.mean(q) + nn.functional.mse_loss(a_policy[:,:4],a_teacher)
                 else: actor_loss = - alpha * torch.mean(q) + nn.functional.mse_loss(a_policy,a_teacher)
             else:
                 actor_loss = -torch.mean(q)
