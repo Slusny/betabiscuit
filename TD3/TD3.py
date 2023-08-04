@@ -412,6 +412,7 @@ class TD3Agent(object):
                     
                 # To fill buffer once before training
                 if(timestep < fill_buffer_timesteps):
+                    print("Buffer filled")
                     break
 
             if(self._config["replay_ratio"] != 0):
