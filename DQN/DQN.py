@@ -148,7 +148,6 @@ class DQNAgent(object):
     def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, **userconfig):
         
         observation_space = env.observation_space
-        action_space = env.action_space
         # if not isinstance(observation_space, spaces.box.Box):
         #     raise UnsupportedSpace('Observation space {} incompatible ' \
         #                            'with {}. (Require: Box)'.format(observation_space, self))
@@ -164,7 +163,6 @@ class DQNAgent(object):
         self.env_name = env_name
         self.env = env
         self._observation_space = observation_space
-        self._action_space = action_space
         self._action_n = action_n
 
         if self.env_name == "hockey":
@@ -172,8 +170,8 @@ class DQNAgent(object):
             action_map = {}
             for i in range(0,12):
                 action_map[tuple(discrete_to_continous_action(i))] = i
-            self.ac_space = spaces.Discrete(len(action_map))
-        else: self.ac_space = self.env.action_space
+            self._action_space = spaces.Discrete(len(action_map))
+        else: self._action_space = self.env.action_space
 
         self._config = {
             "eps": 1,            # Epsilon in epsilon greedy policies
@@ -513,7 +511,6 @@ def discrete_to_continous_action(discrete_action):
                    (discrete_action == 5) * -1 + (discrete_action == 6) * 1]  # player angle
     if True: # keep_mode
       action_cont.append(discrete_action == 7)
-
     return action_cont
 
 # easy mapping
@@ -569,7 +566,7 @@ def run(model, env_name="hockey"):
         env = h_env.HockeyEnv()
         action_map = {}
         for i in range(0,12):
-            action_map[tuple(discrete_to_continous_action(i, env))] = i
+            action_map[tuple(discrete_to_continous_action(i))] = i
         ac_space = spaces.Discrete(len(action_map))
         player2 = h_env.BasicOpponent(weak=False)
         obs_agent2 = env.obs_agent_two()
