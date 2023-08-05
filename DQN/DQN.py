@@ -295,6 +295,7 @@ class DQNAgent(object):
         # epsilon greedy
         if np.random.random() > eps:
             action = self.Q.greedyAction(observation)
+            action = discrete_to_continous_action(action)
         else:
             action = self._action_space.sample()
 
@@ -432,7 +433,7 @@ class DQNAgent(object):
                     else :                          a = self.act(ob)
                     
                     if self.env_name == "hockey":
-                        a1 = discrete_to_continous_action(a)
+                        a1 = a
                         a2 = opponent_action()
                         a_step = np.hstack([a1,a2])
                     (ob_new, reward, done, trunc, _info) = self.env.step(a_step)
