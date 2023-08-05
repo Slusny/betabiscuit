@@ -167,8 +167,8 @@ class DQNAgent(object):
         self._action_space = action_space
         self._action_n = action_n
 
-        # if self.env_name == "hockey":
-        #     self.player = h_env.BasicOpponent(weak=False)
+        if self.env_name == "hockey":
+            self.player = h_env.BasicOpponent(weak=False)
         #     action_map = {}
         #     for i in range(0,12):
         #         action_map[tuple(discrete_to_continous_action(i))] = i
