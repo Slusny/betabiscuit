@@ -410,10 +410,11 @@ class DQNAgent(object):
             #     if isinstance(env.action_space, spaces.Box):
             #         env = DiscreteActionWrapper(env,5)
             #     ac_space = env.action_space
-            past_obs = ob.copy()
+            
             self.reset()
             total_reward = 0
             ob, _info = self.env.reset()
+            past_obs = ob.copy()
             added_transitions = 0
             while True:
                 for t in range(max_timesteps):
