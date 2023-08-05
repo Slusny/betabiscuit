@@ -145,7 +145,7 @@ class DQNAgent(object):
     """
     Agent implementing Q-learning with NN function approximation.
     """
-    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, **userconfig):
+    def __init__(self, env, env_name, ac_space, action_n, seed, savepath, wandb_run, **userconfig):
         
         observation_space = env.observation_space
         action_space = env.action_space
@@ -166,6 +166,14 @@ class DQNAgent(object):
         self._observation_space = observation_space
         self._action_space = action_space
         self._action_n = action_n
+
+        if self.env_name == "hockey":
+            self.player = h_env.BasicOpponent(weak=False)
+            action_map = {}
+            for i in range(0,12):
+                action_map[tuple(discrete_to_continous_action(i, self.env))] = i
+            self.ac_space = spaces.Discrete(len(action_map))
+        else: self.ac_space = self.env.action_space
 
         self._config = {
             "eps": 1,            # Epsilon in epsilon greedy policies
@@ -383,9 +391,7 @@ class DQNAgent(object):
 
     def train(self,iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
         #train( exploration=False, wandb_track=False, load_model = None, save_model= None, dueling = False, env_name = "hockey", epoch = 1000, discount = .95, hard_updates = True, target_update = 20, beta = .4, tau=.001, eps=1
-        if self.env_name == "hockey":
-            self.player = h_env.BasicOpponent(weak=False)
-
+        
         def add_derivative(obs,pastobs):
             return np.append(obs,(obs-pastobs)[self._config["derivative_indices"]])
         
