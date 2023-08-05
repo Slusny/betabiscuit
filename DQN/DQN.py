@@ -169,12 +169,11 @@ class DQNAgent(object):
 
         if self.env_name == "hockey":
             self.player = h_env.BasicOpponent(weak=False)
-        #     action_map = {}
-        #     for i in range(0,12):
-        #         action_map[tuple(discrete_to_continous_action(i))] = i
-        #     self.ac_space = spaces.Discrete(len(action_map))
-        # else: 
-        self.ac_space = self.env.action_space
+            action_map = {}
+            for i in range(0,12):
+                action_map[tuple(discrete_to_continous_action(i))] = i
+            self.ac_space = spaces.Discrete(len(action_map))
+        else: self.ac_space = self.env.action_space
 
         self._config = {
             "eps": 1,            # Epsilon in epsilon greedy policies
@@ -295,9 +294,9 @@ class DQNAgent(object):
         # epsilon greedy
         if np.random.random() > eps:
             action = self.Q.greedyAction(observation)
-            action = discrete_to_continous_action(action)
+            # action = discrete_to_continous_action(action)
         else:
-            action = self._action_space.sample()[:4]
+            action = self._action_space.sample()#[:4]
 
         return action
 
@@ -434,9 +433,9 @@ class DQNAgent(object):
                     else :                          a = self.act(ob)
                     
                     if self.env_name == "hockey":
-                        a1 = a
+                        # a1 = a
                         a2 = opponent_action()
-                        a_step = np.hstack([a1,a2])
+                        a_step = np.hstack([discrete_to_continous_action(a),a2])
                     (ob_new, reward, done, trunc, _info) = self.env.step(a_step)
                     # reward = _info["winner"]*10
                     if(self._config["dense_reward"]): 
