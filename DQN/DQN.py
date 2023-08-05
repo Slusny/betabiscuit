@@ -149,12 +149,12 @@ class DQNAgent(object):
         
         observation_space = env.observation_space
         action_space = env.action_space
-        if not isinstance(observation_space, spaces.box.Box):
-            raise UnsupportedSpace('Observation space {} incompatible ' \
-                                   'with {}. (Require: Box)'.format(observation_space, self))
-        if not isinstance(action_space, spaces.discrete.Discrete):
-            raise UnsupportedSpace('Action space {} incompatible with {}.' \
-                                   ' (Reqire Discrete.)'.format(action_space, self))
+        # if not isinstance(observation_space, spaces.box.Box):
+        #     raise UnsupportedSpace('Observation space {} incompatible ' \
+        #                            'with {}. (Require: Box)'.format(observation_space, self))
+        # if not isinstance(action_space, spaces.discrete.Discrete):
+        #     raise UnsupportedSpace('Action space {} incompatible with {}.' \
+        #                            ' (Reqire Discrete.)'.format(action_space, self))
 
         if seed is not None:
             torch.manual_seed(seed)
