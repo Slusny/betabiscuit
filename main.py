@@ -67,11 +67,9 @@ training.add_argument('-n', '--eps',action='store',  type=float,
                     dest='eps',default=0.1,
                     help='Exploration noise')
 training.add_argument( '--eps_decay',action='store',  type=float,
-                    dest='eps',default=0.9999,
-                    help='Exploration decay')
+                    default=0.9999, help='Exploration decay')
 training.add_argument( '--min_eps',action='store',  type=float,
-                    dest='eps',default=0.01,
-                    help='minimum exploration noise to decay to')
+                    default=0.01, help='minimum exploration noise to decay to')
 
 
 
