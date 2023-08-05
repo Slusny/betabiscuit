@@ -189,7 +189,7 @@ class DQNAgent(object):
             "alpha_decay": 1,
             "beta_growth": 1.0001,
             "derivative_indices": [],
-            'use_derivatives': False,
+            'use_derivative': False,
             #new
             'replay_ratio': 0.25,
             'cpu': False,
