@@ -276,6 +276,7 @@ if __name__ == "__main__":
                         cpu=args.cpu,
                         replay_ratio=args.replay_ratio,
                         dueling=args.dueling,
+                        double=args.double,
                         per_own_impl=args.per_own_impl,
                         beta=args.beta,
                         alpha=args.alpha,

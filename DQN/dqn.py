@@ -183,7 +183,6 @@ class DQNAgent(object):
             "per_own_impl": False,
             "per": False,
             "dueling":False,
-            'double':False,
             "wandb": False,
             "beta": 0.4,
             "alpha": 0.6,
@@ -196,6 +195,8 @@ class DQNAgent(object):
             'cpu': False,
             "bc": False,
             "bc_lambda":2.0,
+            "bootstrap":None,
+            "dense_reward":False,
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
