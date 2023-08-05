@@ -261,7 +261,7 @@ if __name__ == "__main__":
                         replay_ratio=args.replay_ratio
                         )
     elif args.algo == "dqn":
-        agent = DQNAgent(env, env_name, 8 , args.seed, args.savepath, wandb_run,
+        agent = DQNAgent(env, env_name, 12 , args.seed, args.savepath, wandb_run,
                         eps = args.eps, 
                         update_target_every = args.update_every,
                         # past_states = args.past_states,
