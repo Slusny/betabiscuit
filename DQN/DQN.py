@@ -411,7 +411,7 @@ class DQNAgent(object):
             #         env = DiscreteActionWrapper(env,5)
             #     ac_space = env.action_space
             
-            self.reset()
+            # self.reset()
             total_reward = 0
             ob, _info = self.env.reset()
             past_obs = ob.copy()
