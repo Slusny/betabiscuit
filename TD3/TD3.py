@@ -144,7 +144,6 @@ class TD3Agent(object):
         self.env_name = env_name
         self.env = env
         self._observation_space = observation_space
-        self._obs_dim=self._observation_space.shape[0]
         self._action_space = action_space
         self._action_n = action_n
         self._config = {
@@ -176,16 +175,17 @@ class TD3Agent(object):
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
+        self._obs_dim=self._observation_space.shape[0] + len(self._config["derivative_indices"])
         print("Config: ", self._config)
 
         self.action_noise = OUNoise((self._action_n))
 
         if self._config["per"]:
             self.buffer = PrioritizedReplayBuffer(self._config["buffer_size"], {
-                "obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "obs": {"shape": (self._obs_dim)},
                 "act": {"shape": (self._action_n)},
                 "rew": {},
-                "next_obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "next_obs": {"shape": (self._obs_dim)},
                 "done": {}
                 }
             )
@@ -198,20 +198,20 @@ class TD3Agent(object):
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         # Q Network
-        self.Q = QFunction(input_size=self._obs_dim+self._action_n+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
+        self.Q = QFunction(input_size=self._obs_dim+self._action_n,#self._obs_dim*self._config["past_states"],
                            hidden_sizes= self._config["hidden_sizes_critic"],
                            learning_rate = self._config["learning_rate_critic"]).to(self.device)
         # target Q Network
-        self.Q_target = QFunction(input_size=self._obs_dim+self._action_n+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
+        self.Q_target = QFunction(input_size=self._obs_dim+self._action_n,#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_critic"],
                                   learning_rate = 0).to(self.device)
 
-        self.policy = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
+        self.policy = Feedforward(input_size=self._obs_dim,#self._obs_dim*self._config["past_states"],
                                   hidden_sizes= self._config["hidden_sizes_actor"],
                                   output_size=self._action_n,
                                   activation_fun = torch.nn.ReLU(),
                                   output_activation = torch.nn.Tanh()).to(self.device)
-        self.policy_target = Feedforward(input_size=self._obs_dim+len(self._config["derivative_indices"]),#self._obs_dim*self._config["past_states"],
+        self.policy_target = Feedforward(input_size=self._obs_dim,#self._obs_dim*self._config["past_states"],
                                          hidden_sizes= self._config["hidden_sizes_actor"],
                                          output_size=self._action_n,
                                          activation_fun = torch.nn.ReLU(),

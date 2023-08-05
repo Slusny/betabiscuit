@@ -166,7 +166,6 @@ class DQNAgent(object):
         self._observation_space = observation_space
         self._action_space = action_space
         self._action_n = action_n
-        self._obs_dim=self._observation_space.shape[0]
 
         self._config = {
             "eps": 1,            # Epsilon in epsilon greedy policies
@@ -201,6 +200,7 @@ class DQNAgent(object):
         self._config.update(userconfig)
         self._eps = self._config['eps']
         self.tau = self._config["tau"]
+        self._obs_dim=self._observation_space.shape[0] + len(self._config["derivative_indices"])
         print("Config: ", self._config)
 
         # if using PER, memory uses PER class
@@ -208,10 +208,10 @@ class DQNAgent(object):
             self.buffer = mem.PrioritizedReplayBuffer(self._config["buffer_size"], alpha = self._config["alpha"], beta = self._config["beta"], alpha_decay = self._config["alpha_decay"], beta_growth= self._config["beta_growth"])
         elif self._config['per']:
             self.buffer = PrioritizedReplayBuffer(self._config["buffer_size"], {
-                "obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "obs": {"shape": (self._obs_dim)},
                 "act": {"shape": (self._action_n)},
                 "rew": {},
-                "next_obs": {"shape": (self._obs_dim+len(self._config["derivative_indices"]))},
+                "next_obs": {"shape": (self._obs_dim)},
                 "done": {}
                 }
             )
