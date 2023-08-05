@@ -326,6 +326,7 @@ class DQNAgent(object):
             s_prime = np.stack(data[:,3]) # s_t+1
             done = np.stack(data[:,4])[:,None] # done signal  (batchsize,1)
             idxs = None
+            weights = None
         return to_torch(s),to_torch(a),to_torch(rew),to_torch(s_prime),to_torch(done),idxs, weights
 
     def restore_state(self,state):
