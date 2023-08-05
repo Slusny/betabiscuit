@@ -63,6 +63,17 @@ training.add_argument('-s', '--seed', type=int,
 training.add_argument('--replay_ratio', type=float,
                     default=0.,
                     help='how many gradient updates should be done per replay buffer update. Replaces train_iter')
+training.add_argument('-n', '--eps',action='store',  type=float,
+                    dest='eps',default=0.1,
+                    help='Exploration noise')
+training.add_argument( '--eps_decay',action='store',  type=float,
+                    dest='eps',default=0.9999,
+                    help='Exploration decay')
+training.add_argument( '--min_eps',action='store',  type=float,
+                    dest='eps',default=0.01,
+                    help='minimum exploration noise to decay to')
+
+
 
 # Training parameters DQN
 dqn = parser.add_argument_group('DQN')
@@ -84,9 +95,6 @@ ddpg.add_argument('--learning_rate_actor', type=float,
                     default=0.0001)
 ddpg.add_argument('--learning_rate_critic', type=float,
                     default=0.0001)
-ddpg.add_argument('-n', '--eps',action='store',  type=float,
-                    dest='eps',default=0.1,
-                    help='Exploration noise')
 
 # Training parameters TD3
 td3 = parser.add_argument_group('TD3')
@@ -280,6 +288,8 @@ if __name__ == "__main__":
                         alpha=args.alpha,
                         alpha_decay=args.alpha_decay,
                         beta_growth=args.beta_growth,
+                        eps_decay=args.eps_decay,
+                        min_eps=args.min_eps,
 
                         )
     
