@@ -483,7 +483,7 @@ class DQNAgent(object):
 
 
 # added more actions
-def discrete_to_continous_action(discrete_action, env):
+def discrete_to_continous_action(discrete_action):
     ''' converts discrete actions into continuous ones (for each player)
         The actions allow only one operation each timestep, e.g. X or Y or angle change.
         This is surely limiting. Other discrete actions are possible
@@ -503,7 +503,7 @@ def discrete_to_continous_action(discrete_action, env):
     action_cont = [((discrete_action == 1) | (discrete_action == 8) | (discrete_action == 9)) * -1 + ((discrete_action == 2) | (discrete_action == 10) | (discrete_action == 11)) * 1,  # player x
                    ((discrete_action == 3) | (discrete_action == 8) | (discrete_action == 10)) * -1 + ((discrete_action == 4) | (discrete_action == 9) | (discrete_action == 11)) * 1,  # player y
                    (discrete_action == 5) * -1 + (discrete_action == 6) * 1]  # player angle
-    if env.keep_mode:
+    if True: # keep_mode
       action_cont.append(discrete_action == 7)
 
     return action_cont
