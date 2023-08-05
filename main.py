@@ -66,8 +66,6 @@ training.add_argument('--replay_ratio', type=float,
 
 # Training parameters DQN
 dqn = parser.add_argument_group('DQN')
-dqn.add_argument('--beta', type=float,
-                    default=0.0001)
 dqn.add_argument('--double', action='store_true',help='use double dqn')
 dqn.add_argument('--dueling', action='store_true',help='use dueling dqn')
 dqn.add_argument('--per_own_impl', action='store_true',help='use own implementation of prioritized experience replay')
