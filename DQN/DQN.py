@@ -379,7 +379,7 @@ class DQNAgent(object):
 
             losses.append(fit_loss)
 
-        return losses
+        return fit_loss
 
     def train(self,iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
         #train( exploration=False, wandb_track=False, load_model = None, save_model= None, dueling = False, env_name = "hockey", epoch = 1000, discount = .95, hard_updates = True, target_update = 20, beta = .4, tau=.001, eps=1
