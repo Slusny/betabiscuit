@@ -226,17 +226,17 @@ class DQNAgent(object):
         # dueling nets alg inherits NN from different class
         # note: target doesn't learn, rather updated with Q weights
         if self._config['dueling']:
-            self.Q = DuelingQFunction(observation_dim=self._observation_space.shape[0],
+            self.Q = DuelingQFunction(observation_dim=self._obs_dim,
                                action_dim=self._action_n,
                                learning_rate = self._config["learning_rate"])
-            self.Q_target = DuelingQFunction(observation_dim=self._observation_space.shape[0],
+            self.Q_target = DuelingQFunction(observation_dim=self._obs_dim,
                                       action_dim=self._action_n,
                                       learning_rate = 0).to(self.device)
         else:
-            self.Q = QFunction(observation_dim=self._observation_space.shape[0],
+            self.Q = QFunction(observation_dim=self._obs_dim,
                                action_dim=self._action_n,
                                learning_rate = self._config["learning_rate"])
-            self.Q_target = QFunction(observation_dim=self._observation_space.shape[0],
+            self.Q_target = QFunction(observation_dim=self._obs_dim,
                                       action_dim=self._action_n,
                                       learning_rate = 0).to(self.device)
 
