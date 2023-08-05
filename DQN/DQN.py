@@ -297,7 +297,7 @@ class DQNAgent(object):
             action = self.Q.greedyAction(observation)
             action = discrete_to_continous_action(action)
         else:
-            action = self._action_space.sample()
+            action = self._action_space.sample()[:4]
 
         return action
 
