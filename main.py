@@ -32,7 +32,7 @@ parser.add_argument('-r', '--run', action='store_true',
 parser.add_argument('--cpu', action='store_true',
                     help='Force to run on cpu')
 
-# Training parameters DDPG
+# Training parameters
 training = parser.add_argument_group('training parameters')
 training.add_argument('--buffer_size', type=int,
                     default=int(1e6))
@@ -63,6 +63,22 @@ training.add_argument('-s', '--seed', type=int,
 training.add_argument('--replay_ratio', type=float,
                     default=0.,
                     help='how many gradient updates should be done per replay buffer update. Replaces train_iter')
+
+# Training parameters DQN
+dqn = parser.add_argument_group('DQN')
+dqn.add_argument('--beta', type=float,
+                    default=0.0001)
+dqn.add_argument('--double', action='store_true',help='use double dqn')
+dqn.add_argument('--dueling', action='store_true',help='use dueling dqn')
+dqn.add_argument('--per_own_impl', action='store_true',help='use own implementation of prioritized experience replay')
+dqn.add_argument('--beta', type=float,
+                    default=0.4, help='beta for prioritized experience replay')
+dqn.add_argument('--beta_growth', type=float,
+                    default=1.0001, help='beta_growth for prioritized experience replay')
+dqn.add_argument('--alpha', type=float,
+                    default=0.6, help='alpha for prioritized experience replay')
+dqn.add_argument('--alpha_decay', type=float,
+                    default=1., help='alpha_decay for prioritized experience replay')
 
 # Training parameters DDPG
 ddpg = parser.add_argument_group('DDPG')
@@ -237,6 +253,35 @@ if __name__ == "__main__":
                         bc_lambda=args.bc_lambda,
                         cpu=args.cpu,
                         replay_ratio=args.replay_ratio
+                        )
+    elif args.algo == "dqn":
+        agent = TD3Agent(env, env_name, 12 , args.seed, args.savepath, wandb_run,
+                        eps = args.eps, 
+                        update_target_every = args.update_every,
+                        # past_states = args.past_states,
+                        derivative = args.use_derivative,
+                        derivative_indices = derivative_indices,
+                        buffer_size=args.buffer_size,
+                        discount=args.discount,
+                        batch_size=args.batch_size,
+                        learning_rate=args.lr,
+                        hidden_sizes_actor=eval(args.hidden_sizes_actor),
+                        hidden_sizes_critic=eval(args.hidden_sizes_critic),
+                        tau=args.tau,
+                        per=args.per,
+                        dense_reward=args.dense_reward,
+                        bootstrap=args.bootstrap,
+                        bc=args.bc,
+                        bc_lambda=args.bc_lambda,
+                        cpu=args.cpu,
+                        replay_ratio=args.replay_ratio,
+                        dueling=args.dueling,
+                        per_own_impl=args.per_own_impl,
+                        beta=args.beta,
+                        alpha=args.alpha,
+                        alpha_decay=args.alpha_decay,
+                        beta_growth=args.beta_growth,
+
                         )
     
     if args.run:

@@ -222,7 +222,10 @@ class TD3Agent(object):
         if(self._config["bootstrap"] is not None):
             api = wandb.Api()
             art = api.artifact(self._config["bootstrap"], type='model')
-            state = torch.load(art.file())
+            if self._config["cpu"]:
+                state = torch.load(art.file(),map_location='cpu')
+            else:
+                state = torch.load(art.file())
             self.restore_state(state)
         
         if self._config["bc"]:
@@ -326,12 +329,12 @@ class TD3Agent(object):
             
             # target
             gamma=self._config['discount']
-            td_target = rew + gamma * (1.0-done) * q_prime
+            td_target = rew + gamma * (1.0-done) * q_prime.detach()
 
             # prediction for priotized replay buffer - needs copying back to cpu -> performance hit
             if self._config["per"]:
-                pred1 = self.Q.Q1_value(s,a)
-                priorities = abs(td_target - pred1).detach().cpu().numpy()
+                pred1 = self.Q.Q1_value(s,a).detach()
+                priorities = abs(td_target - pred1).cpu().numpy()
                 self.buffer.update_priorities(idxs, priorities) 
 
             # optimize the Q objective ( Critic )
@@ -345,7 +348,7 @@ class TD3Agent(object):
                 q = self.Q.Q1_value(s, a_policy)
                 if self._config["bc"]:
                     alpha = self._config["bc_lambda"]# * q.mean().detach()
-                    a_teacher = to_torch(np.array([self.teacher.act(s_elem.cpu().numpy()) for s_elem in s ])) # expensive copy back and forth
+                    a_teacher = to_torch(np.array([self.teacher.act(s_elem.cpu().numpy()) for s_elem in s ])).detach() # expensive copy back and forth
                     bc_loss = alpha *nn.functional.mse_loss(a_policy,a_teacher)
                     q_loss = - torch.mean(q)
                     actor_loss = q_loss + bc_loss
@@ -413,7 +416,9 @@ class TD3Agent(object):
                         reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
                     total_reward+= reward
                     
-                    self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
+                    if self._config["derivative"]:  self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
+                    else:                           self.store_transition((ob, a, reward, ob_new, done))
+                    
                     added_transitions += 1
                     past_obs = ob
                     ob=ob_new
@@ -451,7 +456,7 @@ class TD3Agent(object):
                 avg_length = int(np.mean(lengths[-log_interval:]))
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
 
-        if i_episode % 500 != 0: save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
+        if i_episode % log_interval != 0: save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
             
         return losses
 

@@ -125,6 +125,8 @@ class DDPGAgent(object):
             "bc": False,
             "bc_lambda":2.0,
             "cpu": False,
+            "replay_ratio": 0,
+
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -253,6 +255,9 @@ class DDPGAgent(object):
     def train_innerloop(self, iter_fit=32):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
         losses = []
+        actor_loss_value = []
+        q_loss_value = []
+        bc_loss_value = []
         self.train_iter+=1
         if self._config["use_target_net"] and self.train_iter % self._config["update_target_every"] == 0:  # using 100 update interval this means 3200 updates to Q networks
             self._copy_nets()
@@ -285,16 +290,25 @@ class DDPGAgent(object):
             if self._config["bc"]:
                 alpha = self._config["bc_lambda"]
                 a_teacher = to_torch(np.array([self.teacher.act(s_elem.cpu().numpy()) for s_elem in s ])) # expensive copy back and forth
-                if self._config["legacy"]: actor_loss = - torch.mean(q) + alpha * nn.functional.mse_loss(a_policy[:,:4],a_teacher)
-                else: actor_loss = - torch.mean(q) + alpha * nn.functional.mse_loss(a_policy,a_teacher)
+                if self._config["legacy"]: bc_loss = alpha * nn.functional.mse_loss(a_policy[:,:4],a_teacher)
+                else: bc_loss = alpha * nn.functional.mse_loss(a_policy,a_teacher)
+                q_loss = - torch.mean(q)
+                actor_loss = q_loss + bc_loss
+                #logging
+                q_loss_value.append( q_loss.item())
+                bc_loss_value.append( bc_loss.item())
             else:
                 actor_loss = -torch.mean(q)
+
+            actor_loss_value.append( actor_loss.item())
             actor_loss.backward()
             self.optimizer.step()
 
-            losses.append((fit_loss, actor_loss.item()))
 
-        return losses
+        if self._config["bc"]:
+            return (losses,actor_loss_value,q_loss_value,bc_loss_value)
+        else:
+            return (losses,actor_loss_value)
 
     def train(self, iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
@@ -355,7 +369,9 @@ class DDPGAgent(object):
                 (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                 total_reward+= reward
                 
-                self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
+                if self._config["derivative"]:  self.store_transition((add_derivative(ob,past_obs), a, reward, add_derivative(ob_new,ob), done))
+                else:                           self.store_transition((ob, a, reward, ob_new, done))
+                    
                 past_obs = ob
                 ob=ob_new
 
@@ -371,8 +387,12 @@ class DDPGAgent(object):
             rewards.append(total_reward)
             lengths.append(t)
             if self.wandb_run : 
-                loss_mean_innerloop = np.array(l).mean(axis=0)
-                wandb.log({"actor_loss": loss_mean_innerloop[1] , "critic_loss": loss_mean_innerloop[0] , "reward": total_reward, "length":t })
+                if self._config["bc"]:
+                    wandb.log({"actor_loss": np.array(l[1]).mean() , "critic_loss": np.array(l[0]).mean() , "reward": total_reward, "length":t, "q_loss": np.array(l[2]).mean(), "bc_loss":np.array(l[3]).mean()})    
+                else:
+                    wandb.log({"actor_loss": np.array(l[1]).mean() , "critic_loss": np.array(l[0]).mean() , "reward": total_reward, "length":t })
+
+            
 
             # save every 500 episodes
             if i_episode % save_interval == 0:
