@@ -215,7 +215,7 @@ class DQNAgent(object):
         elif self._config['per']:
             self.buffer = PrioritizedReplayBuffer(self._config["buffer_size"], {
                 "obs": {"shape": (self._obs_dim)},
-                "act": {"shape": (self._action_n)},
+                "act": {},
                 "rew": {},
                 "next_obs": {"shape": (self._obs_dim)},
                 "done": {}
