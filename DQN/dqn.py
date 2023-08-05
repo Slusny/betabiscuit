@@ -465,11 +465,11 @@ class DQNAgent(object):
             if i_episode % log_interval == 0:
                 avg_reward = np.mean(rewards[-log_interval:])
                 avg_length = int(np.mean(lengths[-log_interval:]))
-                print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
+                print('Episode {} \t avg length: {} \t reward: {} \t eps: {}'.format(i_episode, avg_length, avg_reward, self._eps))
 
             # save every 500 episodes
             if i_episode % save_interval == 0:
-                save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
+                save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, self._config["learning_rate"], self.seed,rewards,lengths, losses)
 
         # clean up
         self.env.close()
