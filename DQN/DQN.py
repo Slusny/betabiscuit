@@ -171,7 +171,7 @@ class DQNAgent(object):
             self.player = h_env.BasicOpponent(weak=False)
             action_map = {}
             for i in range(0,12):
-                action_map[tuple(discrete_to_continous_action(i, self.env))] = i
+                action_map[tuple(discrete_to_continous_action(i))] = i
             self.ac_space = spaces.Discrete(len(action_map))
         else: self.ac_space = self.env.action_space
 
