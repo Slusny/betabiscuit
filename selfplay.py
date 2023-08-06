@@ -318,9 +318,9 @@ if __name__ == '__main__':
     # del config_wandb
     # if args["wandb_resume is not None :
     if args_main.wandb: 
-        wandb_run = wandb.init(project="self-play",# + env_name + " - " +names[0] ,  #" - ".join(names[0])
+        wandb_run = wandb.init(project="self-play",
             config=config_wandb,
-            notes=args_main.file,
+            notes=" - ".join(args_main.file),
             # resume="must",
             # id=args["wandb_resume
             )
