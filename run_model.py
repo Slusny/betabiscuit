@@ -4,12 +4,6 @@ import sys
 from pathlib import Path
 import laserhockey.hockey_env as h_env
 import torch
-sys.path.insert(0,'./DDPG')
-sys.path.insert(0,'./TD3')
-sys.path.insert(0,'./DQN')
-from DDPG import DDPGAgent
-from TD3 import TD3Agent
-from DQN import DQNAgent
 import wandb
 import numpy as np
 import pyvirtualdisplay
@@ -138,6 +132,8 @@ player_normal = h_env.BasicOpponent(weak=False)
 player_weak = h_env.BasicOpponent(weak=True)
 
 if run_args.legacy and args['algo'] == "ddpg" :
+    sys.path.insert(0,'./DDPG')
+    from DDPG import DDPGAgent
     action_n = 8
     agent = DDPGAgent(env, env_name, action_n, None, args["savepath"], False,
             eps = 0.0, 
@@ -148,6 +144,8 @@ if run_args.legacy and args['algo'] == "ddpg" :
             derivative_indices = derivative_indices)
 #     agent.restore_state(state)
 elif args['algo'] == "ddpg":
+    sys.path.insert(0,'./DDPG')
+    from DDPG import DDPGAgent
     agent = DDPGAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
                     eps = 0.0, 
                     update_target_every = args["update_every"],
@@ -165,6 +163,8 @@ elif args['algo'] == "ddpg":
                     cpu=True,
                     )
 elif args['algo'] == "td3":
+    sys.path.insert(0,'./TD3')
+    from TD3 import TD3Agent
     agent = TD3Agent(env, env_name, action_n, args["seed"], "/home/lenny", False,
                     eps = 0.0, 
                     update_target_every = args["update_every"],
@@ -186,6 +186,8 @@ elif args['algo'] == "td3":
                     batchnorm=args["legacy"],
                     )
 elif args['algo'] == "dqn":
+    sys.path.insert(0,'./DQN')
+    from DQN import DQNAgent
     print("if you changed the layer sizes, this needs some change")
     agent = DQNAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
                     eps = 0.0, 

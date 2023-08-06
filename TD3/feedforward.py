@@ -5,7 +5,6 @@ class Feedforward(torch.nn.Module):
     def __init__(self, input_size, hidden_sizes, output_size, activation_fun=torch.nn.Tanh(), output_activation=None, batchnorm = False):
         super(Feedforward, self).__init__()
         print("TD3")
-        print("batchnorm = ", batchnorm)
         self.input_size = input_size
         self.hidden_sizes  = hidden_sizes
         self.output_size  = output_size

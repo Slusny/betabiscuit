@@ -212,14 +212,14 @@ class TD3Agent(object):
                                   output_size=self._action_n,
                                   activation_fun = torch.nn.ReLU(),
                                   output_activation = torch.nn.Tanh(),
-                                #   batchnorm=self._config["batchnorm"]
+                                  batchnorm=self._config["batchnorm"]
                                   ).to(self.device)
         self.policy_target = Feedforward(input_size=self._obs_dim,#self._obs_dim*self._config["past_states"],
                                          hidden_sizes= self._config["hidden_sizes_actor"],
                                          output_size=self._action_n,
                                          activation_fun = torch.nn.ReLU(),
                                          output_activation = torch.nn.Tanh(),
-                                        #  batchnorm=self._config["batchnorm"]
+                                         batchnorm=self._config["batchnorm"]
                                          ).to(self.device)
         
         # To resume training from a saved model.
