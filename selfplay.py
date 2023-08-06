@@ -208,11 +208,11 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         return np.append(obs,(obs-pastobs)[derivative_indices])
     
     def act(obs,pastobs,agents,config_agents,idx):
-        if config_agents[idx]["use_derivative"]:    a = agents[idx].act(add_derivative(obs,pastobs))
-        else :                                      a = agents[idx].act(obs)
-        if config_agents[idx]["algo"] == "dqn":     a = discrete_to_continous_action(int(a))
-        
-        return a
+        if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs))
+        else :                                      a_s = agents[idx].act(obs)
+        if config_agents[idx]["algo"] == "dqn":     a = discrete_to_continous_action(int(a_s))
+        else:                                       a = a_s
+        return a, a_s
     
     def store_transition(agents,config_agents,idx,obs,pastobs,action,reward,next_obs,done):
         if config_agents[idx]["use_derivative"]:    agents[idx].store_transition((add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done))
@@ -239,8 +239,8 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             for t in range(max_timesteps):
                 timestep += 1
                 
-                a1 = act(ob1,past_obs1,agents,config_agents,idx1)
-                a2 = act(ob2,past_obs2,agents,config_agents,idx2)
+                a1, a1_s = act(ob1,past_obs1,agents,config_agents,idx1)
+                a2, a2_s = act(ob2,past_obs2,agents,config_agents,idx2)
 
                 (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
                 ob_new2 = env.obs_agent_two()
@@ -248,8 +248,8 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                 #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
                 total_reward+= reward
                 
-                store_transition(agents,config_agents,idx1,ob1,past_obs1,a1,reward,ob_new1,done)
-                store_transition(agents,config_agents,idx2,ob2,past_obs2,a2,-reward,ob_new2,done)
+                store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward,ob_new1,done)
+                store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,-reward,ob_new2,done)
                 
                 added_transitions += 1
                 past_obs1 = ob1
