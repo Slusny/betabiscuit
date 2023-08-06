@@ -7,7 +7,7 @@ import numpy as np
 import itertools
 import time
 import torch
-from mpl_toolkits.mplot3d import Axes3D
+# from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import laserhockey.hockey_env as h_env
 import wandb
