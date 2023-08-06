@@ -48,6 +48,7 @@ parser.add_argument('-s','--sleep', type=float, default=0., help="slow down simu
 parser.add_argument('-w','--weak_opponent', action='store_true')
 parser.add_argument('-l','--legacy', action='store_true')
 parser.add_argument('--action_n', action='store', default=4)
+parser.add_argument('--validate', action='store_true')
 
 run_args = parser.parse_args()
 
@@ -221,14 +222,14 @@ elif args['algo'] == "dqn":
                     min_eps=args["min_eps"],
                     )
 
+length = []
+rewards = []
 for i_episode in range(1, run_args.max_episodes+1):
     ob, _info = env.reset()
-    timestep = 0
     total_reward = 0
     for t in range(run_args.max_timesteps):
         time.sleep(run_args.sleep)
-        env.render()
-        timestep += 1
+        if not run_args.validate :env.render()
         done = False
         obs_agent2 = env.obs_agent_two()
         a2 = opponent_action(obs_agent2)
@@ -239,7 +240,13 @@ for i_episode in range(1, run_args.max_episodes+1):
         (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
         total_reward+= reward
         ob=ob_new
-        if done: break
+        if done: 
+            length.append(t)
+            rewards.append(total_reward)
+            break
+
+print("avg length: ",np.array(length).mean())
+print("avg reward: ",np.array(rewards).mean())
 
 if run_args.vir :
     _display.stop()
