@@ -54,8 +54,8 @@ class DuelingDQN(torch.nn.Module):
         self.hidden_sizes  = hidden_sizes
         self.output_size  = output_size
         layer_sizes = [self.input_size] + self.hidden_sizes
-        layer_sizes_values = [self.layer_sizes[-1]] + hidden_sizes_values
-        layer_sizes_advantages = [self.layer_sizes[-1]] + hidden_sizes_advantages
+        layer_sizes_values = [layer_sizes[-1]] + hidden_sizes_values
+        layer_sizes_advantages = [layer_sizes[-1]] + hidden_sizes_advantages
         self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
         self.layers_values = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes_values[:-1], layer_sizes_values[1:])])
         self.layers_advantages = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes_advantages[:-1], layer_sizes_advantages[1:])])
