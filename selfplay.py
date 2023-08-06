@@ -284,7 +284,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             # save every 500 episodes
             if i_episode % save_interval == 0:
                 agents[idx1].save_agent_wandb(i_episode, rewards, lengths, losses,"sp-"+names[idx1])
-                agents[idx2].save_agent_wandb(i_episode, rewards, lengths, losses,"sp-"+names[idx1])
+                agents[idx2].save_agent_wandb(i_episode, rewards, lengths, losses,"sp-"+names[idx2])
 
             # logging
             if i_episode % log_interval == 0:
