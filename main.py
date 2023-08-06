@@ -88,6 +88,14 @@ dqn.add_argument('--alpha', type=float,
                     default=0.6, help='alpha for prioritized experience replay')
 dqn.add_argument('--alpha_decay', type=float,
                     default=1., help='alpha_decay for prioritized experience replay')
+dqn.add_argument('--hidden_sizes_values', type=str,
+                    default='[128]')
+dqn.add_argument('--hidden_sizes_advantages', type=str,
+                    default='[128]')
+dqn.add_argument('--hidden_sizes', type=str,
+                    default='[256,128,128]')
+
+
 
 # Training parameters DDPG
 ddpg = parser.add_argument_group('DDPG')
@@ -214,7 +222,6 @@ if __name__ == "__main__":
     if args.algo == "ddpg":
         agent = DDPGAgent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
                         eps = args.eps, 
-                        learning_rate_actor = args.lr,
                         update_target_every = args.update_every,
                         # past_states = args.past_states,
                         derivative = args.use_derivative,
@@ -222,6 +229,7 @@ if __name__ == "__main__":
                         buffer_size=args.buffer_size,
                         discount=args.discount,
                         batch_size=args.batch_size,
+                        learning_rate_actor = args.learning_rate_actor,
                         learning_rate_critics=args.learning_rate_critic,
                         hidden_sizes_actor=eval(args.hidden_sizes_actor),
                         hidden_sizes_critic=eval(args.hidden_sizes_critic),
@@ -237,7 +245,6 @@ if __name__ == "__main__":
     elif args.algo == "td3":
         agent = TD3Agent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
                         eps = args.eps, 
-                        learning_rate_actor = args.learning_rate_actor,
                         update_target_every = args.update_every,
                         # past_states = args.past_states,
                         derivative = args.use_derivative,
@@ -245,6 +252,7 @@ if __name__ == "__main__":
                         buffer_size=args.buffer_size,
                         discount=args.discount,
                         batch_size=args.batch_size,
+                        learning_rate_actor = args.learning_rate_actor,
                         learning_rate_critic=args.learning_rate_critic,
                         hidden_sizes_actor=eval(args.hidden_sizes_actor),
                         hidden_sizes_critic=eval(args.hidden_sizes_critic),
@@ -271,8 +279,9 @@ if __name__ == "__main__":
                         discount=args.discount,
                         batch_size=args.batch_size,
                         learning_rate=args.lr,
-                        hidden_sizes_actor=eval(args.hidden_sizes_actor),
-                        hidden_sizes_critic=eval(args.hidden_sizes_critic),
+                        hidden_sizes=eval(args.hidden_sizes),
+                        hidden_sizes_values=eval(args.hidden_sizes_values),
+                        hidden_sizes_advantages=eval(args.hidden_sizes_advantages),
                         tau=args.tau,
                         per=args.per,
                         dense_reward=args.dense_reward,

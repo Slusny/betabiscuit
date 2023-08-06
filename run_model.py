@@ -6,12 +6,40 @@ import laserhockey.hockey_env as h_env
 import torch
 sys.path.insert(0,'./DDPG')
 sys.path.insert(0,'./TD3')
+sys.path.insert(0,'./DQN')
 from DDPG import DDPGAgent
 from TD3 import TD3Agent
+from DQN import DQNAgent
 import wandb
 import numpy as np
 import pyvirtualdisplay
 import time
+
+
+# added more actions
+def discrete_to_continous_action(discrete_action):
+    ''' converts discrete actions into continuous ones (for each player)
+        The actions allow only one operation each timestep, e.g. X or Y or angle change.
+        This is surely limiting. Other discrete actions are possible
+        Action 0: do nothing
+        Action 1: -1 in x
+        Action 2: 1 in x
+        Action 3: -1 in y
+        Action 4: 1 in y
+        Action 5: -1 in angle
+        Action 6: 1 in angle
+        Action 7: shoot (if keep_mode is on)
+        Action 8: -1 in x, -1 in y
+        Action 9: -1 in x, 1 in y
+        Action 10: 1 in x, -1 in y
+        Action 11: 1 in x, 1 in y
+        '''
+    action_cont = [((discrete_action == 1) | (discrete_action == 8) | (discrete_action == 9)) * -1 + ((discrete_action == 2) | (discrete_action == 10) | (discrete_action == 11)) * 1,  # player x
+                   ((discrete_action == 3) | (discrete_action == 8) | (discrete_action == 10)) * -1 + ((discrete_action == 4) | (discrete_action == 9) | (discrete_action == 11)) * 1,  # player y
+                   (discrete_action == 5) * -1 + (discrete_action == 6) * 1]  # player angle
+    if True: # keep_mode
+      action_cont.append(discrete_action == 7)
+    return action_cont
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -122,7 +150,6 @@ if run_args.legacy :
 elif args['algo'] == "ddpg":
     agent = DDPGAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
                     eps = args["eps"], 
-                    learning_rate_actor = args["lr"],
                     update_target_every = args["update_every"],
                     # past_states = args.past_states,
                     derivative = args["use_derivative"],
@@ -130,6 +157,7 @@ elif args['algo'] == "ddpg":
                     buffer_size=args["buffer_size"],
                     discount=args["discount"],
                     batch_size=args["batch_size"],
+                    learning_rate_actor = args["learning_rate_actor"],
                     learning_rate_critics=args["learning_rate_critic"],
                     hidden_sizes_actor=eval(args["hidden_sizes_actor"]),
                     hidden_sizes_critic=eval(args["hidden_sizes_critic"]),
@@ -138,7 +166,6 @@ elif args['algo'] == "ddpg":
 elif args['algo'] == "td3":
     agent = TD3Agent(env, env_name, action_n, args["seed"], "/home/lenny", False,
                     eps = args["eps"], 
-                    learning_rate_actor = args["lr"],
                     update_target_every = args["update_every"],
                     # past_states = args.past_states,
                     derivative = args["use_derivative"],
@@ -146,6 +173,7 @@ elif args['algo'] == "td3":
                     buffer_size=args["buffer_size"],
                     discount=args["discount"],
                     batch_size=args["batch_size"],
+                    learning_rate_actor = args["learning_rate_actor"],
                     learning_rate_critics=args["learning_rate_critic"],
                     hidden_sizes_actor=eval(args["hidden_sizes_actor"]),
                     hidden_sizes_critic=eval(args["hidden_sizes_critic"]),
@@ -153,6 +181,38 @@ elif args['algo'] == "td3":
                     tau=args["tau"],
                     policy_noise=args["policy_noise"],
                     noise_clip=args["noise_clip"],
+                    )
+elif args['algo'] == "dqn":
+    agent = DQNAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
+                    eps = args["eps"], 
+                    learning_rate = args["lr"],
+                    update_target_every = args["update_every"],
+                    # past_states = args.past_states,
+                    derivative = args["use_derivative"],
+                    derivative_indices = derivative_indices,
+                    buffer_size=args["buffer_size"],
+                    discount=args["discount"],
+                    batch_size=args["batch_size"],
+                    hidden_sizes=eval(args["hidden_sizes"]),
+                    hidden_sizes_values=eval(args["hidden_sizes_values"]),
+                    hidden_sizes_advantages=eval(args["hidden_sizes_advantages"]),
+                    bootstrap=args["bootstrap"],
+                    tau=args["tau"],
+                    per=args["per"],
+                    dense_reward=args["dense_reward"],
+                    bc=args["bc"],
+                    bc_lambda=args["bc_lambda"],
+                    cpu=args["cpu"],
+                    replay_ratio=args["replay_ratio"],
+                    dueling=args["dueling"],
+                    double=args["double"],
+                    per_own_impl=args["per_own_impl"],
+                    beta=args["beta"],
+                    alpha=args["alpha"],
+                    alpha_decay=args["alpha_decay"],
+                    beta_growth=args["beta_growth"],
+                    eps_decay=args["eps_decay"],
+                    min_eps=args["min_eps"],
                     )
 
 for i_episode in range(1, run_args.max_episodes+1):
@@ -167,6 +227,8 @@ for i_episode in range(1, run_args.max_episodes+1):
         obs_agent2 = env.obs_agent_two()
         a2 = opponent_action(obs_agent2)
         a = agent.act(ob)
+        if args['algo'] == "dqn" :
+            a = discrete_to_continous_action(a)
         a = a[:4]
         (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
         total_reward+= reward
@@ -198,3 +260,4 @@ def get_run_names(runs):
     # print(summary_list)
     print(config_list)
     # print(name_list)
+
