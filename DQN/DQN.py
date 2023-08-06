@@ -11,9 +11,9 @@ import torch
 # from matplotlib import cm
 import laserhockey.hockey_env as h_env
 import wandb
-import memory as mem
-from feedforward import Feedforward
-from feedforward import DuelingDQN
+import memory_DQN as mem
+from feedforward_DQN import Feedforward
+from feedforward_DQN import DuelingDQN
 sys.path.append('..')
 from utility import save_checkpoint
 
