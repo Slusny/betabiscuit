@@ -66,6 +66,10 @@ training.add_argument( '--eps_decay',action='store',  type=float,
                     default=0.9999, help='Exploration decay')
 training.add_argument( '--min_eps',action='store',  type=float,
                     default=0.01, help='minimum exploration noise to decay to')
+training.add_argument( '--validation_interval',action='store',  type=int,
+                    default=float("inf"), help='minimum exploration noise to decay to')
+training.add_argument( '--validation_episodes',action='store',  type=int,
+                    default=200, help='minimum exploration noise to decay to')
 
 
 
@@ -266,6 +270,8 @@ if __name__ == "__main__":
                         cpu=args.cpu,
                         replay_ratio=args.replay_ratio,
                         batchnorm=args.batchnorm,
+                        validation_episodes=args.validation_episodes,
+                        validation_interval=args.validation_interval,
                         )
     elif args.algo == "dqn":
         sys.path.insert(0,'./DQN')

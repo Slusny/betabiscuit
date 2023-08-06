@@ -172,6 +172,8 @@ class TD3Agent(object):
             "cpu": False,
             "replay_ratio": 0,
             "batchnorm": False,
+            "validation_interval": float("inf"),
+            "validation_episodes": 200,
 
         }
         self._config.update(userconfig)
@@ -393,16 +395,11 @@ class TD3Agent(object):
         if (self.env_name == "hockey"):
             self.player = h_env.BasicOpponent(weak=False)
 
-        def opponent_action():
-            if (self.env_name == "hockey"):
-                obs_agent2 = self.env.obs_agent_two()
-                return self.player.act(obs_agent2)
-            else:
-                return np.array([0,0.,0,0])
-
         # training loop
         fill_buffer_timesteps = self._config["buffer_size"] // 100
         for i_episode in range(1, max_episodes+1):
+            # validate
+            self.validate()
             ob, _info = self.env.reset()
             # Incorporate  Acceleration
             past_obs = ob.copy()
@@ -416,7 +413,7 @@ class TD3Agent(object):
                     if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
                     else :                          a = self.act(ob)
                     
-                    a2 = opponent_action()
+                    a2 = self.opponent_action()
 
                     (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
                     if(self._config["dense_reward"]): 
@@ -466,7 +463,14 @@ class TD3Agent(object):
         if i_episode % log_interval != 0: save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
             
         return losses
-
+    
+    def opponent_action(self):
+        if (self.env_name == "hockey"):
+            obs_agent2 = self.env.obs_agent_two()
+            return self.player.act(obs_agent2)
+        else:
+            return np.array([0,0.,0,0])
+            
     def train_human_in_the_loop(self, iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
         to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
          # logging variables
@@ -482,13 +486,6 @@ class TD3Agent(object):
         if (self.env_name == "hockey"):
             self.player = h_env.BasicOpponent(weak=False)
 
-        def opponent_action():
-            if (self.env_name == "hockey"):
-                obs_agent2 = self.env.obs_agent_two()
-                return self.player.act(obs_agent2)
-            else:
-                return np.array([0,0.,0,0])
-
         # training loop
         for i_episode in range(1, max_episodes+1):
             ob, _info = self.env.reset()
@@ -502,7 +499,7 @@ class TD3Agent(object):
                 if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))
                 else :                          a = self.act(ob)
                 
-                a2 = opponent_action()
+                a2 = self.opponent_action()
                 
                 # Human Action
                 a_h = input()
@@ -555,3 +552,24 @@ class TD3Agent(object):
         if i_episode % 500 != 0: save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
             
         return losses
+    
+    def validate(self):
+        length = []
+        rewards = []
+        for i_episode in range(1, self._config['validation_episodes']+1):
+            ob, _info = self.env.reset()
+            total_reward = 0
+            for t in range(500):
+                done = False
+                a2 = self.opponent_action()
+                a = self.act(ob,eps=0.0)
+                (ob_new, reward, done, trunc, _info) = self.env.step(np.hstack([a,a2]))
+                total_reward+= reward
+                ob=ob_new
+                if done: 
+                    length.append(t)
+                    rewards.append(total_reward)
+                    break
+
+        print("Validation:\n \t avg length: ",np.array(length).mean(), ", avg reward: ",np.array(rewards).mean())
+
