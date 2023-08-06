@@ -182,13 +182,13 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         return np.append(obs,(obs-pastobs)[derivative_indices])
     
     def act(obs,pastobs,agents,config_agents,idx):
-        if config_agents[idx]["derivative"]:    a = agents[idx].act(add_derivative(obs,pastobs))
-        else :                                  a = agents[idx].act(obs)
+        if config_agents[idx]["use_derivative"]:    a = agents[idx].act(add_derivative(obs,pastobs))
+        else :                                      a = agents[idx].act(obs)
         return a
     
     def store_transition(agents,config_agents,idx,obs,pastobs,action,reward,next_obs,done):
-        if config_agents[idx]["derivative"]:    agents[idx].store_transition(add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done)
-        else :                                  agents[idx].store_transition(obs,action,reward,next_obs,done)
+        if config_agents[idx]["use_derivative"]:    agents[idx].store_transition(add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done)
+        else :                                      agents[idx].store_transition(obs,action,reward,next_obs,done)
 
 
     # training loop
@@ -252,9 +252,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         if args_main.wandb: 
             wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,names[idx1] +"-"+ names[idx2] +"_reward": total_reward, "length":t })
 
-        # # save every 500 episodes
-        # if i_episode % save_interval == 0:
-        #     save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
+        # save every 500 episodes
+        if i_episode % save_interval == 0:
+            agents[idx1].save_checkpoint(i_episode, rewards, lengths, losses)
+            agents[idx2].save_checkpoint(i_episode, rewards, lengths, losses)
 
         # logging
         if i_episode % log_interval == 0:
