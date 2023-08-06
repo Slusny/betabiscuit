@@ -140,7 +140,7 @@ player_weak = h_env.BasicOpponent(weak=True)
 if run_args.legacy :
     action_n = 8
     agent = DDPGAgent(env, env_name, action_n, None, args["savepath"], False,
-            eps = args["eps"], 
+            eps = 0.0, 
             learning_rate_actor = args["lr"],
             update_target_every = args["update_every"],
             # past_states = args.past_states,
@@ -149,7 +149,7 @@ if run_args.legacy :
 #     agent.restore_state(state)
 elif args['algo'] == "ddpg":
     agent = DDPGAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
-                    eps = args["eps"], 
+                    eps = 0.0, 
                     update_target_every = args["update_every"],
                     # past_states = args.past_states,
                     derivative = args["use_derivative"],
@@ -165,7 +165,7 @@ elif args['algo'] == "ddpg":
                     )
 elif args['algo'] == "td3":
     agent = TD3Agent(env, env_name, action_n, args["seed"], "/home/lenny", False,
-                    eps = args["eps"], 
+                    eps = 0.0, 
                     update_target_every = args["update_every"],
                     # past_states = args.past_states,
                     derivative = args["use_derivative"],
@@ -185,7 +185,7 @@ elif args['algo'] == "td3":
 elif args['algo'] == "dqn":
     print("if you changed the layer sizes, this needs some change")
     agent = DQNAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
-                    eps = args["eps"], 
+                    eps = 0.0, 
                     learning_rate = args["lr"],
                     update_target_every = args["update_every"],
                     # past_states = args.past_states,
@@ -227,7 +227,7 @@ for i_episode in range(1, run_args.max_episodes+1):
         done = False
         obs_agent2 = env.obs_agent_two()
         a2 = opponent_action(obs_agent2)
-        a = agent.act(ob)
+        a = agent.act(ob,eps=0.0)
         if args['algo'] == "dqn" :
             a = discrete_to_continous_action(a)
         a = a[:4]
