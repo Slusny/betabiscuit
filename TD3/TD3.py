@@ -554,6 +554,7 @@ class TD3Agent(object):
         return losses
     
     def validate(self):
+        print("Validating...")
         length = []
         rewards = []
         for i_episode in range(1, self._config['validation_episodes']+1):
@@ -571,5 +572,5 @@ class TD3Agent(object):
                     rewards.append(total_reward)
                     break
 
-        print("Validation:\n \t avg length: ",np.array(length).mean(), ", avg reward: ",np.array(rewards).mean())
+        print("\t avg length: ",np.array(length).mean(), ", avg reward: ",np.array(rewards).mean())
 
