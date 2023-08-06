@@ -317,7 +317,7 @@ class DQNAgent(object):
 
         # epsilon greedy
         if np.random.random() > eps:
-            action = self.Q.greedyAction(observation)
+            action = self.Q.greedyAction(observation).cpu.numpy()
             # action = discrete_to_continous_action(action)
         else:
             action = self._action_space.sample()#[:4]
