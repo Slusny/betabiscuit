@@ -193,7 +193,7 @@ elif args['algo'] == "dqn":
                     buffer_size=args["buffer_size"],
                     discount=args["discount"],
                     batch_size=args["batch_size"],
-                    hidden_sizes=eval(args["hidden_sizes"]),
+                    # hidden_sizes=eval(args["hidden_sizes"]),
                     hidden_sizes_values=eval(args["hidden_sizes_values"]),
                     hidden_sizes_advantages=eval(args["hidden_sizes_advantages"]),
                     bootstrap=args["bootstrap"],
