@@ -513,7 +513,7 @@ class DQNAgent(object):
 
             # save every 500 episodes
             if i_episode % save_interval == 0:
-                save_checkpoint(self.Q.state(),self.savepath,"DQN",self.env_name, i_episode, self.wandb_run, self._eps, self._config["learning_rate"], self.seed,rewards,lengths, losses)
+                save_checkpoint(self.Q.state_dict(),self.savepath,"DQN",self.env_name, i_episode, self.wandb_run, self._eps, self._config["learning_rate"], self.seed,rewards,lengths, losses)
 
         # clean up
         self.env.close()
@@ -521,7 +521,7 @@ class DQNAgent(object):
         losses_np = np.asarray(losses)
     
         # final save
-        if i_episode % log_interval != 0: save_checkpoint(self.Q.state(),self.savepath,"DQN",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
+        if i_episode % log_interval != 0: save_checkpoint(self.Q.state_dict(),self.savepath,"DQN",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
         
 
 
