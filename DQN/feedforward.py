@@ -96,7 +96,7 @@ class DuelingDQN(torch.nn.Module):
     
         for layer,activation_fun in zip(self.layers, self.activations):
             state = activation_fun(layer(state))
-        features = state.copy()
+        features = state.clone()
         
         for layer,activation_fun in zip(self.layers_values, self.activation_fun_value):
             state = activation_fun(layer(state))
