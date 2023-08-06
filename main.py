@@ -70,6 +70,8 @@ training.add_argument( '--validation_interval',action='store',  type=int,
                     default=float("inf"), help='minimum exploration noise to decay to')
 training.add_argument( '--validation_episodes',action='store',  type=int,
                     default=200, help='minimum exploration noise to decay to')
+training.add_argument( '--filled_buffer_ratio',action='store',  type=int,
+                    default=100, help='to which extend should the replay buffer be filled at the start of training. E.g. for a buffer size of 1000 and a filled_buffer_ratio of 10, 100 samples will be collected before training starts')
 
 
 
@@ -272,6 +274,7 @@ if __name__ == "__main__":
                         batchnorm=args.batchnorm,
                         validation_episodes=args.validation_episodes,
                         validation_interval=args.validation_interval,
+                        filled_buffer_ratio=args.filled_buffer_ratio,
                         )
     elif args.algo == "dqn":
         sys.path.insert(0,'./DQN')

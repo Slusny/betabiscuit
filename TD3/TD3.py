@@ -174,6 +174,7 @@ class TD3Agent(object):
             "batchnorm": False,
             "validation_interval": float("inf"),
             "validation_episodes": 200,
+            "filled_buffer_ratio": 100,
 
         }
         self._config.update(userconfig)
@@ -396,7 +397,7 @@ class TD3Agent(object):
             self.player = h_env.BasicOpponent(weak=False)
 
         # training loop
-        fill_buffer_timesteps = self._config["buffer_size"] #// 100
+        fill_buffer_timesteps = self._config["buffer_size"] // self._config["filled_buffer_ratio"]
         for i_episode in range(1, max_episodes+1):
             # validate
             if i_episode % self._config["validation_interval"] == 0 and timestep > fill_buffer_timesteps: self.validate()
@@ -573,4 +574,6 @@ class TD3Agent(object):
                     break
 
         print("\t avg length: ",np.array(length).mean(), ", avg reward: ",np.array(rewards).mean())
+        if self.wandb.run is not None:
+            wandb.log({"validation_length": np.array(length).mean(), "validation_reward": np.array(rewards).mean()})
 
