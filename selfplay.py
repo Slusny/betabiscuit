@@ -184,6 +184,8 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     def act(obs,pastobs,agents,config_agents,idx):
         if config_agents[idx]["use_derivative"]:    a = agents[idx].act(add_derivative(obs,pastobs))
         else :                                      a = agents[idx].act(obs)
+        if config_agents[idx]["algo"] == "dqn":     a = agents[idx].discrete_to_continous_action(a)
+        
         return a
     
     def store_transition(agents,config_agents,idx,obs,pastobs,action,reward,next_obs,done):
