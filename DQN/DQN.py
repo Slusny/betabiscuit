@@ -503,7 +503,7 @@ class DQNAgent(object):
                 if self._config["bc"]:
                     wandb.log({"actor_loss": np.array(loss[0]).mean()  , "reward": total_reward, "length":t, "q_loss": np.array(loss[1]).mean(), "bc_loss":np.array(loss[2]).mean()})    
                 else:
-                    wandb.log({"actor_loss": np.array(loss[0]).mean() , "reward": total_reward, "length":t })
+                    wandb.log({"actor_loss": np.array(loss).mean() , "reward": total_reward, "length":t })
 
             # logging
             if i_episode % log_interval == 0:
