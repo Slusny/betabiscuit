@@ -13,7 +13,7 @@ import random
 def instanciate_agent(args):
     
     # creating environment
-    env_name = args.env_name
+    env_name = args["env_name"]
     if env_name == "lunarlander":
         env = gym.make("LunarLander-v2", continuous = True)
         action_n = env.action_space.shape[0]
@@ -24,14 +24,14 @@ def instanciate_agent(args):
         env = h_env.HockeyEnv()
         action_n = 4
         # vx1, vy1, rot1, vx2, vy2, rot2, puck_vx, puck_vy
-        if args.use_derivative:
+        if args["use_derivative"]:
             derivative_indices = [3,4,5,9,10,11,14,15]
         else:
             derivative_indices = []
     elif env_name == "hockey-train-shooting":
         # reload(h_env)
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
-        if args.use_derivative:
+        if args["use_derivative"]:
             derivative_indices = [3,4,5,9,10,11,14,15]
         else:
             derivative_indices = []
@@ -39,7 +39,7 @@ def instanciate_agent(args):
     elif env_name == "hockey-train-defense":
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_DEFENSE)
         action_n = 4
-        if args.use_derivative:
+        if args["use_derivative"]:
             derivative_indices = [3,4,5,9,10,11,14,15]
         else:
             derivative_indices = []
@@ -47,117 +47,117 @@ def instanciate_agent(args):
         env = gym.make(env_name)
 
     #weights and biases
-    if args.wandb   : 
+    if args["wandb"]   : 
         config_wandb = vars(args).copy()
         for key in ['notes','tags','wandb']:del config_wandb[key]
         del config_wandb
-        if args.wandb_resume is not None :
-            wandb_run = wandb.init(project=env_name + " - " +args.algo, 
+        if args["wandb_resume"] is not None:
+            wandb_run = wandb.init(project=env_name + " - " +args["algo"], 
                 config=args,
-                notes=args.notes,
-                tags=args.tags,
+                notes="Self-Play",
+                tags="S",
                 resume="must",
-                id=args.wandb_resume)
+                id=args["wandb_resume"])
         else:
-            wandb_run = wandb.init(project=env_name + " - " +args.algo, 
+            wandb_run = wandb.init(project=env_name + " - " +args["algo"], 
                 config=args,
-                notes=args.notes,
-                tags=args.tags)
+                notes="Self-Play",
+                tags="S")
     else : wandb_run = None
 
     #create save path
-    Path(args.savepath).mkdir(parents=True, exist_ok=True)
+    Path(args["savepath"]).mkdir(parents=True, exist_ok=True)
 
-    if args.algo == "ddpg":
+    if args["algo"] == "ddpg":
         sys.path.insert(0,'./DDPG')
         from DDPG import DDPGAgent
-        agent = DDPGAgent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
-                        eps = args.eps, 
-                        update_target_every = args.update_every,
-                        # past_states = args.past_states,
-                        derivative = args.use_derivative,
+        agent = DDPGAgent(env, env_name, action_n, args["seed"], args["savepath"], wandb_run,
+                        eps = args["eps"], 
+                        update_target_every = args["update_every"],
+                        # past_states = args["past_states,
+                        derivative = args["use_derivative"],
                         derivative_indices = derivative_indices,
-                        buffer_size=args.buffer_size,
-                        discount=args.discount,
-                        batch_size=args.batch_size,
-                        learning_rate_actor = args.learning_rate_actor,
-                        learning_rate_critics=args.learning_rate_critic,
-                        hidden_sizes_actor=eval(args.hidden_sizes_actor),
-                        hidden_sizes_critic=eval(args.hidden_sizes_critic),
-                        per=args.per,
-                        dense_reward=args.dense_reward,
-                        bootstrap=args.bootstrap,
-                        legacy=args.legacy,
-                        bc=args.bc,
-                        bc_lambda=args.bc_lambda,
-                        cpu=args.cpu,
-                        replay_ratio=args.replay_ratio,
+                        buffer_size=args["buffer_size"],
+                        discount=args["discount"],
+                        batch_size=args["batch_size"],
+                        learning_rate_actor = args["learning_rate_actor"],
+                        learning_rate_critics=args["learning_rate_critic"],
+                        hidden_sizes_actor=eval(args["hidden_sizes_actor"]),
+                        hidden_sizes_critic=eval(args["hidden_sizes_critic"]),
+                        per=args["per"],
+                        dense_reward=args["dense_reward"],
+                        bootstrap=args["bootstrap"],
+                        legacy=args["legacy"],
+                        bc=args["bc"],
+                        bc_lambda=args["bc_lambda"],
+                        cpu=args["cpu"],
+                        replay_ratio=args["replay_ratio"],
                         )
-    elif args.algo == "td3":
+    elif args["algo"] == "td3":
         sys.path.insert(0,'./TD3')
         from TD3 import TD3Agent
-        agent = TD3Agent(env, env_name, action_n, args.seed, args.savepath, wandb_run,
-                        eps = args.eps, 
-                        update_target_every = args.update_every,
-                        # past_states = args.past_states,
-                        derivative = args.use_derivative,
+        agent = TD3Agent(env, env_name, action_n, args["seed"], args["savepath"], wandb_run,
+                        eps = args["eps"], 
+                        update_target_every = args["update_every"],
+                        # past_states = args["past_states,
+                        derivative = args["use_derivative"],
                         derivative_indices = derivative_indices,
-                        buffer_size=args.buffer_size,
-                        discount=args.discount,
-                        batch_size=args.batch_size,
-                        learning_rate_actor = args.learning_rate_actor,
-                        learning_rate_critic=args.learning_rate_critic,
-                        hidden_sizes_actor=eval(args.hidden_sizes_actor),
-                        hidden_sizes_critic=eval(args.hidden_sizes_critic),
-                        tau=args.tau,
-                        policy_noise=args.policy_noise,
-                        noise_clip=args.noise_clip,
-                        per=args.per,
-                        dense_reward=args.dense_reward,
-                        bootstrap=args.bootstrap,
-                        HiL=args.hil,
-                        bc=args.bc,
-                        bc_lambda=args.bc_lambda,
-                        cpu=args.cpu,
-                        replay_ratio=args.replay_ratio,
-                        batchnorm=args.batchnorm,
-                        validation_episodes=args.validation_episodes,
-                        validation_interval=args.validation_interval,
-                        filled_buffer_ratio=args.filled_buffer_ratio,
+                        buffer_size=args["buffer_size"],
+                        discount=args["discount"],
+                        batch_size=args["batch_size"],
+                        learning_rate_actor = args["learning_rate_actor"],
+                        learning_rate_critic=args["learning_rate_critic"],
+                        hidden_sizes_actor=eval(args["hidden_sizes_actor"]),
+                        hidden_sizes_critic=eval(args["hidden_sizes_critic"]),
+                        tau=args["tau"],
+                        policy_noise=args["policy_noise"],
+                        noise_clip=args["noise_clip"],
+                        per=args["per"],
+                        dense_reward=args["dense_reward"],
+                        bootstrap=args["bootstrap"],
+                        HiL=args["hil"],
+                        bc=args["bc"],
+                        bc_lambda=args["bc_lambda"],
+                        cpu=args["cpu"],
+                        replay_ratio=args["replay_ratio"],
+                        batchnorm=args["batchnorm"],
+                        validation_episodes=args["validation_episodes"],
+                        validation_interval=args["validation_interval"],
+                        filled_buffer_ratio=args["filled_buffer_ratio"],
                         )
-    elif args.algo == "dqn":
+    elif args["algo"] == "dqn":
         sys.path.insert(0,'./DQN')
         from DQN import DQNAgent
-        agent = DQNAgent(env, env_name, 12 , args.seed, args.savepath, wandb_run,
-                        eps = args.eps, 
-                        update_target_every = args.update_every,
-                        # past_states = args.past_states,
-                        derivative = args.use_derivative,
+        agent = DQNAgent(env, env_name, 12 , args["seed"], args["savepath"], wandb_run,
+                        eps = args["eps"], 
+                        update_target_every = args["update_every"],
+                        # past_states = args["past_states,
+                        derivative = args["use_derivative"],
                         derivative_indices = derivative_indices,
-                        buffer_size=args.buffer_size,
-                        discount=args.discount,
-                        batch_size=args.batch_size,
-                        learning_rate=args.lr,
-                        hidden_sizes=eval(args.hidden_sizes),
-                        hidden_sizes_values=eval(args.hidden_sizes_values),
-                        hidden_sizes_advantages=eval(args.hidden_sizes_advantages),
-                        tau=args.tau,
-                        per=args.per,
-                        dense_reward=args.dense_reward,
-                        bootstrap=args.bootstrap,
-                        bc=args.bc,
-                        bc_lambda=args.bc_lambda,
-                        cpu=args.cpu,
-                        replay_ratio=args.replay_ratio,
-                        dueling=args.dueling,
-                        double=args.double,
-                        per_own_impl=args.per_own_impl,
-                        beta=args.beta,
-                        alpha=args.alpha,
-                        alpha_decay=args.alpha_decay,
-                        beta_growth=args.beta_growth,
-                        eps_decay=args.eps_decay,
-                        min_eps=args.min_eps,
+                        buffer_size=args["buffer_size"],
+                        discount=args["discount"],
+                        batch_size=args["batch_size"],
+                        learning_rate=args["lr"],
+                        hidden_sizes=eval(args["hidden_sizes"]),
+                        hidden_sizes_values=eval(args["hidden_sizes_values"]),
+                        hidden_sizes_advantages=eval(args["hidden_sizes_advantages"]),
+                        tau=args["tau"],
+                        per=args["per"],
+                        dense_reward=args["dense_reward"],
+                        bootstrap=args["bootstrap"],
+                        bc=args["bc"],
+                        bc_lambda=args["bc_lambda"],
+                        cpu=args["cpu"],
+                        replay_ratio=args["replay_ratio"],
+                        dueling=args["dueling"],
+                        double=args["double"],
+                        per_own_impl=args["per_own_impl"],
+                        beta=args["beta"],
+                        alpha=args["alpha"],
+                        alpha_decay=args["alpha_decay"],
+                        beta_growth=args["beta_growth"],
+                        eps_decay=args["eps_decay"],
+                        min_eps=args["min_eps"],
 
                         )
     return agent
@@ -326,13 +326,13 @@ if __name__ == '__main__':
     config_wandb = vars(args_main).copy()
     # for key in ['notes','tags','wandb']:del config_wandb[key]
     # del config_wandb
-    # if args.wandb_resume is not None :
+    # if args["wandb_resume is not None :
     if args_main.wandb: 
         wandb_run = wandb.init(project="self-play: " + env_name + " - " + str(names), 
             config=config_wandb,
             notes=args_main.notes,
             # resume="must",
-            # id=args.wandb_resume
+            # id=args["wandb_resume
             )
     # else:
     
