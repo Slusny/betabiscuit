@@ -194,102 +194,103 @@ def instanciate_agent(args):
 def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max_timesteps, log_interval,save_interval):
         
     # select two agents:
-    # idx1, idx2 = random.sample(range(len(agents)), 2)
-    idx1, idx2 = 0,1
+    while True:
+        idx1, idx2 = random.sample(range(len(agents)), 2)
+        # idx1, idx2 = 0,1
 
-    # to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
-        # logging variables
-    rewards = []
-    lengths = []
-    losses = []
-    timestep = 0
+        # to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
+            # logging variables
+        rewards = []
+        lengths = []
+        losses = []
+        timestep = 0
 
-    def add_derivative(obs,pastobs):
-        return np.append(obs,(obs-pastobs)[derivative_indices])
-    
-    def act(obs,pastobs,agents,config_agents,idx):
-        if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs))
-        else :                                      a_s = agents[idx].act(obs)
-        if config_agents[idx]["algo"] == "dqn":     a = discrete_to_continous_action(int(a_s))
-        else:                                       a = a_s
-        return a, a_s
-    
-    def store_transition(agents,config_agents,idx,obs,pastobs,action,reward,next_obs,done):
-        if config_agents[idx]["use_derivative"]:    agents[idx].store_transition((add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done))
-        else :                                      agents[idx].store_transition((obs,action,reward,next_obs,done))
+        def add_derivative(obs,pastobs):
+            return np.append(obs,(obs-pastobs)[derivative_indices])
+        
+        def act(obs,pastobs,agents,config_agents,idx):
+            if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs))
+            else :                                      a_s = agents[idx].act(obs)
+            if config_agents[idx]["algo"] == "dqn":     a = discrete_to_continous_action(int(a_s))
+            else:                                       a = a_s
+            return a, a_s
+        
+        def store_transition(agents,config_agents,idx,obs,pastobs,action,reward,next_obs,done):
+            if config_agents[idx]["use_derivative"]:    agents[idx].store_transition((add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done))
+            else :                                      agents[idx].store_transition((obs,action,reward,next_obs,done))
 
 
-    # training loop
-#        fill_buffer_timesteps = self._config["buffer_size"] // self._config["filled_buffer_ratio"]
-    for i_episode in range(1, max_episodes_per_pair+1):
-        # validate
-#        if i_episode % self._config["validation_interval"] == 0 and timestep > fill_buffer_timesteps: self.validate()
-        ob1, _info = env.reset()
-        ob2 = env.obs_agent_two()
-        # Incorporate  Acceleration
-        past_obs1 = ob1.copy()
-        past_obs2 = ob2.copy()
-        total_reward=0
-        added_transitions = 0
+        # training loop
+    #        fill_buffer_timesteps = self._config["buffer_size"] // self._config["filled_buffer_ratio"]
+        for i_episode in range(1, max_episodes_per_pair+1):
+            # validate
+    #        if i_episode % self._config["validation_interval"] == 0 and timestep > fill_buffer_timesteps: self.validate()
+            ob1, _info = env.reset()
+            ob2 = env.obs_agent_two()
+            # Incorporate  Acceleration
+            past_obs1 = ob1.copy()
+            past_obs2 = ob2.copy()
+            total_reward=0
+            added_transitions = 0
 
-        buffer_size = 1000000
-        filled_buffer_ratio = 100
-        fill_buffer_timesteps = buffer_size // filled_buffer_ratio
-        while True:
-            for t in range(max_timesteps):
-                timestep += 1
-                
-                a1, a1_s = act(ob1,past_obs1,agents,config_agents,idx1)
-                a2, a2_s = act(ob2,past_obs2,agents,config_agents,idx2)
+            buffer_size = 1000000
+            filled_buffer_ratio = 100
+            fill_buffer_timesteps = buffer_size // filled_buffer_ratio
+            while True:
+                for t in range(max_timesteps):
+                    timestep += 1
+                    
+                    a1, a1_s = act(ob1,past_obs1,agents,config_agents,idx1)
+                    a2, a2_s = act(ob2,past_obs2,agents,config_agents,idx2)
 
-                (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
-                ob_new2 = env.obs_agent_two()
-                # if(self._config["dense_reward"]): 
-                #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
-                total_reward+= reward
-                
-                store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward,ob_new1,done)
-                store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,-reward,ob_new2,done)
-                
-                added_transitions += 1
-                past_obs1 = ob1
-                past_obs2 = ob2
-                ob1=ob_new1
-                ob2=ob_new2
+                    (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
+                    ob_new2 = env.obs_agent_two()
+                    # if(self._config["dense_reward"]): 
+                    #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
+                    total_reward+= reward
+                    
+                    store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward,ob_new1,done)
+                    store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,-reward,ob_new2,done)
+                    
+                    added_transitions += 1
+                    past_obs1 = ob1
+                    past_obs2 = ob2
+                    ob1=ob_new1
+                    ob2=ob_new2
 
-                if done or trunc: break
+                    if done or trunc: break
 
-            # To fill buffer once before training
-            if(timestep > fill_buffer_timesteps):
-                break
-            elif timestep == fill_buffer_timesteps:                  
-                print("Buffer filled")
-                added_transitions = 1     
+                # To fill buffer once before training
+                if(timestep > fill_buffer_timesteps):
+                    break
+                elif timestep == fill_buffer_timesteps:                  
+                    print("Buffer filled")
+                    added_transitions = 1     
 
-        if(args_main.replay_ratio != 0):
-           iter_fit = int(added_transitions * args_main.replay_ratio) + 1  
+            if(args_main.replay_ratio != 0):
+                iter_fit = int(added_transitions * args_main.replay_ratio) + 1  
 
-        l1 = agents[idx1].train_innerloop(iter_fit)
-        l2 = agents[idx2].train_innerloop(iter_fit)
-        # losses.extend(l)
+            l1 = agents[idx1].train_innerloop(iter_fit)
+            l2 = agents[idx2].train_innerloop(iter_fit)
+            # losses.extend(l)
 
-        rewards.append(total_reward)
-        lengths.append(t)
+            rewards.append(total_reward)
+            lengths.append(t)
 
-        # logging
-        if args_main.wandb: 
-            wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,names[idx1] +"-"+ names[idx2] +"_reward": total_reward, "length":t })
+            # logging
+            if args_main.wandb: 
+                wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,names[idx1] +"-"+ names[idx2] +"_reward": total_reward, "length":t })
 
-        # save every 500 episodes
-        if i_episode % save_interval == 0:
-            agents[idx1].save_checkpoint(i_episode, rewards, lengths, losses)
-            agents[idx2].save_checkpoint(i_episode, rewards, lengths, losses)
+            # save every 500 episodes
+            if i_episode % save_interval == 0:
+                agents[idx1].save_checkpoint(i_episode, rewards, lengths, losses)
+                agents[idx2].save_checkpoint(i_episode, rewards, lengths, losses)
 
-        # logging
-        if i_episode % log_interval == 0:
-            avg_reward = np.mean(rewards[-log_interval:])
-            avg_length = int(np.mean(lengths[-log_interval:]))
-            print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
+            # logging
+            if i_episode % log_interval == 0:
+                avg_reward = np.mean(rewards[-log_interval:])
+                avg_length = int(np.mean(lengths[-log_interval:]))
+                print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
 
     # if i_episode % log_interval != 0: save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
         
@@ -304,7 +305,7 @@ if __name__ == '__main__':
     parser_main.add_argument('--max_episodes_per_pair', default=1000000)
     parser_main.add_argument('--log_interval', default=20)
     parser_main.add_argument('--save_interval', default=5000)
-    parser_main.add_argument('--max_timesteps', default=300)
+    parser_main.add_argument('--max_timesteps', default=800)
     parser_main.add_argument('--iter_fit', default=10)
     parser_main.add_argument('--replay_ratio', default=0.25)
     parser_main.add_argument('--notes', default="",type=str)
