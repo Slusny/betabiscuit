@@ -48,7 +48,7 @@ def instanciate_agent(args):
 
     #weights and biases
     if args["wandb"]   : 
-        config_wandb = vars(args).copy()
+        config_wandb = args.copy()
         for key in ['notes','tags','wandb']:del config_wandb[key]
         del config_wandb
         if args["wandb_resume"] is not None:
