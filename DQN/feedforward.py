@@ -52,9 +52,8 @@ class DuelingDQN(torch.nn.Module):
     def __init__(self, input_size, hidden_sizes, hidden_sizes_values, hidden_sizes_advantages, output_size, activation_fun=torch.nn.Tanh(),activation_fun_values=torch.nn.ReLU(),activation_fun_advantages=torch.nn.ReLU(), output_activation=None ):
         super(DuelingDQN, self).__init__()
         self.input_size = input_size
-        self.hidden_sizes  = hidden_sizes
         self.output_size  = output_size
-        layer_sizes = [self.input_size] + self.hidden_sizes
+        layer_sizes = [self.input_size] + hidden_sizes
         layer_sizes_values = [layer_sizes[-1]] + hidden_sizes_values
         layer_sizes_advantages = [layer_sizes[-1]] + hidden_sizes_advantages
         self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
@@ -63,7 +62,8 @@ class DuelingDQN(torch.nn.Module):
         self.activations = [ activation_fun for l in  self.layers ]
         self.activation_fun_values = [ activation_fun_values for l in  self.layers_values ]
         self.activation_fun_advantages = [ activation_fun_advantages for l in  self.layers_advantages ]
-        self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
+        self.readout_values = torch.nn.Linear(hidden_sizes_values[-1], 1)
+        self.readout_advantages = torch.nn.Linear(hidden_sizes_advantages[-1], self.output_size)
         self.output_activation = output_activation
 
         # self.feauture_layer = torch.nn.Sequential(
@@ -100,11 +100,11 @@ class DuelingDQN(torch.nn.Module):
         
         for layer,activation_fun in zip(self.layers_values, self.activation_fun_values):
             state = activation_fun(layer(state))
-        values = state 
+        values = self.readout_values(state)
 
         for layer,activation_fun in zip(self.layers_advantages, self.activation_fun_advantages):
             features = activation_fun(layer(features))
-        advantages = features 
+        advantages = self.readout_advantages(features)
         
         return values + (advantages - advantages.mean())
 
