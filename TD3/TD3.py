@@ -399,7 +399,7 @@ class TD3Agent(object):
         fill_buffer_timesteps = self._config["buffer_size"] #// 100
         for i_episode in range(1, max_episodes+1):
             # validate
-            if i_episode % self._config["validatation_interval"] == 0 and timestep > fill_buffer_timesteps: self.validate()
+            if i_episode % self._config["validation_interval"] == 0 and timestep > fill_buffer_timesteps: self.validate()
             ob, _info = self.env.reset()
             # Incorporate  Acceleration
             past_obs = ob.copy()
