@@ -13,6 +13,7 @@ class Feedforward(torch.nn.Module):
         self.layers = torch.nn.ModuleList([ torch.nn.Linear(i, o) for i,o in zip(layer_sizes[:-1], layer_sizes[1:])])
         self.activations = [ activation_fun for l in  self.layers ]
         self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
+        self.output_activation = output_activation
 
         # self.feauture_layer = torch.nn.Sequential(
         #     torch.nn.Linear(self.input_size, 256),
@@ -63,7 +64,7 @@ class DuelingDQN(torch.nn.Module):
         self.activation_fun_values = [ activation_fun_values for l in  self.layers_values ]
         self.activation_fun_advantages = [ activation_fun_advantages for l in  self.layers_advantages ]
         self.readout = torch.nn.Linear(self.hidden_sizes[-1], self.output_size)
-
+        self.output_activation = output_activation
 
         # self.feauture_layer = torch.nn.Sequential(
         #     torch.nn.Linear(self.input_dim, 256),
@@ -94,12 +95,12 @@ class DuelingDQN(torch.nn.Module):
         
     
         for layer,activation_fun in zip(self.layers, self.activations):
-            x = activation_fun(layer(x))
-        features = x.copy()
+            state = activation_fun(layer(state))
+        features = state.copy()
         
         for layer,activation_fun in zip(self.layers_values, self.activation_fun_value):
-            x = activation_fun(layer(x))
-        values = x 
+            state = activation_fun(layer(state))
+        values = state 
 
         for layer,activation_fun in zip(self.layers_advantages, self.activation_fun_advantage):
             features = activation_fun(layer(features))
