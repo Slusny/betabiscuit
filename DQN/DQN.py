@@ -413,7 +413,7 @@ class DQNAgent(object):
                 # probably also bad implementation whoops
                 pred = self.Q.Q_value(s, a).detach()
                 # Compute TD error
-                td_error = torch.abs(pred - td_target).cpu.numpy()
+                td_error = torch.abs(pred - td_target).cpu().numpy()
                 self.buffer.update_priorities(idxs, td_error)
                 # same as regular replay buffer but with weights
                 fit_loss = self.Q.fit(s, a, td_target, self._config["bc_lambda"], weights = weights, bc_teacher=teacher)
