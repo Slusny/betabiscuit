@@ -301,7 +301,6 @@ class DQNAgent(object):
         self.wandb_run = wandb_run
         if(wandb_run):
             wandb.watch(self.Q, log_freq=100)
-            wandb.watch(self.policy, log_freq=100)
 
 
     def get_config(self):
