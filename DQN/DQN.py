@@ -497,7 +497,7 @@ class DQNAgent(object):
             loss = self.train_innerloop(iter_fit)
             rewards.append(total_reward)
             lengths.append(t)
-            losses.extend(loss)
+            losses.append(loss)
             stats.append([i_episode,total_reward,t+1])
 
             if self.wandb_run : 
