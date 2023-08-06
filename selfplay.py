@@ -313,6 +313,19 @@ if __name__ == '__main__':
 
     args_main = parser_main.parse_args()
 
+    config_wandb = vars(args_main).copy()
+    # for key in ['notes','tags','wandb']:del config_wandb[key]
+    # del config_wandb
+    # if args["wandb_resume is not None :
+    if args_main.wandb: 
+        wandb_run = wandb.init(project="self-play",# + env_name + " - " +names[0] ,  #" - ".join(names[0])
+            config=config_wandb,
+            notes=args_main.file,
+            # resume="must",
+            # id=args["wandb_resume
+            )
+
+
     config_agents = []
     agents = []
     names = []
@@ -356,17 +369,17 @@ if __name__ == '__main__':
         env = gym.make(env_name)
 
 #    #weights and biases
-    config_wandb = vars(args_main).copy()
-    # for key in ['notes','tags','wandb']:del config_wandb[key]
-    # del config_wandb
-    # if args["wandb_resume is not None :
-    if args_main.wandb: 
-        wandb_run = wandb.init(project="self-play " + env_name + " - " +names[0] ,  #" - ".join(names[0])
-            config=config_wandb,
-            notes=args_main.notes,
-            # resume="must",
-            # id=args["wandb_resume
-            )
+    # config_wandb = vars(args_main).copy()
+    # # for key in ['notes','tags','wandb']:del config_wandb[key]
+    # # del config_wandb
+    # # if args["wandb_resume is not None :
+    # if args_main.wandb: 
+    #     wandb_run = wandb.init(project="self-play " + env_name + " - " +names[0] ,  #" - ".join(names[0])
+    #         config=config_wandb,
+    #         notes=args_main.notes,
+    #         # resume="must",
+    #         # id=args["wandb_resume
+    #         )
     # else:
     
     train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval)
