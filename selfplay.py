@@ -302,12 +302,12 @@ if __name__ == '__main__':
     # Load agent config from files
     parser_main = argparse.ArgumentParser()
     parser_main.add_argument('--file', nargs='+', help='<Required> Set flag', required=True)
-    parser_main.add_argument('--max_episodes_per_pair', default=1000000)
-    parser_main.add_argument('--log_interval', default=20)
-    parser_main.add_argument('--save_interval', default=5000)
-    parser_main.add_argument('--max_timesteps', default=800)
-    parser_main.add_argument('--iter_fit', default=10)
-    parser_main.add_argument('--replay_ratio', default=0.25)
+    parser_main.add_argument('--max_episodes_per_pair', default=1000000, type=int)
+    parser_main.add_argument('--log_interval', default=20, type=int)
+    parser_main.add_argument('--save_interval', default=5000, type=int)
+    parser_main.add_argument('--max_timesteps', default=800, type=int)
+    parser_main.add_argument('--iter_fit', default=10, type=int)
+    parser_main.add_argument('--replay_ratio', default=0., type=float)
     parser_main.add_argument('--notes', default="",type=str)
     parser_main.add_argument('--wandb', action="store_true")
 
