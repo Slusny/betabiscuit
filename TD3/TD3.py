@@ -396,7 +396,7 @@ class TD3Agent(object):
             self.player = h_env.BasicOpponent(weak=False)
 
         # training loop
-        fill_buffer_timesteps = self._config["buffer_size"] // 100
+        fill_buffer_timesteps = self._config["buffer_size"] #// 100
         for i_episode in range(1, max_episodes+1):
             # validate
             self.validate()
