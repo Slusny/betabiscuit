@@ -416,10 +416,10 @@ class DQNAgent(object):
                 td_error = torch.abs(pred - td_target).cpu.numpy()
                 self.buffer.update_priorities(idxs, td_error)
                 # same as regular replay buffer but with weights
-                fit_loss = self.Q.fit(s, a, td_target, weights = weights, bc_teacher=teacher)
+                fit_loss = self.Q.fit(s, a, td_target, self._config["bc_lambda"], weights = weights, bc_teacher=teacher)
             else:
                 # optimize the lsq objective
-                fit_loss = self.Q.fit(s, a, td_target, weights = None, bc_teacher=teacher)
+                fit_loss = self.Q.fit(s, a, td_target, self._config["bc_lambda"], weights = None, bc_teacher=teacher)
 
             self.soft_update_target_net()
 
