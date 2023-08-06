@@ -55,10 +55,10 @@ class DiscreteActionWrapper(gym.ActionWrapper):
 # because this is basically the same as the other class
 # other than the inheritance... whoops
 class DuelingQFunction(DuelingDQN):
-    def __init__(self, observation_dim, action_dim, hidden_sizes=[100,100],
-                 learning_rate = 0.0002):
-        super().__init__(input_size=observation_dim,
-                         output_size=action_dim)
+    def __init__(self, input_size, hidden_sizes, hidden_sizes_values, hidden_sizes_advantages, 
+                output_size, activation_fun, activation_fun_values, activation_fun_advantages, learning_rate, output_activation):
+        super().__init__(input_size, hidden_sizes, hidden_sizes_values, hidden_sizes_advantages, 
+                output_size, activation_fun, activation_fun_values, activation_fun_advantages, output_activation)
 
         self.optimizer=torch.optim.Adam(self.parameters(),
                                         lr=learning_rate,
@@ -69,15 +69,15 @@ class DuelingQFunction(DuelingDQN):
         self.train() # put model in training mode
         self.optimizer.zero_grad()
         # Forward pass
-        acts = torch.from_numpy(actions)
-        pred = self.Q_value(torch.from_numpy(observations).float(), acts)
+        # acts = torch.from_numpy(actions)
+        pred = self.Q_value(observations, actions)
 
         # only used for PER
         if weights is None:
             weights = torch.ones_like(pred)
 
         # Compute Loss
-        loss = self.loss(pred*weights, torch.from_numpy(targets).float()*weights)
+        loss = self.loss(pred*weights, targets*weights)
 
         # Backward pass
         loss.backward()
@@ -88,16 +88,14 @@ class DuelingQFunction(DuelingDQN):
         return self.forward(observations).gather(1, actions[:,None])
 
     def maxQ(self, observations):
-        return np.max(self.predict(observations), axis=-1, keepdims=True)
+        return torch.max(self.predict(observations), axis=-1, keepdims=True)
 
     def greedyAction(self, observations):
-        return np.argmax(self.predict(observations), axis=-1)
+        return torch.argmax(self.predict(observations), axis=-1)
 
 class QFunction(Feedforward):
-    def __init__(self, observation_dim, action_dim, hidden_sizes=[100,100],
-                 learning_rate = 0.0002):
-        super().__init__(input_size=observation_dim, hidden_sizes=hidden_sizes,
-                         output_size=action_dim)
+    def __init__(self, input_size, hidden_sizes, output_size, activation_fun, output_activation,learning_rate):
+        super().__init__(input_size, hidden_sizes, output_size, activation_fun, output_activation)
 
         self.optimizer=torch.optim.Adam(self.parameters(),
                                         lr=learning_rate,
@@ -202,6 +200,12 @@ class DQNAgent(object):
             "bc_lambda":2.0,
             "bootstrap":None,
             "dense_reward":False,
+            "hidden_sizes": [256,128,128],
+            "hidden_sizes_values":[128], 
+            "hidden_sizes_advantages": [128], 
+            "activation_fun":torch.nn.Tanh(),
+            "activation_fun_value":torch.nn.ReLU(),
+            "activation_fun_advantage":torch.nn.ReLU(),
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -232,19 +236,39 @@ class DQNAgent(object):
         # dueling nets alg inherits NN from different class
         # note: target doesn't learn, rather updated with Q weights
         if self._config['dueling']:
-            self.Q = DuelingQFunction(observation_dim=self._obs_dim,
-                               action_dim=self._action_n,
-                               learning_rate = self._config["learning_rate"])
-            self.Q_target = DuelingQFunction(observation_dim=self._obs_dim,
-                                      action_dim=self._action_n,
-                                      learning_rate = 0).to(self.device)
+            self.Q = DuelingQFunction(input_size=self._obs_dim, 
+                hidden_sizes=self._config["hidden_sizes"], 
+                hidden_sizes_values=self._config["hidden_sizes_values"], 
+                hidden_sizes_advantages=self._config["hidden_sizes_advantages"], 
+                output_size=self._action_n, 
+                activation_fun=torch.nn.Tanh(),
+                activation_fun_values=torch.nn.ReLU(),
+                activation_fun_advantages=torch.nn.ReLU(), 
+                learning_rate = self._config["learning_rate"],
+                output_activation=None).to(self.device)
+            self.Q_target = DuelingQFunction(input_size=self._obs_dim, 
+                hidden_sizes=self._config["hidden_sizes"], 
+                hidden_sizes_values=self._config["hidden_sizes_values"], 
+                hidden_sizes_advantages=self._config["hidden_sizes_advantages"], 
+                output_size=self._action_n, 
+                activation_fun=torch.nn.Tanh(),
+                activation_fun_values=torch.nn.ReLU(),
+                activation_fun_advantages=torch.nn.ReLU(), 
+                learning_rate = 0,
+                output_activation=None).to(self.device)
         else:
-            self.Q = QFunction(observation_dim=self._obs_dim,
-                               action_dim=self._action_n,
-                               learning_rate = self._config["learning_rate"])
-            self.Q_target = QFunction(observation_dim=self._obs_dim,
-                                      action_dim=self._action_n,
-                                      learning_rate = 0).to(self.device)
+            self.Q = QFunction(input_size=self._obs_dim, 
+                hidden_sizes=self._config["hidden_sizes"], 
+                output_size=self._action_n, 
+                activation_fun=torch.nn.Tanh(), 
+                output_activation=None,
+                learning_rate = self._config["learning_rate"]).to(self.device)
+            self.Q_target = QFunction(input_size=self._obs_dim, 
+                hidden_sizes=self._config["hidden_sizes"], 
+                output_size=self._action_n, 
+                activation_fun=torch.nn.Tanh(), 
+                output_activation=None,
+                learning_rate = 0).to(self.device)
 
         # init Q' weights = Q weights
         self._update_target_net()
