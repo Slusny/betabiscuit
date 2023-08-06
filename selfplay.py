@@ -71,6 +71,7 @@ def instanciate_agent(args):
     if args["algo"] == "ddpg":
         sys.path.insert(0,'./DDPG')
         from DDPG import DDPGAgent
+        sys.path.pop(0)
         agent = DDPGAgent(env, env_name, action_n, args["seed"], args["savepath"], wandb_run,
                         eps = args["eps"], 
                         update_target_every = args["update_every"],
@@ -96,6 +97,7 @@ def instanciate_agent(args):
     elif args["algo"] == "td3":
         sys.path.insert(0,'./TD3')
         from TD3 import TD3Agent
+        sys.path.pop(0)
         agent = TD3Agent(env, env_name, action_n, args["seed"], args["savepath"], wandb_run,
                         eps = args["eps"], 
                         update_target_every = args["update_every"],
@@ -128,6 +130,7 @@ def instanciate_agent(args):
     elif args["algo"] == "dqn":
         sys.path.insert(0,'./DQN')
         from DQN import DQNAgent
+        sys.path.pop(0)
         agent = DQNAgent(env, env_name, 12 , args["seed"], args["savepath"], wandb_run,
                         eps = args["eps"], 
                         update_target_every = args["update_every"],
