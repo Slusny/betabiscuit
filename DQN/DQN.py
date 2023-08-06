@@ -424,7 +424,7 @@ class DQNAgent(object):
 
             losses.append(fit_loss)
 
-        return fit_loss
+        return (losses, None)
 
     def train(self,iter_fit, max_episodes, max_timesteps,log_interval,save_interval):
         #train( exploration=False, wandb_track=False, load_model = None, save_model= None, dueling = False, env_name = "hockey", epoch = 1000, discount = .95, hard_updates = True, target_update = 20, beta = .4, tau=.001, eps=1
@@ -503,7 +503,7 @@ class DQNAgent(object):
                 if self._config["bc"]:
                     wandb.log({"actor_loss": np.array(loss[0]).mean()  , "reward": total_reward, "length":t, "q_loss": np.array(loss[1]).mean(), "bc_loss":np.array(loss[2]).mean()})    
                 else:
-                    wandb.log({"actor_loss": np.array(loss).mean() , "reward": total_reward, "length":t })
+                    wandb.log({"actor_loss": np.array(loss[0]).mean() , "reward": total_reward, "length":t })
 
             # logging
             if i_episode % log_interval == 0:
