@@ -183,6 +183,7 @@ elif args['algo'] == "td3":
                     policy_noise=args["policy_noise"],
                     noise_clip=args["noise_clip"],
                     cpu=True,
+                    batchnorm=args["legacy"],
                     )
 elif args['algo'] == "dqn":
     print("if you changed the layer sizes, this needs some change")

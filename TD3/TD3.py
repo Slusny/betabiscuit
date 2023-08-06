@@ -171,6 +171,7 @@ class TD3Agent(object):
             "bc_lambda":2.0,
             "cpu": False,
             "replay_ratio": 0,
+            "batchnorm": False,
 
         }
         self._config.update(userconfig)
@@ -210,12 +211,14 @@ class TD3Agent(object):
                                   hidden_sizes= self._config["hidden_sizes_actor"],
                                   output_size=self._action_n,
                                   activation_fun = torch.nn.ReLU(),
-                                  output_activation = torch.nn.Tanh()).to(self.device)
+                                  output_activation = torch.nn.Tanh(),
+                                  batchnorm=self._config["batchnorm"]).to(self.device)
         self.policy_target = Feedforward(input_size=self._obs_dim,#self._obs_dim*self._config["past_states"],
                                          hidden_sizes= self._config["hidden_sizes_actor"],
                                          output_size=self._action_n,
                                          activation_fun = torch.nn.ReLU(),
-                                         output_activation = torch.nn.Tanh()).to(self.device)
+                                         output_activation = torch.nn.Tanh(),
+                                         batchnorm=self._config["batchnorm"]).to(self.device)
         
         # To resume training from a saved model.
         # Models get saved in weights-and-biases and loaded from there.

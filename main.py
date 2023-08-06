@@ -136,7 +136,7 @@ architecture.add_argument('--hil', action='store_true',help='human in the loop t
 architecture.add_argument('--bc', action='store_true',help='use behavior cloning')
 architecture.add_argument('--bc_lambda', action='store', type=float, 
                           default=2.0 ,help='hyperparameter for behavior cloning loss')
-                    
+architecture.add_argument('--batchnorm', action='store_true',help='use a batch norm in the network')
 architecture.add_argument('--legacy', action='store_true',help='use outdated architecture')
 
 
@@ -266,7 +266,8 @@ if __name__ == "__main__":
                         bc=args.bc,
                         bc_lambda=args.bc_lambda,
                         cpu=args.cpu,
-                        replay_ratio=args.replay_ratio
+                        replay_ratio=args.replay_ratio,
+                        batchnorm=args.batchnorm,
                         )
     elif args.algo == "dqn":
         agent = DQNAgent(env, env_name, 12 , args.seed, args.savepath, wandb_run,
