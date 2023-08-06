@@ -85,6 +85,7 @@ class DuelingQFunction(DuelingDQN):
         return loss.item()
 
     def Q_value(self, observations, actions):
+        print(actions.shape, "  -  ", observations.shape)
         return self.forward(observations).gather(1, (actions[:,None]).type(torch.int64))
 
     def maxQ(self, observations):
