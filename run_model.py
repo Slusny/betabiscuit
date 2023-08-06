@@ -183,6 +183,7 @@ elif args['algo'] == "td3":
                     noise_clip=args["noise_clip"],
                     )
 elif args['algo'] == "dqn":
+    print("if you changed the layer sizes, this needs some change")
     agent = DQNAgent(env, env_name, action_n, args["seed"], "/home/lenny", False,
                     eps = args["eps"], 
                     learning_rate = args["lr"],
@@ -194,8 +195,8 @@ elif args['algo'] == "dqn":
                     discount=args["discount"],
                     batch_size=args["batch_size"],
                     # hidden_sizes=eval(args["hidden_sizes"]),
-                    hidden_sizes_values=eval(args["hidden_sizes_values"]),
-                    hidden_sizes_advantages=eval(args["hidden_sizes_advantages"]),
+                    # hidden_sizes_values=eval(args["hidden_sizes_values"]),
+                    # hidden_sizes_advantages=eval(args["hidden_sizes_advantages"]),
                     bootstrap=args["bootstrap"],
                     tau=args["tau"],
                     per=args["per"],
