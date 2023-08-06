@@ -523,8 +523,8 @@ class DQNAgent(object):
         # final save
         if i_episode % log_interval != 0: save_checkpoint(self.Q.state_dict(),self.savepath,"DQN",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
         
-    def save_agent_wandb(self, i_episode, rewards, lengths, losses):
-        save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, None, self.seed,rewards,lengths, losses)
+    def save_agent_wandb(self, i_episode, rewards, lengths, losses,notes=""):
+        save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, None, self.seed,rewards,lengths, losses,notes=notes)
 
     def state(self):
         return self.Q.state_dict()

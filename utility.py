@@ -11,18 +11,18 @@ def save_statistics(savepath,algo,env_name,i_episode,rewards=None,lengths=None,t
     with open(savepath_stats, 'wb') as f:
         pickle.dump({"rewards" : rewards, "lengths": lengths, "losses": losses}, f)
                 
-def wandb_save_model(wandb_run,savepath):
+def wandb_save_model(wandb_run,savepath,notes=""):
     #print("----------- Writing Model to W&B -----------")
-    artifact = wandb.Artifact(wandb_run.name + '_model', type='model')
+    artifact = wandb.Artifact(wandb_run.name + notes + '_model', type='model')
     artifact.add_file(savepath)
     wandb_run.log_artifact(artifact)
 
-def save_checkpoint(torch_state,savepath,algo,env_name,i_episode,wandb_run=None,eps="Nan",train_iter="Nan",lr="Nan",seed="Nan",rewards=None,lengths=None, losses=None):
+def save_checkpoint(torch_state,savepath,algo,env_name,i_episode,wandb_run=None,eps="Nan",train_iter="Nan",lr="Nan",seed="Nan",rewards=None,lengths=None, losses=None,notes=""):
     print("########## Saving a checkpoint... ##########")
     date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
     savepath_checkpoint = os.path.join(savepath,f'{algo}_{env_name}_{i_episode}-{date_str}.pth')
     torch.save(torch_state, savepath_checkpoint)
-    if wandb_run : wandb_save_model(wandb_run,savepath_checkpoint)
+    if wandb_run : wandb_save_model(wandb_run,savepath_checkpoint,notes)
     #save_statistics(savepath,algo,env_name,i_episode,rewards,lengths,train_iter, losses, eps,lr,seed)
 
 def restore_from_wandb(str):

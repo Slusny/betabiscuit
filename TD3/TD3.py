@@ -465,8 +465,8 @@ class TD3Agent(object):
             
         return losses
     
-    def save_agent_wandb(self, i_episode, rewards, lengths, losses):
-        save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, None, self.seed,rewards,lengths, losses)
+    def save_agent_wandb(self, i_episode, rewards, lengths, losses,notes=""):
+        save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, None, self.seed,rewards,lengths, losses,notes)
 
     def opponent_action(self):
         if (self.env_name == "hockey"):
