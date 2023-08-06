@@ -309,6 +309,8 @@ class DQNAgent(object):
                 target_param.data.copy_(self.tau * param + (1 - self.tau) * target_param)
 
     def act(self, observation, eps=None):
+        to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
+        observation = to_torch(observation)
         if eps is None:
             eps = self._eps
             self._eps = max(self._config["eps_decay"]*eps, self._config["min_eps"])
