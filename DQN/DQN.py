@@ -65,7 +65,7 @@ class DuelingQFunction(DuelingDQN):
                                         eps=0.000001)
         self.loss = torch.nn.SmoothL1Loss() # MSELoss()
 
-    def fit(self, observations, actions, targets, weights = None):
+    def fit(self, observations, actions, targets, bc_lambda, weights = None, bc_teacher=None):
         self.train() # put model in training mode
         self.optimizer.zero_grad()
         # Forward pass
@@ -77,12 +77,21 @@ class DuelingQFunction(DuelingDQN):
             weights = torch.ones_like(pred)
 
         # Compute Loss
-        loss = self.loss(pred*weights, targets*weights)
+        q_loss = self.loss(pred*weights, targets*weights)
 
-        # Backward pass
-        loss.backward()
-        self.optimizer.step()
-        return loss.item()
+        if bc_teacher is not None:
+            bc_loss = bc_lambda * torch.nn.functional.mse_loss(pred,bc_teacher)
+            loss = q_loss + bc_loss
+            # Backward pass
+            loss.backward()
+            self.optimizer.step()
+            return (loss.item(), q_loss.item(), bc_loss.item())
+        else:
+            loss = q_loss
+            # Backward pass
+            loss.backward()
+            self.optimizer.step()
+            return (loss.item())
 
     def Q_value(self, observations, actions):
         actions = actions.squeeze()
@@ -132,7 +141,8 @@ class QFunction(Feedforward):
             return (loss.item())
 
     def Q_value(self, observations, actions):
-        return self.forward(observations).gather(1, actions[:,None])
+        actions = actions.squeeze()
+        return self.forward(observations).gather(1, (actions[:,None]).type(torch.int64))
 
     def maxQ(self, observations):
         return torch.max(self.predict(observations), axis=-1, keepdims=True)
