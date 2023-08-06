@@ -281,9 +281,6 @@ class DQNAgent(object):
                 output_activation=None,
                 learning_rate = 0).to(self.device)
 
-        # init Q' weights = Q weights
-        self._update_target_net()
-        self.train_iter = 0
 
         if(self._config["bootstrap"] is not None):
             api = wandb.Api()
@@ -293,6 +290,10 @@ class DQNAgent(object):
             else:
                 state = torch.load(art.file())
             self.restore_state(state)
+
+        # init Q' weights = Q weights
+        self._update_target_net()
+        self.train_iter = 0
         
         if self._config["bc"]:
             self.teacher = h_env.BasicOpponent(weak=False)

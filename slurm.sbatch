@@ -7,16 +7,16 @@
 
 #resources:
 
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=2
 # the job can use and see 4 CPUs (from max 24).
 
 #SBATCH --partition=week
 # the slurm partition the job is queued to.
 
-#SBATCH --mem-per-cpu=12G
+#SBATCH --mem-per-cpu=4G
 # the job will need 12GB of memory equally distributed on 4 cpus.(251GB are available in total on one node)
 
-#SBATCH --gres=gpu:0
+#SBATCH --gres=gpu:1
 #the job can use and see 1 GPUs (4 GPUs are available in total on one node) use SBATCH --gres=gpu:1080ti:1 to explicitly demand a Geforce 1080 Ti GPU. Use SBATCH --gres=gpu:A4000:1 to explicitly demand a RTX A4000 GPU
 
 #SBATCH --time=3-3
@@ -54,7 +54,7 @@
 # #sudo apt-get install python3-setuptools
 # pip3 install -r requirements_pip.txt 
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 main.py --algo td3 --env hockey --max_episodes 1000000 --batch_size 512 --hidden_sizes_actor "[300,300]" --hidden_sizes_critic "[300,300]" -u 2 --discount 0.99 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --lr 0.0001 --save_interval 5000 --wandb --per --replay_ratio 0.2 --bc_lambda 0.5 --eps 0.3 --notes "cluster cpu" --tags "c" --cpu
+singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 main.py --algo td3 --env hockey --max_episodes 1000000 --notes "resume fallen shape without bc" --batch_size 512 --hidden_sizes_actor [200,200] --hidden_sizes_critic [200,200] -u 2 --discount 0.99 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --lr 0.0001 --save_interval 5000 --wandb --bootstrap "betabiscuit/hockey - td3/fallen-shape-8_model:v203" --per --cpu --replay_ratio 0.2 --eps 0.1 --wandb_resume "h8l02eg1"
 
 # Restarted dulcet-leaf
 #main.py --algo td3 --env hockey --max_episodes 1000000 --notes "fixed bc scaling" --save_interval 5000 --batch_size 512 --hidden_sizes_actor "[300,300]" --hidden_sizes_critic "[300,300]" --bootstrap "betabiscuit/hockey - td3/dulcet-leaf-12_model:v183" --update 2 --discount 0.98 --lr 0.0001 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --bc --per --cpu --wandb --wandb_resume "kzxa5iwv" --eps 0.3 --replay_ratio 0.2 --bc_lambda 0.5
