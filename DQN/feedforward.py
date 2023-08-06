@@ -98,11 +98,11 @@ class DuelingDQN(torch.nn.Module):
             state = activation_fun(layer(state))
         features = state.clone()
         
-        for layer,activation_fun in zip(self.layers_values, self.activation_fun_value):
+        for layer,activation_fun in zip(self.layers_values, self.activation_fun_values):
             state = activation_fun(layer(state))
         values = state 
 
-        for layer,activation_fun in zip(self.layers_advantages, self.activation_fun_advantage):
+        for layer,activation_fun in zip(self.layers_advantages, self.activation_fun_advantages):
             features = activation_fun(layer(features))
         advantages = features 
         
