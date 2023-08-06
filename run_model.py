@@ -162,6 +162,7 @@ elif args['algo'] == "ddpg":
                     hidden_sizes_actor=eval(args["hidden_sizes_actor"]),
                     hidden_sizes_critic=eval(args["hidden_sizes_critic"]),
                     bootstrap=args["bootstrap"],
+                    cpu=True,
                     )
 elif args['algo'] == "td3":
     agent = TD3Agent(env, env_name, action_n, args["seed"], "/home/lenny", False,
@@ -181,6 +182,7 @@ elif args['algo'] == "td3":
                     tau=args["tau"],
                     policy_noise=args["policy_noise"],
                     noise_clip=args["noise_clip"],
+                    cpu=True,
                     )
 elif args['algo'] == "dqn":
     print("if you changed the layer sizes, this needs some change")
@@ -203,7 +205,7 @@ elif args['algo'] == "dqn":
                     dense_reward=args["dense_reward"],
                     bc=args["bc"],
                     bc_lambda=args["bc_lambda"],
-                    cpu=args["cpu"],
+                    cpu=True,
                     replay_ratio=args["replay_ratio"],
                     dueling=args["dueling"],
                     double=args["double"],
