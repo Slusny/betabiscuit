@@ -217,7 +217,11 @@ def validate(agents, idx1, idx2,val_episodes,max_timesteps):
             if done or trunc: break
         rewards.append(total_reward)
         length.append(t)
-    win_rate = np.array(rewards).mean().round(3)
+    win_rate = np.array(rewards)
+    print(win_rate)
+    win_rate[win_rate < 0] = 0
+    win_rate = .mean().round(3)
+    if win_rate < 0: win_rate = 
     print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2))
     return win_rate
 
