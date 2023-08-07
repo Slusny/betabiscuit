@@ -406,7 +406,7 @@ if __name__ == '__main__':
 
     # Load agent config from files
     parser_main = argparse.ArgumentParser()
-    parser_main.add_argument('--file', nargs='+', help='<Required> Set flag', required=True)
+    parser_main.add_argument('--agents', nargs='+', help='json config files defining an agent', required=True)
     parser_main.add_argument('--max_episodes_per_pair', default=1000000, type=int)
     parser_main.add_argument('--log_interval', default=20, type=int)
     parser_main.add_argument('--save_interval', default=5000, type=int)
@@ -436,7 +436,7 @@ if __name__ == '__main__':
     if args_main.wandb: 
         wandb_run = wandb.init(project="self-play",
             config=config_wandb,
-            notes=" - ".join(args_main.file),
+            notes=" - ".join(args_main.agents),
             # resume="must",
             # id=args["wandb_resume
             )
@@ -446,7 +446,7 @@ if __name__ == '__main__':
     config_agents = []
     agents = []
     names = []
-    for file in args_main.file:
+    for file in args_main.agents:
         names.append(Path(file).stem)
         with open(file, 'r') as f:
             config = json.load(f)
