@@ -314,6 +314,7 @@ if __name__ == '__main__':
             # resume="must",
             # id=args["wandb_resume
             )
+    else: wandb_run = None
 
 
     config_agents = []
