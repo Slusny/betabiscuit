@@ -289,7 +289,7 @@ if __name__ == '__main__':
     for i, file in enumerate(args_main.agents):
         string = Path(file).stem 
         if args_main.bootstrap_overwrite :
-            string + "_" + args_main.bootstrap_overwrite[i]
+            string += "_" + args_main.bootstrap_overwrite[i]
         names.append(string)
         with open(file, 'r') as f:
             config = json.load(f)

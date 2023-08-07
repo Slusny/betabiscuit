@@ -224,11 +224,8 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
     print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw_rate, " max length: ",np.array(length).max(), " avg length: ",np.array(length).mean())
     return win_rate, draw_rate
 
-    print("\t avg length: ",np.array(length).mean(), ", avg reward: ",np.array(rewards).mean())
-    if self.wandb.run is not None:
-        wandb.log({"validation_length": np.array(length).mean(), "validation_reward": np.array(rewards).mean()})
 
-def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max_timesteps, log_interval,save_interval,val_episodes,tables):
+def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max_timesteps, log_interval,save_interval,val_episodes,tables,all_agains_one,loner_idx):
     
     num_agents = len(agents)
     win_rates = np.empty((num_agents,num_agents-1,1)).tolist()
@@ -236,7 +233,12 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         for j in range(num_agents-1):
             win_rates[i][j].pop()
 
-    pairings = list(itertools.combinations(range(num_agents), 2))
+    if all_agains_one:
+        print("All against One")
+        pairings = [(loner_idx,x) for x in range(num_agents) if x != loner_idx]
+    else:
+        pairings = list(itertools.combinations(range(num_agents), 2))
+
     current_pairing = 0
     wandb_steps = [0]*len(pairings) # adjust step for plotting in wandb logging
     win_rate_steps = [0]*len(names) # adjust step for plotting in wandb logging
@@ -422,6 +424,7 @@ if __name__ == '__main__':
     parser_main.add_argument('-s','--sleep', default=0., type=float)
     parser_main.add_argument('--simple_reward', action="store_true")
     parser_main.add_argument('--val_episodes', default=20, type=int)
+    parser_main.add_argument('g','--all_against_one', default=False, type=str)
 
 
     args_main = parser_main.parse_args()
@@ -457,6 +460,15 @@ if __name__ == '__main__':
             # instanciate agents
             agents.append(instanciate_agent(config,wandb_run))
 
+    # All against one
+        if args_main.all_against_one:
+            names.append(Path(args_main.all_against_one).stem )
+            loner_idx = len(names)-1
+            all_agains_one = True
+            print("all against one !")
+        else: all_agains_one = False
+
+
     # print agent configs
     for i, agent_config in enumerate(config_agents):
         print(names[i])
@@ -489,11 +501,11 @@ if __name__ == '__main__':
         env = gym.make(env_name)
 
     try:
-
+        
         if args_main.wandb:
             tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
         else :tables = None
-        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables)
+        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,all_agains_one,loner_idx)
     finally:
         print("closing script")
         if wandb_run:
