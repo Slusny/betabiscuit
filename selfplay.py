@@ -237,14 +237,18 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     else:
                         env.render()
                         time.sleep(args_main.sleep)
+                        print(reward," agent 2: ",env.get_reward_agent_two(), ", real reward: ",env._compute_reward())
+                        
                     
                     added_transitions += 1
                     past_obs1 = ob1
                     past_obs2 = ob2
                     ob1=ob_new1
                     ob2=ob_new2
-
-                    if done or trunc: break
+                
+                    if done or trunc: 
+                        # if re
+                        break
                 if not args_main.visualize: break
                 # # To fill buffer once before training
                 # if(timestep > fill_buffer_timesteps and not args_main.visualize):
