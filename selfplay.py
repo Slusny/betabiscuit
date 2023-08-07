@@ -207,13 +207,14 @@ def validate(agents, idx1, idx2,val_episodes,max_timesteps):
             (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
             ob_new2 = env.obs_agent_two()
 
-            reward = env._compute_reward()
+            reward = env._compute_reward()/10
 
             total_reward+= reward
             past_obs1 = ob1
             past_obs2 = ob2
             ob1=ob_new1
             ob2=ob_new2
+            if done or trunc: break
         rewards.append(total_reward)
         length.append(t)
     win_rate = np.array(rewards).mean().round(3)
