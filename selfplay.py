@@ -220,8 +220,7 @@ def validate(agents, idx1, idx2,val_episodes,max_timesteps):
     win_rate = np.array(rewards)
     print(win_rate)
     win_rate[win_rate < 0] = 0
-    win_rate = .mean().round(3)
-    if win_rate < 0: win_rate = 
+    win_rate = win_rate.mean().round(3)
     print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2))
     return win_rate
 
