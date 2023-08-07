@@ -20,7 +20,7 @@ def wandb_save_model(wandb_run,savepath,notes=""):
 def save_checkpoint(torch_state,savepath,algo,env_name,i_episode,wandb_run=None,eps="Nan",train_iter="Nan",lr="Nan",seed="Nan",rewards=None,lengths=None, losses=None,notes=""):
     print("########## Saving a checkpoint... ##########")
     date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
-    savepath_checkpoint = os.path.join(savepath,f'{algo}_{env_name}_{i_episode}-{date_str}.pth')
+    savepath_checkpoint = os.path.join(savepath,f'{notes}_{algo}_{env_name}_{i_episode}-{date_str}.pth')
     torch.save(torch_state, savepath_checkpoint)
     if wandb_run : wandb_save_model(wandb_run,savepath_checkpoint,notes)
     #save_statistics(savepath,algo,env_name,i_episode,rewards,lengths,train_iter, losses, eps,lr,seed)
