@@ -225,6 +225,12 @@ def validate(agents, idx1, idx2,val_episodes,max_timesteps):
         wandb.log({"validation_length": np.array(length).mean(), "validation_reward": np.array(rewards).mean()})
 
 
+
+wandb.define_metric("custom_step")
+# define which metrics will be plotted against it
+wandb.define_metric(
+  "validation_loss", step_metric="custom_step")
+
 def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max_timesteps, log_interval,save_interval,val_episodes,tables):
     
     num_agents = len(agents)
@@ -235,13 +241,24 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
     pairings = list(itertools.combinations(num_agents, 2))
     current_pairing = 0
-    # for i of range(len(agents)): win_rate[i]
-    # select two agents:
+
+    # Set up wandb logging metrics
+    if args_main.wandb:
+        for pair in pairings:
+            idx1, idx2 = pair
+            wandb.define_metric(names[idx1] +"-"+ names[idx2]+"_step")
+            wandb.define_metric(names[idx1]+"_loss", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
+            wandb.define_metric(names[idx2]+"_loss", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
+            wandb.define_metric(names[idx1] +"-"+ names[idx2] +"_reward", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
+            wandb.define_metric(names[idx1] +"-"+ names[idx2] +"length", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
+   
     while True: # stop manually
         # randomly get pairing
         # idx1, idx2 = random.sample(range(len(agents)), 2)
         idx1, idx2 = pairings[current_pairing % len(pairings)]
         current_pairing += 1
+        wandb_steps = [0]*len(pairings)
+        
         # if args_main.visualize: 
         print(names[idx1]," vs ",names[idx2])
         
@@ -350,7 +367,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
             # logging
             if args_main.wandb: 
-                wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,names[idx1] +"-"+ names[idx2] +"_reward": total_reward, names[idx1] +"-"+ names[idx2] +"length":t })
+                wandb_steps[current_pairing % len(pairings)] += 1
+                wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,
+                           names[idx1] +"-"+ names[idx2] +"_reward": total_reward, names[idx1] +"-"+ names[idx2] +"length":t,
+                            names[idx1] +"-"+ names[idx2]+"_step":wandb_steps[current_pairing % len(pairings)] })
 
             # save every 500 episodes
             if i_episode % save_interval == 0:
@@ -474,7 +494,7 @@ if __name__ == '__main__':
         if args_main.wandb:
             tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
         else :tables = None
-        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes)
+        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables)
     finally:
         print("closing script")
         if wandb_run:
