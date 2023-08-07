@@ -54,7 +54,7 @@
 # #sudo apt-get install python3-setuptools
 # pip3 install -r requirements_pip.txt 
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 python main.py --algo td3 --env hockey --max_episodes 1000000 --notes "resumed from dulcet-leaf at 1.3M try to retrain" --save_interval 5000 --batch_size 512 --hidden_sizes_actor "[300,300]" --hidden_sizes_critic "[300,300]" --bootstrap "betabiscuit/hockey - td3/dulcet-leaf-12_model:v264" --update 2 --discount 0.99 --learning_rate_actor 0.00001 --learning_rate_critic 0.00001 --policy_noise 0.1 --noise_clip 0.3 --per --cpu --replay_ratio 0.2 --eps 0.1 --validation_interval 500 --filled_buffer_ratio 1
+singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 main.py --algo td3 --env hockey --max_episodes 1000000 --notes "resumed from dulcet-leaf at 1.3M try to retrain" --save_interval 5000 --batch_size 512 --hidden_sizes_actor "[300,300]" --hidden_sizes_critic "[300,300]" --bootstrap "betabiscuit/hockey - td3/dulcet-leaf-12_model:v264" --update 2 --discount 0.99 --learning_rate_actor 0.00001 --learning_rate_critic 0.00001 --policy_noise 0.1 --noise_clip 0.3 --per --cpu --replay_ratio 0.2 --eps 0.1 --validation_interval 500 --filled_buffer_ratio 1
 
 
 #main.py --algo td3 --env hockey --max_episodes 1000000 --notes "resume fallen shape without bc" --batch_size 512 --hidden_sizes_actor [200,200] --hidden_sizes_critic [200,200] -u 2 --discount 0.99 --learning_rate_actor 0.0001 --learning_rate_critic 0.0001 --lr 0.0001 --save_interval 5000 --wandb --bootstrap "betabiscuit/hockey - td3/fallen-shape-8_model:v203" --per --cpu --replay_ratio 0.2 --eps 0.1 --wandb_resume "h8l02eg1"

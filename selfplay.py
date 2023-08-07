@@ -227,6 +227,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
                     (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
                     ob_new2 = env.obs_agent_two()
+                    if args_main.simple_reward:
+                        reward = env._compute_reward()
+                    else: 
+                        reward = env._compute_reward()
                     # if(self._config["dense_reward"]): 
                     #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
                     total_reward+= reward
@@ -237,7 +241,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     else:
                         env.render()
                         time.sleep(args_main.sleep)
-                        print(reward, ", real reward: ",env._compute_reward()) #," agent 2: ",env.get_reward_agent_two(env.get_info_agent_two()),
+                        # print(reward, ", real reward: ",env._compute_reward()) #," agent 2: ",env.get_reward_agent_two(env.get_info_agent_two()),
                         
                     
                     added_transitions += 1
@@ -302,6 +306,7 @@ if __name__ == '__main__':
     parser_main.add_argument('--wandb', action="store_true")
     parser_main.add_argument('--visualize', action="store_true")
     parser_main.add_argument('-s','--sleep', default=0., type=float)
+    parser_main.add_argument('--simple_reward', action="store_true")
 
 
     args_main = parser_main.parse_args()
