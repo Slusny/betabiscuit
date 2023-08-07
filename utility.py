@@ -13,7 +13,7 @@ def save_statistics(savepath,algo,env_name,i_episode,rewards=None,lengths=None,t
                 
 def wandb_save_model(wandb_run,savepath,notes="",episode=0):
     #print("----------- Writing Model to W&B -----------")
-    artifact = wandb.Artifact(wandb_run.name + notes + '_model', type='model',metadata={"episode":episode}})
+    artifact = wandb.Artifact(wandb_run.name + notes + '_model', type='model',metadata={"episode":episode})
     artifact.add_file(savepath)
     wandb_run.log_artifact(artifact)
 
