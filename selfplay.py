@@ -261,19 +261,20 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         print(names[idx1]," vs ",names[idx2])
         
         # inital validation:    
-        print(" Pre Validating...")
+        print("Pre Validating...")
         win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,max_timesteps)
         #if draw rate is too high or to low, we adjust the timesteps
         if draw_rate > 0.15: timesteps[current_pairing_idx] += 100
-        if draw_rate < 0.05: timesteps[current_pairing_idx] -= 50
+        if draw_rate < 0.05: timesteps[current_pairing_idx] -= 10
         win_rates[idx1][idx2].append(win_rate)
         win_rates[idx2][idx1].append(1-win_rate)
         if current_pairing_idx == 0 and current_pairing != 0:
             if args_main.wandb:
                 log_dict = dict()
                 for i,table in enumerate(tables):
-                    table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
-                    log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
+                    last_row = np.delete(np.array(win_rates[i])[:,-1],i)
+                    table.add(last_row)
+                    log_dict[names[i]+"win_rate"] = last_row.mean()
                 wandb.log({log_dict})
 
 
@@ -375,15 +376,18 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         win_rate, draw_rate = validate(agents, names, idx1, idx2,val_episodes,max_timesteps)
         #if draw rate is too high or to low, we adjust the timesteps
         if draw_rate > 0.15: timesteps[current_pairing_idx] += 100
-        if draw_rate < 0.05: timesteps[current_pairing_idx] -= 50
+        if draw_rate < 0.05: timesteps[current_pairing_idx] -= 10
         win_rates[idx1][idx2].append(win_rate)
         win_rates[idx2][idx1].append(1-win_rate)
         if current_pairing_idx == 0 and current_pairing != 0:
             if args_main.wandb:
                 log_dict = dict()
                 for i,table in enumerate(tables):
-                    table.add(win_rates[i][:i]+win_rates[i][i+1:])
-                    log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
+                    last_row = np.delete(np.array(win_rates[i])[:,-1],i)
+                    table.add(last_row)
+                    log_dict[names[i]+"win_rate"] = last_row.mean()
+                    # table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
+                    # log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
                 wandb.log({log_dict})
         
         # Prepare next pair
@@ -412,7 +416,10 @@ if __name__ == '__main__':
 
 
     args_main = parser_main.parse_args()
-
+    # catch wrong save_interval
+    if args_main.max_episodes_per_pair > args_main.save_interval : print("!!!!!!!!! max_episodes_per_pair > save_interval !!!!!!!!!\nnothing gets saved!\n")
+    
+    # Start
     print('self-play started with this configuration: ')
     print(args_main)
 
