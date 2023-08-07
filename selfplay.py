@@ -428,7 +428,7 @@ if __name__ == '__main__':
     parser_main.add_argument('--simple_reward', action="store_true")
     parser_main.add_argument('--val_episodes', default=20, type=int)
     parser_main.add_argument('-g','--all_against_one', default=False, type=str)
-    parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', defaul=False)
+    parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', default=False)
     
 
     args_main = parser_main.parse_args()
