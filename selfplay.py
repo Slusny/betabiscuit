@@ -232,7 +232,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     num_agents = len(agents)
     win_rates = np.empty((num_agents,num_agents-1,1)).tolist()
     for i in range(num_agents):
-        for j in range(num_agents):
+        for j in range(num_agents-1):
             win_rates[i][j].pop()
 
     pairings = list(itertools.combinations(range(num_agents), 2))
@@ -485,19 +485,6 @@ if __name__ == '__main__':
     else:
         env = gym.make(env_name)
 
-#    #weights and biases
-    # config_wandb = vars(args_main).copy()
-    # # for key in ['notes','tags','wandb']:del config_wandb[key]
-    # # del config_wandb
-    # # if args["wandb_resume is not None :
-    # if args_main.wandb: 
-    #     wandb_run = wandb.init(project="self-play " + env_name + " - " +names[0] ,  #" - ".join(names[0])
-    #         config=config_wandb,
-    #         notes=args_main.notes,
-    #         # resume="must",
-    #         # id=args["wandb_resume
-    #         )
-    # else:
     try:
 
         if args_main.wandb:
