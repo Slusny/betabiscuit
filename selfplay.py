@@ -3,13 +3,15 @@ import json
 import gymnasium as gym
 import sys
 from pathlib import Path
-import laserhockey.hockey_env as h_env
+# import laserhockey.hockey_env as 
+import laserhockey as h_env
 from importlib import reload
 import wandb
 import torch
 import numpy as np
 import time
 import random
+import itertools
 
    
 # added more actions
@@ -173,14 +175,86 @@ def instanciate_agent(args,wandb_run):
                         )
     return agent
 
-def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max_timesteps, log_interval,save_interval):
+
+def add_derivative(obs,pastobs):
+    return np.append(obs,(obs-pastobs)[derivative_indices])
         
+
+def validate(agents, idx1, idx2,val_episodes,max_timesteps):
+    def act_val(obs,pastobs,agents,config_agents,idx):
+        if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs),eps=0.)
+        else :                                      a_s = agents[idx].act(obs,eps=0.)
+        if config_agents[idx]["algo"] == "dqn":     a = discrete_to_continous_action(int(a_s))
+        else:                                       a = a_s
+        return a, a_s
+    
+    print("Validating...")
+    length = []
+    rewards = []
+    for i_episode in range(1, val_episodes+1):
+        ob1, _info = env.reset()
+        ob2 = env.obs_agent_two()
+        # Incorporate  Acceleration
+        past_obs1 = ob1.copy()
+        past_obs2 = ob2.copy()
+        total_reward=0
+        for t in range(max_timesteps):
+            
+            a1, a1_s = act_val(ob1,past_obs1,agents,config_agents,idx1)
+            a2, a2_s = act_val(ob2,past_obs2,agents,config_agents,idx2)
+
+            (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
+            ob_new2 = env.obs_agent_two()
+
+            reward = env._compute_reward()
+
+            total_reward+= reward
+            past_obs1 = ob1
+            past_obs2 = ob2
+            ob1=ob_new1
+            ob2=ob_new2
+        rewards.append(total_reward)
+        length.append(t)
+    return np.array(rewards).mean()
+
+    print("\t avg length: ",np.array(length).mean(), ", avg reward: ",np.array(rewards).mean())
+    if self.wandb.run is not None:
+        wandb.log({"validation_length": np.array(length).mean(), "validation_reward": np.array(rewards).mean()})
+
+
+def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max_timesteps, log_interval,save_interval,val_episodes,tables):
+    
+    num_agents = len(agents)
+    win_rates = np.empty((num_agents,num_agents,1)).tolist()
+    for i in range(num_agents):
+        for j in range(num_agents):
+            win_rates[i][j].pop()
+
+    pairings = list(itertools.combinations(num_agents, 2))
+    current_pairing = 0
+    # for i of range(len(agents)): win_rate[i]
     # select two agents:
-    while True:
-        idx1, idx2 = random.sample(range(len(agents)), 2)
+    while True: # stop manually
+        # randomly get pairing
+        # idx1, idx2 = random.sample(range(len(agents)), 2)
+        idx1, idx2 = pairings[current_pairing % len(pairings)]
+        current_pairing += 1
         # if args_main.visualize: 
         print(names[idx1]," vs ",names[idx2])
-        # idx1, idx2 = 0,1
+        
+        # inital validation:
+        win_rate = validate(agents, idx1, idx2,val_episodes,max_timesteps)
+        win_rates[idx1][idx2].append(win_rate)
+        win_rates[idx2][idx1].append(1-win_rate)
+        if current_pairing % len(pairings) == 1 and current_pairing != 1:
+            if args_main.wandb:
+                log_dict = dict()
+                for i,table in enumerate(tables):
+                    table.add(win_rates[i][:i]+win_rates[i][i+1:])
+                    log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
+                wandb.log({log_dict})
+
+
 
         # to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
             # logging variables
@@ -189,9 +263,6 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         losses = []
         timestep = 0
 
-        def add_derivative(obs,pastobs):
-            return np.append(obs,(obs-pastobs)[derivative_indices])
-        
         def act(obs,pastobs,agents,config_agents,idx):
             if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs))
             else :                                      a_s = agents[idx].act(obs)
@@ -287,6 +358,17 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                 avg_length = int(np.mean(lengths[-log_interval:]))
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
 
+        # validate after training
+        win_rate = validate(agents, idx1, idx2,val_episodes,max_timesteps)
+        win_rates[idx1][idx2].append(win_rate)
+        win_rates[idx2][idx1].append(1-win_rate)
+        if current_pairing % len(pairings) == 1 and current_pairing != 1:
+            if args_main.wandb:
+                log_dict = dict()
+                for i,table in enumerate(tables):
+                    table.add(win_rates[i][:i]+win_rates[i][i+1:])
+                    log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
+                wandb.log({log_dict})
     # if i_episode % log_interval != 0: save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
         
     return losses
@@ -308,6 +390,7 @@ if __name__ == '__main__':
     parser_main.add_argument('--visualize', action="store_true")
     parser_main.add_argument('-s','--sleep', default=0., type=float)
     parser_main.add_argument('--simple_reward', action="store_true")
+    parser_main.add_argument('--val_episodes', default=20, type=int)
 
 
     args_main = parser_main.parse_args()
@@ -381,5 +464,21 @@ if __name__ == '__main__':
     #         # id=args["wandb_resume
     #         )
     # else:
-    
-    train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval)
+    try:
+
+        if args_main.wandb:
+            tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
+        else :tables = None
+        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes)
+    finally:
+        print("closing script")
+        if wandb_run:
+            for i,table in enumerate(tables):
+                wandb_run.log(names[i],table)
+           
+            # wandb.log({"my_custom_id" : wandb.plot.line_series(
+            #                     xs=[0, 1, 2, 3, 4], 
+            #                     ys=[[10, 20, 30, 40, 50], [0.5, 11, 72, 3, 41]],
+            #                     keys=["metric Y", "metric Z"],
+            #                     title="Two Random Metrics",
+            #                     xname="x units")})
