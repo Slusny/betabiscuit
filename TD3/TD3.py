@@ -253,9 +253,9 @@ class TD3Agent(object):
 
         # log gradients to W&B
         self.wandb_run = wandb_run
-        if(wandb_run):
-            wandb.watch(self.Q, log_freq=100)
-            wandb.watch(self.policy, log_freq=100)
+        # if(wandb_run):
+        #     wandb.watch(self.Q, log_freq=100)
+        #     wandb.watch(self.policy, log_freq=100)
 
 
     def _copy_nets(self):

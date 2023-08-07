@@ -299,8 +299,8 @@ class DQNAgent(object):
 
          # log gradients to W&B
         self.wandb_run = wandb_run
-        if(wandb_run):
-            wandb.watch(self.Q, log_freq=100)
+        # if(wandb_run):
+            # wandb.watch(self.Q, log_freq=100)
 
 
     def get_config(self):

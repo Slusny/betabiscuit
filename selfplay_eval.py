@@ -14,7 +14,6 @@ import random
 import itertools
 import math
 
-timestep_max = 350
    
 # added more actions
 def discrete_to_continous_action(discrete_action):
@@ -182,7 +181,7 @@ def add_derivative(obs,pastobs):
     return np.append(obs,(obs-pastobs)[derivative_indices])
         
 
-def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
+def validate(agents,names, idx1, idx2,val_episodes,max_timesteps,visualize,sleep):
     def act_val(obs,pastobs,agents,config_agents,idx):
         if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs),eps=0.)
         else :                                      a_s = agents[idx].act(obs,eps=0.)
@@ -200,6 +199,9 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
         past_obs2 = ob2.copy()
         total_reward=0
         for t in range(max_timesteps):
+
+            if visualize: env.render()
+            if sleep: time.sleep(sleep)
             
             a1, a1_s = act_val(ob1,past_obs1,agents,config_agents,idx1)
             a2, a2_s = act_val(ob2,past_obs2,agents,config_agents,idx2)
@@ -224,11 +226,7 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
     print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw_rate, " max length: ",np.array(length).max(), " avg length: ",np.array(length).mean())
     return win_rate, draw_rate
 
-    print("\t avg length: ",np.array(length).mean(), ", avg reward: ",np.array(rewards).mean())
-    if self.wandb.run is not None:
-        wandb.log({"validation_length": np.array(length).mean(), "validation_reward": np.array(rewards).mean()})
-
-def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max_timesteps, log_interval,save_interval,val_episodes,tables):
+def validation(agents, config_agents, names, env,val_episodes,visualize,sleep):
     
     num_agents = len(agents)
     win_rates = np.empty((num_agents,num_agents-1,1)).tolist()
@@ -237,172 +235,32 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             win_rates[i][j].pop()
 
     pairings = list(itertools.combinations(range(num_agents), 2))
-    current_pairing = 0
-    wandb_steps = [0]*len(pairings) # adjust step for plotting in wandb logging
-    win_rate_steps = [0]*len(names) # adjust step for plotting in wandb logging
 
-    # Set up wandb logging metrics
-    if args_main.wandb:
-        for pair in pairings:
-            idx1, idx2 = pair
-            wandb.define_metric(names[idx1] +"-"+ names[idx2]+"_step")
-            wandb.define_metric(names[idx1]+"_loss", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
-            wandb.define_metric(names[idx2]+"_loss", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
-            wandb.define_metric(names[idx1] +"-"+ names[idx2] +"_reward", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
-            wandb.define_metric(names[idx1] +"-"+ names[idx2] +"length", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
-        for i,name in enumerate(names):
-            wandb.define_metric(name+"win_rate_step")
-            wandb.define_metric(name+"win_rate", step_metric=name+"win_rate_step")
-
-    while True: # stop manually
-        # randomly get pairing of agents
-        # idx1, idx2 = random.sample(range(len(agents)), 2)
-
+    for i in range(len(pairings)):
         # go orderly through all combinations of agent pairings
-        current_pairing_idx = current_pairing % len(pairings)
-        idx1, idx2 = pairings[current_pairing_idx]
-        timesteps = [max_timesteps]*len(pairings)
-
+        idx1, idx2 = pairings[i]
         
         # if args_main.visualize: 
         print(names[idx1]," vs ",names[idx2])
-        
-        # log the last 2 validations (pre and post) to wandb at the start of a new pairing cycle
-        if current_pairing_idx == 0 and current_pairing != 0:
-            if args_main.wandb:
-                for l in [2,1]:
-                    log_dict = dict()
-                    for i,table in enumerate(tables):
-                        last_row = np.array(win_rates[i])[:,-l]
-                        win_rate_steps[i] += 1
-                        table.add_data(*last_row)
-                        log_dict[names[i]+"win_rate"] = round(last_row.mean(),4)
-                        log_dict[names[i]+"win_rate_step"] = win_rate_steps[i]
-                    wandb.log(log_dict)
-                    # old code
-                    # table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
-                    # log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
 
         # inital validation:    
-        print("Pre Validating...")
-        win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,timesteps[current_pairing_idx])
-        #if draw rate is too high or to low, we adjust the timesteps to drive episodes to conclusion
-        if draw_rate > 0.10 and timesteps[current_pairing_idx] <= timestep_max : timesteps[current_pairing_idx] += 50
-        if draw_rate < 0.05: timesteps[current_pairing_idx] -= 25
+        print("Validating...")
+        win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,350,visualize,sleep)
         # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
         if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
         else:              idx2_w = idx2    ; idx1_w = idx1 -1
         win_rates[idx1][idx2_w].append(win_rate)
         win_rates[idx2][idx1_w].append(1-win_rate)
-        
-        # logging variables
-        rewards = []
-        lengths = []
-        losses = []
-
-        def act(obs,pastobs,agents,config_agents,idx):
-            if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs))
-            else :                                      a_s = agents[idx].act(obs)
-            if config_agents[idx]["algo"] == "dqn":     a = discrete_to_continous_action(int(a_s))
-            else:                                       a = a_s
-            return a, a_s
-        
-        def store_transition(agents,config_agents,idx,obs,pastobs,action,reward,next_obs,done):
-            if config_agents[idx]["use_derivative"]:    agents[idx].store_transition((add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done))
-            else :                                      agents[idx].store_transition((obs,action,reward,next_obs,done))
-
-        # training loop
-        for i_episode in range(1, max_episodes_per_pair+1):
-
-            while True: # continous loop for visualization
-                ob1, _info = env.reset()
-                ob2 = env.obs_agent_two()
-                # Incorporate  Acceleration - keep one past observation for derivative of velocities
-                past_obs1 = ob1.copy()
-                past_obs2 = ob2.copy()
-                total_reward=0
-                added_transitions = 0
-                for t in range(timesteps[current_pairing_idx]):
-                    
-                    a1, a1_s = act(ob1,past_obs1,agents,config_agents,idx1)
-                    a2, a2_s = act(ob2,past_obs2,agents,config_agents,idx2)
-
-                    (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
-                    ob_new2 = env.obs_agent_two()
-                    
-                    # The simple reward only returns 10 and -10 for goals
-                    if args_main.simple_reward:
-                        reward1 = env._compute_reward()
-                        reward2 = - reward1
-                    # The standard reward also considers closeness to puck
-                    else: 
-                        reward1 = reward
-                        reward2 = env.get_reward_agent_two(env.get_info_agent_two())
-
-                    # The dense reward also considers the direction of the puck - not used anymore
-                    # if(self._config["dense_reward"]): 
-                    #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
-                    total_reward+= reward
-                    
-                    if not args_main.visualize:
-                        store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward1,ob_new1,done)
-                        store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,reward2,ob_new2,done)
-                    else:
-                        env.render()
-                        time.sleep(args_main.sleep)                        
-                    
-                    added_transitions += 1
-                    past_obs1 = ob1
-                    past_obs2 = ob2
-                    ob1=ob_new1
-                    ob2=ob_new2
-                
-                    if done or trunc: break
-                if not args_main.visualize: break
-
-            if(args_main.replay_ratio != 0.):
-                iter_fit = int(added_transitions * args_main.replay_ratio) + 1  
-
-            l1 = agents[idx1].train_innerloop(iter_fit)
-            l2 = agents[idx2].train_innerloop(iter_fit)
-
-            rewards.append(total_reward)
-            lengths.append(t)
-
-            # logging
-            if args_main.wandb: 
-                wandb_steps[current_pairing_idx] += 1
-                wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,
-                           names[idx1] +"-"+ names[idx2] +"_reward": total_reward, names[idx1] +"-"+ names[idx2] +"length":t,
-                            names[idx1] +"-"+ names[idx2]+"_step":wandb_steps[current_pairing_idx] })
-
-            # save models
-            if i_episode % save_interval == 0:
-                agents[idx1].save_agent_wandb(wandb_steps[current_pairing_idx], rewards, lengths, losses,"sp-"+names[idx1])
-                agents[idx2].save_agent_wandb(wandb_steps[current_pairing_idx], rewards, lengths, losses,"sp-"+names[idx2])
-
-            # logging
-            if i_episode % log_interval == 0:
-                avg_reward = np.mean(rewards[-log_interval:])
-                avg_length = int(np.mean(lengths[-log_interval:]))
-                print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
-
-        # validate after training
-        print("Post Validating...")
-        win_rate, draw_rate = validate(agents, names, idx1, idx2,val_episodes,timesteps[current_pairing_idx])
-        #if draw rate is too high or to low, we adjust the timesteps
-        if draw_rate > 0.10 and timesteps[current_pairing_idx] <= timestep_max : timesteps[current_pairing_idx] += 50
-        if draw_rate < 0.05: timesteps[current_pairing_idx] -= 25
-        # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
-        if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
-        else:              idx2_w = idx2    ; idx1_w = idx1 -1
-        win_rates[idx1][idx2_w].append(win_rate)
-        win_rates[idx2][idx1_w].append(1-win_rate)
-                
-        # Prepare next pair
-        print("\n") 
-        current_pairing += 1       
-    return losses
+    print("\n")
+    print("\n")
+    for i in range(num_agents):
+        last_row = np.array(win_rates[i])[:,-1]
+        print(names[i] + "overall win rate: ",round(last_row.mean(),4))
+        own = 0
+        for j in range(num_agents -1):
+            if i  == j: own = 1
+            print("\t",names[i+own],": ",round(last_row[i],4)) 
+    return
 
 
 if __name__ == '__main__':
@@ -410,41 +268,16 @@ if __name__ == '__main__':
     # Load agent config from files
     parser_main = argparse.ArgumentParser()
     parser_main.add_argument('--agents', nargs='+', help='json config files defining an agent', required=True)
-    parser_main.add_argument('--max_episodes_per_pair',help='how many episodes should be spend training before switching agents. The training only terminates manually with Strg+C.', default=1000000, type=int)
-    parser_main.add_argument('--log_interval', default=20, type=int)
-    parser_main.add_argument('--save_interval', help='when should a model be saved in terms of episodes_per_pair. Should be less or equal to episodes_per_pair.', default=5000, type=int)
-    parser_main.add_argument('--max_timesteps', default=350, type=int)
-    parser_main.add_argument('--iter_fit', default=10, type=int)
-    parser_main.add_argument('--replay_ratio', default=0., type=float)
-    parser_main.add_argument('--notes', default="",type=str)
-    parser_main.add_argument('--wandb', action="store_true")
     parser_main.add_argument('--visualize', action="store_true")
     parser_main.add_argument('-s','--sleep', default=0., type=float)
-    parser_main.add_argument('--simple_reward', action="store_true")
     parser_main.add_argument('--val_episodes', default=20, type=int)
 
 
     args_main = parser_main.parse_args()
-    # catch wrong save_interval
-    if args_main.max_episodes_per_pair > args_main.save_interval : print("!!!!!!!!! max_episodes_per_pair > save_interval !!!!!!!!!\nnothing gets saved!\n")
-    
+
     # Start
     print('self-play started with this configuration: ')
     print(args_main)
-
-    config_wandb = vars(args_main).copy()
-    # for key in ['notes','tags','wandb']:del config_wandb[key]
-    # del config_wandb
-    # if args["wandb_resume is not None :
-    if args_main.wandb: 
-        wandb_run = wandb.init(project="self-play",
-            config=config_wandb,
-            notes=" - ".join(args_main.agents),
-            # resume="must",
-            # id=args["wandb_resume
-            )
-    else: wandb_run = None
-
 
     config_agents = []
     agents = []
@@ -455,7 +288,7 @@ if __name__ == '__main__':
             config = json.load(f)
             config_agents.append(config) 
             # instanciate agents
-            agents.append(instanciate_agent(config,wandb_run))
+            agents.append(instanciate_agent(config,False))
 
     # print agent configs
     for i, agent_config in enumerate(config_agents):
@@ -489,11 +322,7 @@ if __name__ == '__main__':
         env = gym.make(env_name)
 
     try:
-
-        if args_main.wandb:
-            tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
-        else :tables = None
-        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables)
+        validation(agents, config_agents,names, env, args_main.val_episodes,args_main.visualize,args_main.sleep)
     finally:
         print("closing script")
         if wandb_run:

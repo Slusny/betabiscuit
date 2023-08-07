@@ -352,7 +352,7 @@ class HockeyEnv(gym.Env, EzPickle):
       self.mode = mode
 
     if self.mode == self.NORMAL:
-      self.max_timesteps = 250
+      self.max_timesteps = 350
       if one_starting is not None:
         self.one_starts = one_starting
       else:
