@@ -401,14 +401,14 @@ class TD3Agent(object):
         for i_episode in range(1, max_episodes+1):
             # validate
             if i_episode % self._config["validation_interval"] == 0 and timestep > fill_buffer_timesteps: self.validate()
-            ob, _info = self.env.reset()
-            # Incorporate  Acceleration
-            past_obs = ob.copy()
-            self.reset()
-            total_reward=0
-            added_transitions = 0
 
             while True:
+                ob, _info = self.env.reset()
+                # Incorporate  Acceleration
+                past_obs = ob.copy()
+                self.reset()
+                total_reward=0
+                added_transitions = 0
                 for t in range(max_timesteps):
                     timestep += 1
                     if self._config["derivative"]:  a = self.act(add_derivative(ob,past_obs))

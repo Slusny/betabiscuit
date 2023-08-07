@@ -207,18 +207,18 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         for i_episode in range(1, max_episodes_per_pair+1):
             # validate
     #        if i_episode % self._config["validation_interval"] == 0 and timestep > fill_buffer_timesteps: self.validate()
-            ob1, _info = env.reset()
-            ob2 = env.obs_agent_two()
-            # Incorporate  Acceleration
-            past_obs1 = ob1.copy()
-            past_obs2 = ob2.copy()
-            total_reward=0
-            added_transitions = 0
 
         #     buffer_size = 1000000
         #     filled_buffer_ratio = 100
         #     fill_buffer_timesteps = buffer_size // filled_buffer_ratio
             while True:
+                ob1, _info = env.reset()
+                ob2 = env.obs_agent_two()
+                # Incorporate  Acceleration
+                past_obs1 = ob1.copy()
+                past_obs2 = ob2.copy()
+                total_reward=0
+                added_transitions = 0
                 for t in range(max_timesteps):
                     timestep += 1
                     
@@ -245,8 +245,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     ob2=ob_new2
 
                     if done or trunc: break
-                if not args_main.visualize:
-                    break
+                if not args_main.visualize: break
                 # # To fill buffer once before training
                 # if(timestep > fill_buffer_timesteps and not args_main.visualize):
                 #     break

@@ -455,11 +455,11 @@ class DQNAgent(object):
             #     ac_space = env.action_space
             
             # self.reset()
-            total_reward = 0
-            ob, _info = self.env.reset()
-            past_obs = ob.copy()
-            added_transitions = 0
             while True:
+                total_reward = 0
+                ob, _info = self.env.reset()
+                past_obs = ob.copy()
+                added_transitions = 0
                 for t in range(max_timesteps):
                     timestep += 1
                     done = False
