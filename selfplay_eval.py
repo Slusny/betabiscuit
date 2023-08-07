@@ -258,11 +258,11 @@ def validation(agents, config_agents, names, env,val_episodes,visualize,sleep):
     print("\n")
     for i in range(num_agents):
         last_row = np.array(win_rates[i])[:,-1]
-        print(names[i] + "overall win rate: ",round(last_row.mean(),4))
+        print(names[i] + " overall win rate: ",round(last_row.mean(),4))
         own = 0
         for j in range(num_agents -1):
             if i  == j: own = 1
-            print("\t",names[i+own],": ",round(last_row[i],4)) 
+            print("\t",names[j+own],": ",round(last_row[i],4)) 
     return
 
 
