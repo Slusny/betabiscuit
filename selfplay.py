@@ -237,6 +237,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
     pairings = list(itertools.combinations(range(num_agents), 2))
     current_pairing = 0
+    wandb_steps = [0]*len(pairings) # adjust step for plotting in wandb logging
 
     # Set up wandb logging metrics
     if args_main.wandb:
@@ -255,7 +256,6 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         # go orderly through all combinations of agent pairings
         current_pairing_idx = current_pairing % len(pairings)
         idx1, idx2 = pairings[current_pairing_idx]
-        wandb_steps = [0]*len(pairings) # adjust step for plotting in wandb logging
         timesteps = [max_timesteps]*len(pairings)
 
         
@@ -310,12 +310,12 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             while True: # continous loop for visualization
                 ob1, _info = env.reset()
                 ob2 = env.obs_agent_two()
-                # Incorporate  Acceleration
+                # Incorporate  Acceleration - keep one past observation for derivative of velocities
                 past_obs1 = ob1.copy()
                 past_obs2 = ob2.copy()
                 total_reward=0
                 added_transitions = 0
-                for t in range(max_timesteps):
+                for t in range(timesteps[current_pairing_idx]):
                     
                     a1, a1_s = act(ob1,past_obs1,agents,config_agents,idx1)
                     a2, a2_s = act(ob2,past_obs2,agents,config_agents,idx2)
@@ -358,7 +358,6 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
             l1 = agents[idx1].train_innerloop(iter_fit)
             l2 = agents[idx2].train_innerloop(iter_fit)
-            # losses.extend(l)
 
             rewards.append(total_reward)
             lengths.append(t)
@@ -370,7 +369,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                            names[idx1] +"-"+ names[idx2] +"_reward": total_reward, names[idx1] +"-"+ names[idx2] +"length":t,
                             names[idx1] +"-"+ names[idx2]+"_step":wandb_steps[current_pairing_idx] })
 
-            # save every 500 episodes
+            # save models
             if i_episode % save_interval == 0:
                 agents[idx1].save_agent_wandb(i_episode, rewards, lengths, losses,"sp-"+names[idx1])
                 agents[idx2].save_agent_wandb(i_episode, rewards, lengths, losses,"sp-"+names[idx2])
@@ -404,9 +403,9 @@ if __name__ == '__main__':
     # Load agent config from files
     parser_main = argparse.ArgumentParser()
     parser_main.add_argument('--agents', nargs='+', help='json config files defining an agent', required=True)
-    parser_main.add_argument('--max_episodes_per_pair', default=1000000, type=int)
+    parser_main.add_argument('--max_episodes_per_pair',help='how many episodes should be spend training before switching agents. The training only terminates manually with Strg+C.', default=1000000, type=int)
     parser_main.add_argument('--log_interval', default=20, type=int)
-    parser_main.add_argument('--save_interval', default=5000, type=int)
+    parser_main.add_argument('--save_interval', help='when should a model be saved in terms of episodes_per_pair. Should be less or equal to episodes_per_pair.', default=5000, type=int)
     parser_main.add_argument('--max_timesteps', default=800, type=int)
     parser_main.add_argument('--iter_fit', default=10, type=int)
     parser_main.add_argument('--replay_ratio', default=0., type=float)
