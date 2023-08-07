@@ -220,7 +220,7 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
     draw_rate = np.sum(win_rate == 0) / win_rate.size
     win_rate = (win_rate + 1 ) /2
     win_rate = win_rate.mean().round(3)
-    print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw_rate)
+    print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw_rate, " max length: ",np.array(length).max(), " avg length: ",np.array(length).mean())
     return win_rate, draw_rate
 
     print("\t avg length: ",np.array(length).mean(), ", avg reward: ",np.array(rewards).mean())
@@ -284,7 +284,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
         # inital validation:    
         print("Pre Validating...")
-        win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,max_timesteps)
+        win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,timesteps[current_pairing_idx])
         #if draw rate is too high or to low, we adjust the timesteps to drive episodes to conclusion
         if draw_rate > 0.15: timesteps[current_pairing_idx] += 100
         if draw_rate < 0.05: timesteps[current_pairing_idx] -= 10
@@ -388,7 +388,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
         # validate after training
         print("Post Validating...")
-        win_rate, draw_rate = validate(agents, names, idx1, idx2,val_episodes,max_timesteps)
+        win_rate, draw_rate = validate(agents, names, idx1, idx2,val_episodes,timesteps[current_pairing_idx])
         #if draw rate is too high or to low, we adjust the timesteps
         if draw_rate > 0.15: timesteps[current_pairing_idx] += 100
         if draw_rate < 0.05: timesteps[current_pairing_idx] -= 10
