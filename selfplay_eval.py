@@ -287,7 +287,10 @@ if __name__ == '__main__':
     agents = []
     names = []
     for i, file in enumerate(args_main.agents):
-        names.append(Path(file).stem)
+        string = Path(file).stem 
+        if args_main.bootstrap_overwrite :
+            string + "_" + args_main.bootstrap_overwrite[i]
+        names.append(string)
         with open(file, 'r') as f:
             config = json.load(f)
             config_agents.append(config) 
