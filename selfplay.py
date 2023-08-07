@@ -41,8 +41,11 @@ def discrete_to_continous_action(discrete_action):
       action_cont.append(discrete_action == 7)
     return action_cont
 
-def instanciate_agent(args,wandb_run):
+def instanciate_agent(args,wandb_run,bootstrap_overwrite=None):
     
+    if bootstrap_overwrite is not None:
+        args["bootstrap"] = bootstrap_overwrite
+
     # creating environment
     env_name = args["env_name"]
     if env_name == "lunarlander":
@@ -425,7 +428,8 @@ if __name__ == '__main__':
     parser_main.add_argument('--simple_reward', action="store_true")
     parser_main.add_argument('--val_episodes', default=20, type=int)
     parser_main.add_argument('-g','--all_against_one', default=False, type=str)
-
+    parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', defaul=False)
+    
 
     args_main = parser_main.parse_args()
     # catch wrong save_interval
@@ -452,13 +456,18 @@ if __name__ == '__main__':
     config_agents = []
     agents = []
     names = []
-    for file in args_main.agents:
+    for i, file in enumerate(args_main.agents):
         names.append(Path(file).stem)
         with open(file, 'r') as f:
             config = json.load(f)
             config_agents.append(config) 
             # instanciate agents
-            agents.append(instanciate_agent(config,wandb_run))
+            if (args_main.bootstrap_overwrite):
+                if args_main.bootstrap_overwrite[i] == "None":
+                    agents.append(instanciate_agent(config,wandb_run))
+                instanciate_agent(config,False,args_main.bootstrap_overwrite[i])
+            else:
+                agents.append(instanciate_agent(config,wandb_run))
 
     # All against one
         if args_main.all_against_one:
