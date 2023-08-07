@@ -224,13 +224,6 @@ def validate(agents, idx1, idx2,val_episodes,max_timesteps):
     if self.wandb.run is not None:
         wandb.log({"validation_length": np.array(length).mean(), "validation_reward": np.array(rewards).mean()})
 
-
-
-wandb.define_metric("custom_step")
-# define which metrics will be plotted against it
-wandb.define_metric(
-  "validation_loss", step_metric="custom_step")
-
 def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max_timesteps, log_interval,save_interval,val_episodes,tables):
     
     num_agents = len(agents)
