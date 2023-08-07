@@ -40,7 +40,7 @@
   "hidden_sizes_critic": "[300,300]",
   "use_derivative": false,
   "per": true,
-  "bootstrap": "betabiscuit/hockey - td3/dulcet-leaf-12_model:v270",
+  "bootstrap": "betabiscuit/hockey - td3/dulcet-leaf-12_model:v305",
   "hil": false,
   "bc": true,
   "bc_lambda": 2.0,
