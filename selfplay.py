@@ -218,11 +218,11 @@ def validate(agents, idx1, idx2,val_episodes,max_timesteps):
         rewards.append(total_reward)
         length.append(t)
     win_rate = np.array(rewards)
-    draw = np.sum(win_rate == 0) / win_rate.size
+    draw_rate = np.sum(win_rate == 0) / win_rate.size
     win_rate = (win_rate + 1 ) /2
     win_rate = win_rate.mean().round(3)
-    print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw)
-    return win_rate
+    print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw_rate)
+    return win_rate, draw_rate
 
     print("\t avg length: ",np.array(length).mean(), ", avg reward: ",np.array(rewards).mean())
     if self.wandb.run is not None:
@@ -255,19 +255,24 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         idx1, idx2 = pairings[current_pairing % len(pairings)]
         current_pairing += 1
         wandb_steps = [0]*len(pairings)
+        timesteps = [max_timesteps]*len(pairings)
+
         
         # if args_main.visualize: 
         print(names[idx1]," vs ",names[idx2])
         
         # inital validation:
-        win_rate = validate(agents, idx1, idx2,val_episodes,max_timesteps)
+        win_rate, draw_rate = validate(agents, idx1, idx2,val_episodes,max_timesteps)
+        #if draw rate is too high or to low, we adjust the timesteps
+        if draw_rate > 0.15: timesteps[current_pairing] = timesteps[current_pairing] + 100
+        if draw_rate < 0.05: timesteps[current_pairing] = timesteps[current_pairing] - 50
         win_rates[idx1][idx2].append(win_rate)
         win_rates[idx2][idx1].append(1-win_rate)
         if current_pairing % len(pairings) == 1 and current_pairing != 1:
             if args_main.wandb:
                 log_dict = dict()
                 for i,table in enumerate(tables):
-                    table.add(win_rates[i][:i]+win_rates[i][i+1:])
+                    table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
                     log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
                 wandb.log({log_dict})
 
@@ -381,7 +386,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
 
         # validate after training
-        win_rate = validate(agents, idx1, idx2,val_episodes,max_timesteps)
+        win_rate, draw_rate = validate(agents, idx1, idx2,val_episodes,max_timesteps)
+        #if draw rate is too high or to low, we adjust the timesteps
+        if draw_rate > 0.15: timesteps[current_pairing] = timesteps[current_pairing] + 100
+        if draw_rate < 0.05: timesteps[current_pairing] = timesteps[current_pairing] - 50
         win_rates[idx1][idx2].append(win_rate)
         win_rates[idx2][idx1].append(1-win_rate)
         if current_pairing % len(pairings) == 1 and current_pairing != 1:
@@ -416,6 +424,9 @@ if __name__ == '__main__':
 
 
     args_main = parser_main.parse_args()
+
+    print('self-play started with this configuration: ')
+    print(args_main)
 
     config_wandb = vars(args_main).copy()
     # for key in ['notes','tags','wandb']:del config_wandb[key]
