@@ -4,7 +4,7 @@ import gymnasium as gym
 import sys
 from pathlib import Path
 # import laserhockey.hockey_env as 
-import laserhockey as h_env
+import hockey_env as h_env
 from importlib import reload
 import wandb
 import torch
@@ -300,16 +300,18 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
                     ob_new2 = env.obs_agent_two()
                     if args_main.simple_reward:
-                        reward = env._compute_reward()
+                        reward1 = env._compute_reward()
+                        reward2 = - reward1
                     else: 
-                        reward = env._compute_reward()
+                        reward1 = reward
+                        reward2 = env.get_reward_agent_two(env.get_info_agent_two())
                     # if(self._config["dense_reward"]): 
                     #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
                     total_reward+= reward
                     
                     if not args_main.visualize:
-                        store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward,ob_new1,done)
-                        store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,-reward,ob_new2,done)
+                        store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward1,ob_new1,done)
+                        store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,reward2,ob_new2,done)
                     else:
                         env.render()
                         time.sleep(args_main.sleep)
@@ -345,7 +347,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
             # logging
             if args_main.wandb: 
-                wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,names[idx1] +"-"+ names[idx2] +"_reward": total_reward, "length":t })
+                wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,names[idx1] +"-"+ names[idx2] +"_reward": total_reward, names[idx1] +"-"+ names[idx2] +"length":t })
 
             # save every 500 episodes
             if i_episode % save_interval == 0:
