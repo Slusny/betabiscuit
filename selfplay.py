@@ -475,6 +475,7 @@ if __name__ == '__main__':
             with open(file, 'r') as f:
                 config = json.load(f)
                 config_agents.append(config) 
+                agents.append(instanciate_agent(config,wandb_run)) # missing bootstrap
             loner_idx = len(names)-1
             all_agains_one = True
             print("all against one !")
