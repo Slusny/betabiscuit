@@ -269,7 +269,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     log_dict = dict()
                     for i,table in enumerate(tables):
                         last_row = np.array(win_rates[i])[:,-l]
-                        table.add_data(last_row)
+                        table.add_data(*last_row)
                         log_dict[names[i]+"win_rate"] = round(last_row.mean(),4)
                     wandb.log({log_dict})
                     # old code
@@ -306,7 +306,6 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             else :                                      agents[idx].store_transition((obs,action,reward,next_obs,done))
 
         # training loop
-    #        fill_buffer_timesteps = self._config["buffer_size"] // self._config["filled_buffer_ratio"]
         for i_episode in range(1, max_episodes_per_pair+1):
 
             while True: # continous loop for visualization
@@ -325,6 +324,8 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
                     (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
                     ob_new2 = env.obs_agent_two()
+                    
+                    #
                     if args_main.simple_reward:
                         reward1 = env._compute_reward()
                         reward2 = - reward1
