@@ -40,8 +40,11 @@ def discrete_to_continous_action(discrete_action):
       action_cont.append(discrete_action == 7)
     return action_cont
 
-def instanciate_agent(args,wandb_run):
+def instanciate_agent(args,wandb_run,bootstrap_overwrite):
     
+    if bootstrap_overwrite is not None:
+        args["bootstrap"] = bootstrap_overwrite
+
     # creating environment
     env_name = args["env_name"]
     if env_name == "lunarlander":
@@ -267,10 +270,11 @@ if __name__ == '__main__':
 
     # Load agent config from files
     parser_main = argparse.ArgumentParser()
-    parser_main.add_argument('--agents', nargs='+', help='json config files defining an agent', required=True)
-    parser_main.add_argument('--visualize', action="store_true")
+    parser_main.add_argument('a','--agents', nargs='+', help='json config files defining an agent', required=True)
+    parser_main.add_argument('b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', required=True)
+    parser_main.add_argument('v','--visualize', action="store_true")
     parser_main.add_argument('-s','--sleep', default=0., type=float)
-    parser_main.add_argument('--val_episodes', default=20, type=int)
+    parser_main.add_argument('--val_episodes', default=50, type=int)
 
 
     args_main = parser_main.parse_args()
@@ -282,13 +286,13 @@ if __name__ == '__main__':
     config_agents = []
     agents = []
     names = []
-    for file in args_main.agents:
+    for i, file in enumerate(args_main.agents):
         names.append(Path(file).stem)
         with open(file, 'r') as f:
             config = json.load(f)
             config_agents.append(config) 
             # instanciate agents
-            agents.append(instanciate_agent(config,False))
+            agents.append(instanciate_agent(config,False,args_main.bootstrap_overwrite[i]))
 
     # print agent configs
     for i, agent_config in enumerate(config_agents):
@@ -321,19 +325,5 @@ if __name__ == '__main__':
     else:
         env = gym.make(env_name)
 
-    try:
-        validation(agents, config_agents,names, env, args_main.val_episodes,args_main.visualize,args_main.sleep)
-    finally:
-        print("closing script")
-        if wandb_run:
-            log_dict = dict()
-            for i,table in enumerate(tables):
-                log_dict[names[i]] = table
-            wandb_run.log(log_dict)
-           
-            # wandb.log({"my_custom_id" : wandb.plot.line_series(
-            #                     xs=[0, 1, 2, 3, 4], 
-            #                     ys=[[10, 20, 30, 40, 50], [0.5, 11, 72, 3, 41]],
-            #                     keys=["metric Y", "metric Z"],
-            #                     title="Two Random Metrics",
-            #                     xname="x units")})
+    validation(agents, config_agents,names, env, args_main.val_episodes,args_main.visualize,args_main.sleep)
+   
