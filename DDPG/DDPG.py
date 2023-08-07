@@ -9,8 +9,8 @@ import optparse
 import pickle
 import os
 import wandb
-import memory as mem
-from feedforward import Feedforward
+import DDPG.memory_DDPG as mem
+from DDPG.feedforward_DDPG import Feedforward
 sys.path.append('..')
 from utility import save_checkpoint
 from cpprb import PrioritizedReplayBuffer, ReplayBuffer
