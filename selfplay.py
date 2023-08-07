@@ -8,6 +8,7 @@ from importlib import reload
 import wandb
 import torch
 import numpy as np
+import time
 import random
 
    
@@ -196,6 +197,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     # select two agents:
     while True:
         idx1, idx2 = random.sample(range(len(agents)), 2)
+        if args_main.visualize: print(names[idx1]," vs ",names[idx2])
         # idx1, idx2 = 0,1
 
         # to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
@@ -219,7 +221,6 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             if config_agents[idx]["use_derivative"]:    agents[idx].store_transition((add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done))
             else :                                      agents[idx].store_transition((obs,action,reward,next_obs,done))
 
-
         # training loop
     #        fill_buffer_timesteps = self._config["buffer_size"] // self._config["filled_buffer_ratio"]
         for i_episode in range(1, max_episodes_per_pair+1):
@@ -233,9 +234,9 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             total_reward=0
             added_transitions = 0
 
-            buffer_size = 1000000
-            filled_buffer_ratio = 100
-            fill_buffer_timesteps = buffer_size // filled_buffer_ratio
+        #     buffer_size = 1000000
+        #     filled_buffer_ratio = 100
+        #     fill_buffer_timesteps = buffer_size // filled_buffer_ratio
             while True:
                 for t in range(max_timesteps):
                     timestep += 1
@@ -249,8 +250,12 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
                     total_reward+= reward
                     
-                    store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward,ob_new1,done)
-                    store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,-reward,ob_new2,done)
+                    if not args_main["visualize"]:
+                        store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward,ob_new1,done)
+                        store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,-reward,ob_new2,done)
+                    else:
+                        env.render()
+                        time.sleep(args_main["sleep"])
                     
                     added_transitions += 1
                     past_obs1 = ob1
@@ -259,13 +264,14 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     ob2=ob_new2
 
                     if done or trunc: break
-
-                # To fill buffer once before training
-                if(timestep > fill_buffer_timesteps):
+                if not args_main["visualize"]:
                     break
-                elif timestep == fill_buffer_timesteps:                  
-                    print("Buffer filled")
-                    added_transitions = 1     
+                # # To fill buffer once before training
+                # if(timestep > fill_buffer_timesteps and not args_main["visualize"]):
+                #     break
+                # elif timestep == fill_buffer_timesteps:                  
+                #     print("Buffer filled")
+                #     added_transitions = 1     
 
             if(args_main.replay_ratio != 0):
                 iter_fit = int(added_transitions * args_main.replay_ratio) + 1  
@@ -310,6 +316,9 @@ if __name__ == '__main__':
     parser_main.add_argument('--replay_ratio', default=0., type=float)
     parser_main.add_argument('--notes', default="",type=str)
     parser_main.add_argument('--wandb', action="store_true")
+    parser_main.add_argument('--visualize', action="store_true")
+    parser_main.add_argument('-s','--sleep', default=0., type=float)
+
 
     args_main = parser_main.parse_args()
 
