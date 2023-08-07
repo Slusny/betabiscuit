@@ -37,7 +37,7 @@ def discrete_to_continous_action(discrete_action):
       action_cont.append(discrete_action == 7)
     return action_cont
 
-def instanciate_agent(args):
+def instanciate_agent(args,wandb_run):
     
     # creating environment
     env_name = args["env_name"]
@@ -72,25 +72,6 @@ def instanciate_agent(args):
             derivative_indices = []
     else:
         env = gym.make(env_name)
-
-    #weights and biases
-    if args["wandb"]   : 
-        config_wandb = args.copy()
-        for key in ['notes','tags','wandb']:del config_wandb[key]
-        del config_wandb
-        if args["wandb_resume"] is not None:
-            wandb_run = wandb.init(project=env_name + " - " +args["algo"], 
-                config=args,
-                notes="Self-Play",
-                tags="S",
-                resume="must",
-                id=args["wandb_resume"])
-        else:
-            wandb_run = wandb.init(project=env_name + " - " +args["algo"], 
-                config=args,
-                notes="Self-Play",
-                tags="S")
-    else : wandb_run = None
 
     #create save path
     Path(args["savepath"]).mkdir(parents=True, exist_ok=True)
@@ -250,12 +231,12 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
                     total_reward+= reward
                     
-                    if not args_main["visualize"]:
+                    if not args_main.visualize:
                         store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward,ob_new1,done)
                         store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,-reward,ob_new2,done)
                     else:
                         env.render()
-                        time.sleep(args_main["sleep"])
+                        time.sleep(args_main.sleep)
                     
                     added_transitions += 1
                     past_obs1 = ob1
@@ -264,10 +245,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     ob2=ob_new2
 
                     if done or trunc: break
-                if not args_main["visualize"]:
+                if not args_main.visualize:
                     break
                 # # To fill buffer once before training
-                # if(timestep > fill_buffer_timesteps and not args_main["visualize"]):
+                # if(timestep > fill_buffer_timesteps and not args_main.visualize):
                 #     break
                 # elif timestep == fill_buffer_timesteps:                  
                 #     print("Buffer filled")
@@ -344,7 +325,7 @@ if __name__ == '__main__':
             config = json.load(f)
             config_agents.append(config) 
             # instanciate agents
-            agents.append(instanciate_agent(config))
+            agents.append(instanciate_agent(config,wandb_run))
 
     # print agent configs
     for i, agent_config in enumerate(config_agents):
