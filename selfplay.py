@@ -271,7 +271,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                         last_row = np.array(win_rates[i])[:,-l]
                         table.add_data(*last_row)
                         log_dict[names[i]+"win_rate"] = round(last_row.mean(),4)
-                    wandb.log({log_dict})
+                    wandb.log(log_dict)
                     # old code
                     # table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
                     # log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
@@ -292,7 +292,6 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         rewards = []
         lengths = []
         losses = []
-        timestep = 0
 
         def act(obs,pastobs,agents,config_agents,idx):
             if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs))
@@ -317,7 +316,6 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                 total_reward=0
                 added_transitions = 0
                 for t in range(max_timesteps):
-                    timestep += 1
                     
                     a1, a1_s = act(ob1,past_obs1,agents,config_agents,idx1)
                     a2, a2_s = act(ob2,past_obs2,agents,config_agents,idx2)
@@ -325,13 +323,16 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
                     ob_new2 = env.obs_agent_two()
                     
-                    #
+                    # The simple reward only returns 10 and -10 for goals
                     if args_main.simple_reward:
                         reward1 = env._compute_reward()
                         reward2 = - reward1
+                    # The standard reward also considers closeness to puck
                     else: 
                         reward1 = reward
                         reward2 = env.get_reward_agent_two(env.get_info_agent_two())
+
+                    # The dense reward also considers the direction of the puck - not used anymore
                     # if(self._config["dense_reward"]): 
                     #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
                     total_reward+= reward
