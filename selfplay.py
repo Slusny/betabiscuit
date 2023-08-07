@@ -260,6 +260,20 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         # if args_main.visualize: 
         print(names[idx1]," vs ",names[idx2])
         
+        # log the last 2 validations (pre and post) to wandb at the start of a new pairing cycle
+        if current_pairing_idx == 0 and current_pairing != 0:
+            if args_main.wandb:
+                for l in [2,1]:
+                    log_dict = dict()
+                    for i,table in enumerate(tables):
+                        last_row = np.delete(np.array(win_rates[i])[:,-l],i)
+                        table.add_data(last_row)
+                        log_dict[names[i]+"win_rate"] = last_row.mean()
+                    wandb.log({log_dict})
+                    # old code
+                    # table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
+                    # log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
+
         # inital validation:    
         print("Pre Validating...")
         win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,max_timesteps)
@@ -271,17 +285,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         else:              idx2_w = idx2    ; idx1_w = idx1 -1
         win_rates[idx1][idx2_w].append(win_rate)
         win_rates[idx2][idx1_w].append(1-win_rate)
-        if current_pairing_idx == 0 and current_pairing != 0:
-            if args_main.wandb:
-                log_dict = dict()
-                for i,table in enumerate(tables):
-                    last_row = np.delete(np.array(win_rates[i])[:,-1],i)
-                    table.add(last_row)
-                    log_dict[names[i]+"win_rate"] = last_row.mean()
-                wandb.log({log_dict})
-
-
-
+        
         # to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
             # logging variables
         rewards = []
@@ -385,17 +389,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         else:              idx2_w = idx2    ; idx1_w = idx1 -1
         win_rates[idx1][idx2_w].append(win_rate)
         win_rates[idx2][idx1_w].append(1-win_rate)
-        if current_pairing_idx == 0 and current_pairing != 0:
-            if args_main.wandb:
-                log_dict = dict()
-                for i,table in enumerate(tables):
-                    last_row = np.delete(np.array(win_rates[i])[:,-1],i)
-                    table.add(last_row)
-                    log_dict[names[i]+"win_rate"] = last_row.mean()
-                    # table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
-                    # log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
-                wandb.log({log_dict})
-        
+                
         # Prepare next pair
         print("\n") 
         current_pairing += 1       
