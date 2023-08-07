@@ -232,7 +232,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         for j in range(num_agents):
             win_rates[i][j].pop()
 
-    pairings = list(itertools.combinations(num_agents, 2))
+    pairings = list(itertools.combinations(range(num_agents), 2))
     current_pairing = 0
 
     # Set up wandb logging metrics
@@ -491,8 +491,10 @@ if __name__ == '__main__':
     finally:
         print("closing script")
         if wandb_run:
+            log_dict = dict()
             for i,table in enumerate(tables):
-                wandb_run.log(names[i],table)
+                log_dict[names[i]] = table
+            wandb_run.log(log_dict)
            
             # wandb.log({"my_custom_id" : wandb.plot.line_series(
             #                     xs=[0, 1, 2, 3, 4], 
