@@ -249,11 +249,13 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             wandb.define_metric(names[idx1] +"-"+ names[idx2] +"length", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
    
     while True: # stop manually
-        # randomly get pairing
+        # randomly get pairing of agents
         # idx1, idx2 = random.sample(range(len(agents)), 2)
+
+        # go orderly through all combinations of agent pairings
         current_pairing_idx = current_pairing % len(pairings)
         idx1, idx2 = pairings[current_pairing_idx]
-        wandb_steps = [0]*len(pairings)
+        wandb_steps = [0]*len(pairings) # adjust step for plotting in wandb logging
         timesteps = [max_timesteps]*len(pairings)
 
         
@@ -266,9 +268,9 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                 for l in [2,1]:
                     log_dict = dict()
                     for i,table in enumerate(tables):
-                        last_row = np.delete(np.array(win_rates[i])[:,-l],i)
+                        last_row = np.array(win_rates[i])[:,-l]
                         table.add_data(last_row)
-                        log_dict[names[i]+"win_rate"] = last_row.mean()
+                        log_dict[names[i]+"win_rate"] = round(last_row.mean(),4)
                     wandb.log({log_dict})
                     # old code
                     # table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
@@ -277,7 +279,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         # inital validation:    
         print("Pre Validating...")
         win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,max_timesteps)
-        #if draw rate is too high or to low, we adjust the timesteps
+        #if draw rate is too high or to low, we adjust the timesteps to drive episodes to conclusion
         if draw_rate > 0.15: timesteps[current_pairing_idx] += 100
         if draw_rate < 0.05: timesteps[current_pairing_idx] -= 10
         # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
@@ -286,8 +288,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         win_rates[idx1][idx2_w].append(win_rate)
         win_rates[idx2][idx1_w].append(1-win_rate)
         
-        # to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
-            # logging variables
+        # logging variables
         rewards = []
         lengths = []
         losses = []
