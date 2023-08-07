@@ -424,7 +424,7 @@ if __name__ == '__main__':
     parser_main.add_argument('-s','--sleep', default=0., type=float)
     parser_main.add_argument('--simple_reward', action="store_true")
     parser_main.add_argument('--val_episodes', default=20, type=int)
-    parser_main.add_argument('g','--all_against_one', default=False, type=str)
+    parser_main.add_argument('-g','--all_against_one', default=False, type=str)
 
 
     args_main = parser_main.parse_args()
