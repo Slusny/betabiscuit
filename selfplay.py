@@ -472,6 +472,9 @@ if __name__ == '__main__':
     # All against one
         if args_main.all_against_one:
             names.append(Path(args_main.all_against_one).stem )
+            with open(file, 'r') as f:
+                config = json.load(f)
+                config_agents.append(config) 
             loner_idx = len(names)-1
             all_agains_one = True
             print("all against one !")
