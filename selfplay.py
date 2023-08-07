@@ -238,6 +238,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     pairings = list(itertools.combinations(range(num_agents), 2))
     current_pairing = 0
     wandb_steps = [0]*len(pairings) # adjust step for plotting in wandb logging
+    win_rate_steps = [0]*len(names) # adjust step for plotting in wandb logging
 
     # Set up wandb logging metrics
     if args_main.wandb:
@@ -248,7 +249,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             wandb.define_metric(names[idx2]+"_loss", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
             wandb.define_metric(names[idx1] +"-"+ names[idx2] +"_reward", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
             wandb.define_metric(names[idx1] +"-"+ names[idx2] +"length", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
-   
+        for i,name in enumerate(names):
+            wandb.define_metric(name+"win_rate_step")
+            wandb.define_metric(name+"win_rate", step_metric=name+"win_rate_step")
+
     while True: # stop manually
         # randomly get pairing of agents
         # idx1, idx2 = random.sample(range(len(agents)), 2)
@@ -269,8 +273,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     log_dict = dict()
                     for i,table in enumerate(tables):
                         last_row = np.array(win_rates[i])[:,-l]
+                        win_rate_steps[i] += 1
                         table.add_data(*last_row)
                         log_dict[names[i]+"win_rate"] = round(last_row.mean(),4)
+                        log_dict[names[i]+"win_rate_step"] = win_rate_steps[i]
                     wandb.log(log_dict)
                     # old code
                     # table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
