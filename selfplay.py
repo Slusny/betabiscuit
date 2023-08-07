@@ -178,7 +178,8 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     # select two agents:
     while True:
         idx1, idx2 = random.sample(range(len(agents)), 2)
-        if args_main.visualize: print(names[idx1]," vs ",names[idx2])
+        # if args_main.visualize: 
+        print(names[idx1]," vs ",names[idx2])
         # idx1, idx2 = 0,1
 
         # to_torch = lambda x: torch.from_numpy(x.astype(np.float32)).to(self.device)
