@@ -181,15 +181,14 @@ def add_derivative(obs,pastobs):
     return np.append(obs,(obs-pastobs)[derivative_indices])
         
 
-def validate(agents, idx1, idx2,val_episodes,max_timesteps):
+def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
     def act_val(obs,pastobs,agents,config_agents,idx):
         if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs),eps=0.)
         else :                                      a_s = agents[idx].act(obs,eps=0.)
         if config_agents[idx]["algo"] == "dqn":     a = discrete_to_continous_action(int(a_s))
         else:                                       a = a_s
         return a, a_s
-    
-    print("Validating...")
+
     length = []
     rewards = []
     for i_episode in range(1, val_episodes+1):
@@ -252,8 +251,8 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     while True: # stop manually
         # randomly get pairing
         # idx1, idx2 = random.sample(range(len(agents)), 2)
-        idx1, idx2 = pairings[current_pairing % len(pairings)]
-        current_pairing += 1
+        current_pairing_idx = current_pairing % len(pairings)
+        idx1, idx2 = pairings[current_pairing_idx]
         wandb_steps = [0]*len(pairings)
         timesteps = [max_timesteps]*len(pairings)
 
@@ -261,14 +260,15 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         # if args_main.visualize: 
         print(names[idx1]," vs ",names[idx2])
         
-        # inital validation:
-        win_rate, draw_rate = validate(agents, idx1, idx2,val_episodes,max_timesteps)
+        # inital validation:    
+        print(" Pre Validating...")
+        win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,max_timesteps)
         #if draw rate is too high or to low, we adjust the timesteps
-        if draw_rate > 0.15: timesteps[current_pairing] = timesteps[current_pairing] + 100
-        if draw_rate < 0.05: timesteps[current_pairing] = timesteps[current_pairing] - 50
+        if draw_rate > 0.15: timesteps[current_pairing_idx] += 100
+        if draw_rate < 0.05: timesteps[current_pairing_idx] -= 50
         win_rates[idx1][idx2].append(win_rate)
         win_rates[idx2][idx1].append(1-win_rate)
-        if current_pairing % len(pairings) == 1 and current_pairing != 1:
+        if current_pairing_idx == 0 and current_pairing != 0:
             if args_main.wandb:
                 log_dict = dict()
                 for i,table in enumerate(tables):
@@ -299,13 +299,8 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         # training loop
     #        fill_buffer_timesteps = self._config["buffer_size"] // self._config["filled_buffer_ratio"]
         for i_episode in range(1, max_episodes_per_pair+1):
-            # validate
-    #        if i_episode % self._config["validation_interval"] == 0 and timestep > fill_buffer_timesteps: self.validate()
 
-        #     buffer_size = 1000000
-        #     filled_buffer_ratio = 100
-        #     fill_buffer_timesteps = buffer_size // filled_buffer_ratio
-            while True:
+            while True: # continous loop for visualization
                 ob1, _info = env.reset()
                 ob2 = env.obs_agent_two()
                 # Incorporate  Acceleration
@@ -336,9 +331,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                         store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,reward2,ob_new2,done)
                     else:
                         env.render()
-                        time.sleep(args_main.sleep)
-                        # print(reward, ", real reward: ",env._compute_reward()) #," agent 2: ",env.get_reward_agent_two(env.get_info_agent_two()),
-                        
+                        time.sleep(args_main.sleep)                        
                     
                     added_transitions += 1
                     past_obs1 = ob1
@@ -346,18 +339,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     ob1=ob_new1
                     ob2=ob_new2
                 
-                    if done or trunc: 
-                        # if re
-                        break
+                    if done or trunc: break
                 if not args_main.visualize: break
-                # # To fill buffer once before training
-                # if(timestep > fill_buffer_timesteps and not args_main.visualize):
-                #     break
-                # elif timestep == fill_buffer_timesteps:                  
-                #     print("Buffer filled")
-                #     added_transitions = 1     
 
-            if(args_main.replay_ratio != 0):
+            if(args_main.replay_ratio != 0.):
                 iter_fit = int(added_transitions * args_main.replay_ratio) + 1  
 
             l1 = agents[idx1].train_innerloop(iter_fit)
@@ -369,10 +354,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
             # logging
             if args_main.wandb: 
-                wandb_steps[current_pairing % len(pairings)] += 1
+                wandb_steps[current_pairing_idx] += 1
                 wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,
                            names[idx1] +"-"+ names[idx2] +"_reward": total_reward, names[idx1] +"-"+ names[idx2] +"length":t,
-                            names[idx1] +"-"+ names[idx2]+"_step":wandb_steps[current_pairing % len(pairings)] })
+                            names[idx1] +"-"+ names[idx2]+"_step":wandb_steps[current_pairing_idx] })
 
             # save every 500 episodes
             if i_episode % save_interval == 0:
@@ -386,21 +371,24 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                 print('Episode {} \t avg length: {} \t reward: {}'.format(i_episode, avg_length, avg_reward))
 
         # validate after training
-        win_rate, draw_rate = validate(agents, idx1, idx2,val_episodes,max_timesteps)
+        print("Post Validating...")
+        win_rate, draw_rate = validate(agents, names, idx1, idx2,val_episodes,max_timesteps)
         #if draw rate is too high or to low, we adjust the timesteps
-        if draw_rate > 0.15: timesteps[current_pairing] = timesteps[current_pairing] + 100
-        if draw_rate < 0.05: timesteps[current_pairing] = timesteps[current_pairing] - 50
+        if draw_rate > 0.15: timesteps[current_pairing_idx] += 100
+        if draw_rate < 0.05: timesteps[current_pairing_idx] -= 50
         win_rates[idx1][idx2].append(win_rate)
         win_rates[idx2][idx1].append(1-win_rate)
-        if current_pairing % len(pairings) == 1 and current_pairing != 1:
+        if current_pairing_idx == 0 and current_pairing != 0:
             if args_main.wandb:
                 log_dict = dict()
                 for i,table in enumerate(tables):
                     table.add(win_rates[i][:i]+win_rates[i][i+1:])
                     log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
                 wandb.log({log_dict})
-    # if i_episode % log_interval != 0: save_checkpoint(self.state(),self.savepath,"TD3",self.env_name, i_episode, self.wandb_run, self._eps, lr, self.seed,rewards,lengths, losses)
         
+        # Prepare next pair
+        print("\n") 
+        current_pairing += 1       
     return losses
 
 
