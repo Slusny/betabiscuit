@@ -262,7 +262,7 @@ def validation(agents, config_agents, names, env,val_episodes,visualize,sleep):
         own = 0
         for j in range(num_agents -1):
             if i  == j: own = 1
-            print("\t",names[j+own],": ",round(last_row[i],4)) 
+            print("\t",names[j+own],": ",round(last_row[j],4)) 
     return
 
 
