@@ -237,7 +237,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     else:
                         env.render()
                         time.sleep(args_main.sleep)
-                        print(reward," agent 2: ",env.get_reward_agent_two(env.get_info_agent_two()), ", real reward: ",env._compute_reward())
+                        print(reward, ", real reward: ",env._compute_reward()) #," agent 2: ",env.get_reward_agent_two(env.get_info_agent_two()),
                         
                     
                     added_transitions += 1
