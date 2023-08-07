@@ -286,7 +286,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         print("Pre Validating...")
         win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,timesteps[current_pairing_idx])
         #if draw rate is too high or to low, we adjust the timesteps to drive episodes to conclusion
-        if draw_rate > 0.15: timesteps[current_pairing_idx] += 100
+        if draw_rate > 0.10: timesteps[current_pairing_idx] += 100
         if draw_rate < 0.05: timesteps[current_pairing_idx] -= 20
         # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
         if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
@@ -390,7 +390,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         print("Post Validating...")
         win_rate, draw_rate = validate(agents, names, idx1, idx2,val_episodes,timesteps[current_pairing_idx])
         #if draw rate is too high or to low, we adjust the timesteps
-        if draw_rate > 0.15: timesteps[current_pairing_idx] += 100
+        if draw_rate > 0.10: timesteps[current_pairing_idx] += 100
         if draw_rate < 0.05: timesteps[current_pairing_idx] -= 20
         # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
         if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
