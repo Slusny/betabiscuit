@@ -245,7 +245,7 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
         touches.append((sum(agent1_touch_puck) + sum(agent2_touch_puck)) > 0.0)
     win_rate = np.array(rewards)
     draw_rate = np.sum(win_rate == 0) / win_rate.size
-    draw_rate_with_touch = np.sum(win_rate[touches]) / win_rate[touches].size
+    draw_rate_with_touch = ((win_rate[touches] + 1) / 2).mean().round(2)
     touch_rate = round(sum(touches) / len(touches),2)
     win_rate = (win_rate + 1 ) /2
     win_rate = win_rate.mean().round(3)
