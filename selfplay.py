@@ -14,6 +14,7 @@ import random
 import itertools
 import math
 from datetime import datetime
+import os
 
 timestep_max = 350
    
@@ -61,10 +62,13 @@ def discrete_to_continous_action(discrete_action):
       action_cont.append(discrete_action == 7)
     return action_cont
 
-def instanciate_agent(args,wandb_run,bootstrap_overwrite=None):
+def instanciate_agent(args,wandb_run,bootstrap_overwrite=None, cpu=False):
     
     if bootstrap_overwrite is not None:
         args["bootstrap"] = bootstrap_overwrite
+
+    if cpu:
+        args["cpu"] = True
 
     # creating environment
     env_name = args["env_name"]
@@ -597,6 +601,8 @@ if __name__ == '__main__':
     parser_main.add_argument('--save_buffer_interval', default=10000, type=int)
     parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', default=False)
     parser_main.add_argument('--train_only_one', action="store_true")
+    parser_main.add_argument('--cpu', action="store_true")
+    parser_main.add_argument('--collect_buffer_from_run', default=None, type=str)
     
 
     args_main = parser_main.parse_args()
@@ -644,10 +650,10 @@ if __name__ == '__main__':
             # Instantiate agents
             if (args_main.bootstrap_overwrite):
                 if args_main.bootstrap_overwrite[i] == "None":
-                    agents.append(instanciate_agent(config,wandb_run))
-                instanciate_agent(config,False,args_main.bootstrap_overwrite[i])
+                    agents.append(instanciate_agent(config,wandb_run,cpu=args_main.cpu))
+                instanciate_agent(config,wandb_run,args_main.bootstrap_overwrite[i],cpu=args_main.cpu)
             else:
-                agents.append(instanciate_agent(config,wandb_run))
+                agents.append(instanciate_agent(config,wandb_run,cpu=args_main.cpu))
 
     # scripted agent
     if args_main.scripted_agent:
@@ -662,9 +668,9 @@ if __name__ == '__main__':
             config = json.load(f)
             config_agents.append(config) 
             if args_main.all_against_one_bootstrap:
-                instanciate_agent(config,False,args_main.all_against_one_bootstrap)
+                instanciate_agent(config,wandb_run,args_main.all_against_one_bootstrap,cpu=args_main.cpu)
             else:
-                agents.append(instanciate_agent(config,wandb_run))
+                agents.append(instanciate_agent(config,wandb_run,cpu=args_main.cpu))
         loner_idx = len(names)-1
         all_agains_one = True
         print("\nAll against one !\n")
@@ -672,6 +678,22 @@ if __name__ == '__main__':
         all_agains_one = False
         loner_idx = None
 
+    # collecting buffers
+    if args_main.collect_buffer_from_run is not None:
+        print("\nCollecting buffer from run: ",args_main.collect_buffer_from_run,"\n")
+        buffer_path = "self-play/buffers/"+args_main.collect_buffer_from_run
+        buffer_files = [f for f in os.listdir(buffer_path) if os.path.isfile(os.path.join(buffer_path, f))]
+        buffer_files.sort()
+        buffer_files = buffer_files[1:]
+        for j,name in enumerate(names):
+            found=False
+            for i, file in enumerate(buffer_files):
+                if name in file:
+                    found=True
+                    agents[j].load_buffer(file)
+            if not found:
+                print("no buffer found for agent: ",name)
+        print("done collecting buffer")
 
     # print agent configs
     for i, agent_config in enumerate(config_agents):
@@ -704,28 +726,28 @@ if __name__ == '__main__':
     else:
         env = gym.make(env_name)
 
-    try:
+    # try:
         
-        if args_main.wandb:
-            tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
-        else :tables = None
-        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,all_agains_one,loner_idx)
-    finally:
-        print("closing script")
-        # Save replay buffers
-        for i,agent in enumerate(agents):
-            date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
-            agent.save_buffer("self-play/buffers/"+run_name+"/"+names[i]+"_buffer_end_"+date_str)
-        if wandb_run:
-            log_dict = dict()
-            for i,table in enumerate(tables):
-                log_dict[names[i]] = table
-            wandb_run.log(log_dict)
+    #     if args_main.wandb:
+    #         tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
+    #     else :tables = None
+    #     train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,all_agains_one,loner_idx)
+    # finally:
+    #     print("closing script")
+    #     # Save replay buffers
+    #     for i,agent in enumerate(agents):
+    #         date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
+    #         agent.save_buffer("self-play/buffers/"+run_name+"/"+names[i]+"_buffer_end_"+date_str)
+    #     if wandb_run:
+    #         log_dict = dict()
+    #         for i,table in enumerate(tables):
+    #             log_dict[names[i]] = table
+    #         wandb_run.log(log_dict)
            
-            # wandb.log({"my_custom_id" : wandb.plot.line_series(
-            #                     xs=[0, 1, 2, 3, 4], 
-            #                     ys=[[10, 20, 30, 40, 50], [0.5, 11, 72, 3, 41]],
-            #                     keys=["metric Y", "metric Z"],
-            #                     title="Two Random Metrics",
-            #                     xname="x units")})
+    #         # wandb.log({"my_custom_id" : wandb.plot.line_series(
+    #         #                     xs=[0, 1, 2, 3, 4], 
+    #         #                     ys=[[10, 20, 30, 40, 50], [0.5, 11, 72, 3, 41]],
+    #         #                     keys=["metric Y", "metric Z"],
+    #         #                     title="Two Random Metrics",
+    #         #                     xname="x units")})
 

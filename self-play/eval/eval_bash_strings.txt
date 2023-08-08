@@ -1,12 +1,93 @@
+## Eager Butterfly
 # First try of self-play with standard reward and no draw control
 python selfplay_eval.py --csv_file_name "improvement_for_gallant-butterfly_in_fresh-resonance.csv" --val_episodes 200 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/fresh-resonance-29sp-gallant-butterfly-13_139_model:v0 betabiscuit/self-play/fresh-resonance-29sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/fresh-resonance-29sp-gallant-butterfly-13_139_model:v20 betabiscuit/self-play/fresh-resonance-29sp-gallant-butterfly-13_139_model:v31
 
+fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v0 overall win rate:  0.6433
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v10 :  0.535
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v20 :  0.65
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v30 :  0.745
+fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v10 overall win rate:  0.4867
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v0 :  0.465
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v20 :  0.495
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v30 :  0.5
+fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v20 overall win rate:  0.4517
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v0 :  0.35
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v10 :  0.505
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v30 :  0.5
+fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v30 overall win rate:  0.4183
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v0 :  0.255
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v10 :  0.5
+	 fallen-shape-8_203_betabiscuit/self-play/eager-butterfly-28sp-fallen-shape-8_203_model:v20 :  0.5
+
+
+## Fresh Resonance
 # First try of self-play with simple reward and no draw control
 python selfplay_eval.py --csv_file_name "improvement_for_gallant-butterfly_in_eager-butterfly.csv" --val_episodes 200 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v0 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v20 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v31
+
+fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v0 overall win rate:  0.4923
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v10 :  0.507
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v20 :  0.47
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v30 :  0.5
+fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v10 overall win rate:  0.52
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v0 :  0.493
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v20 :  0.512
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v30 :  0.555
+fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v20 overall win rate:  0.506
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v0 :  0.53
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v10 :  0.488
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v30 :  0.5
+fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v30 overall win rate:  0.4817
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v0 :  0.5
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v10 :  0.445
+	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v20 :  0.5
+
+
+Hardy SUN - Normal Reward
+# First try of self-play with simple reward and no draw control
+python selfplay_eval.py --csv_file_name "improvement_for_gallant-butterfly_in_eager-butterfly.csv" --val_episodes 200 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v0 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v20 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v31
+
+
+
+## Morning Silence (with Bug) -> Canceled
+# All Against Butterfly - Scripted Agent
+# Simple Reward
+
+python selfplay_eval.py --csv_file_name "imp_butterfly_morning-silence.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b "betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139" betabiscuit/self-play/morning-silence-67sp-gallant-butterfly-13_139_model:v6 betabiscuit/self-play/morning-silence-67sp-gallant-butterfly-13_139_model:v6
+
+
+
+
+
+
+
+## Warm Mountan (fix DQN bug)
+# All Against Butterfly - Scripted Agent
+
+python selfplay_eval.py --csv_file_name "imp_butterfly_warm-mountain.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b "betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139" betabiscuit/self-play/warm-mountain-69sp-gallant-butterfly-13_139_model:v5 betabiscuit/self-play/warm-mountain-69sp-gallant-butterfly-13_139_model:v11
+
+gallant-butterfly-13_139_betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139 overall win rate:  0.25
+	 gallant-butterfly-13_139_betabiscuit/self-play/warm-mountain-69sp-gallant-butterfly-13_139_model:v5 :  0.405
+	 gallant-butterfly-13_139_betabiscuit/self-play/warm-mountain-69sp-gallant-butterfly-13_139_model:v11 :  0.095
+gallant-butterfly-13_139_betabiscuit/self-play/warm-mountain-69sp-gallant-butterfly-13_139_model:v5 overall win rate:  0.5925
+	 gallant-butterfly-13_139_betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139 :  0.595
+	 gallant-butterfly-13_139_betabiscuit/self-play/warm-mountain-69sp-gallant-butterfly-13_139_model:v11 :  0.59
+gallant-butterfly-13_139_betabiscuit/self-play/warm-mountain-69sp-gallant-butterfly-13_139_model:v11 overall win rate:  0.6575
+	 gallant-butterfly-13_139_betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139 :  0.905
+	 gallant-butterfly-13_139_betabiscuit/self-play/warm-mountain-69sp-gallant-butterfly-13_139_model:v5 :  0.41
+
+
+
 
 
 
 
 
 # Start scripts for self-play 
+
+
+
+
+
+
+
 python selfplay.py --max_episodes_per_pair 1000 --save_interval 1000 --max_timesteps 350 --notes "self play simple reward all against one" --agents self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/dulcet-leaf-12_305.json --wandb --val_episodes 100 --simple_reward --train_only_one --save_buffer_interval 5 --replay_ratio 0.25 --replay_buffer_fill_ratio 100 --replay_buffer_fill --scripted_agent --all_against_one self-play/agents/gallant-butterfly-13_139.json 
