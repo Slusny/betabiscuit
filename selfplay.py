@@ -13,6 +13,7 @@ import time
 import random
 import itertools
 import math
+from datetime import datetime
 
 timestep_max = 350
    
@@ -417,8 +418,9 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         
         # save replay buffers
         if cycle % args_main.save_buffer_interval == 0:
+            date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
             for i,agent in enumerate(agents):
-                agent.save_buffer("self-play/buffers/"+names[i]+"_buffer_"+str(cycle)) 
+                agent.save_buffer("self-play/buffers/"+names[i]+"_buffer_"+str(cycle)+"_"+date_str) 
 
         # inital validation:    
         print("Pre Validating...")
@@ -685,7 +687,8 @@ if __name__ == '__main__':
         print("closing script")
         # Save replay buffers
         for i,agent in enumerate(agents):
-            agent.save_buffer("self-play/buffers/"+names[i]+"_buffer_end")
+            date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
+            agent.save_buffer("self-play/buffers/"+names[i]+"_buffer_end_"+date_str)
         if wandb_run:
             log_dict = dict()
             for i,table in enumerate(tables):
