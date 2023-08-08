@@ -359,7 +359,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                 wandb.define_metric(names[i]+"_reward", step_metric=names[i]+"_step")
                 wandb.define_metric(names[i]+"length", step_metric=names[i]+"_step")
                 wandb.define_metric(names[i]+"win_rate_step")
-                wandb.define_metric(names[i]+"win_rate", step_metric=name+"win_rate_step")
+                wandb.define_metric(names[i]+"win_rate", step_metric=names[i]+"win_rate_step")
         else:   
             for pair in pairings:
                 idx1, idx2 = pair
