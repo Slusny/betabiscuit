@@ -7,16 +7,16 @@
 
 #resources:
 
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=4
 # the job can use and see 4 CPUs (from max 24).
 
 #SBATCH --partition=day
 # the slurm partition the job is queued to.
 
-#SBATCH --mem-per-cpu=12G
+#SBATCH --mem-per-cpu=8G
 # the job will need 12GB of memory equally distributed on 4 cpus.(251GB are available in total on one node)
 
-#SBATCH --gres=gpu:0
+#SBATCH --gres=gpu:1
 #the job can use and see 1 GPUs (4 GPUs are available in total on one node) use SBATCH --gres=gpu:1080ti:1 to explicitly demand a Geforce 1080 Ti GPU. Use SBATCH --gres=gpu:A4000:1 to explicitly demand a RTX A4000 GPU
 
 #SBATCH --time=1-0
@@ -54,7 +54,7 @@
 # #sudo apt-get install python3-setuptools
 # pip3 install -r requirements_pip.txt 
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
-singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 selfplay.py --max_episodes_per_pair 500 --save_interval 500 --max_timesteps 350 --notes "self play started from Hard Sun" --agents self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json --wandb --val_episodes 100 --replay_buffer_fill --replay_buffer_fill_ratio 100 --save_buffer_interval 3 --scripted_agent --replay_ratio 0.25 --cpu
+singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 selfplay.py --max_episodes_per_pair 500 --save_interval 500 --max_timesteps 350 --notes "self play normal R,  Single Train DQN" --agents self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json --wandb --val_episodes 100 --replay_buffer_fill --replay_buffer_fill_ratio 100 --save_buffer_interval 3 --scripted_agent --replay_ratio 0.25 --cpu --all_against_one self-play/agents/fallen-shape-8_203.json --train_only_one
 
 # Trying to resurect warm-mountain - all against (simple reward)
 #selfplay.py --max_episodes_per_pair 1000 --save_interval 1000 --max_timesteps 350 --notes "self play simple reward all against one restarted from morning silence" --agents self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/dulcet-leaf-12_305.json --wandb --val_episodes 100 --simple_reward --train_only_one --save_buffer_interval 5 --replay_ratio 0.25 --replay_buffer_fill --replay_buffer_fill_ratio 100 --scripted_agent --all_against_one self-play/agents/gallant-butterfly-13_139.json --all_against_one_bootstrap "betabiscuit/self-play/morning-silence-67sp-gallant-butterfly-13_139_model:v7" --collect_buffer_from_run "warm-mountain-69" --buffer_identifyer "end" --cpu

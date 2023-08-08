@@ -47,13 +47,57 @@ Hardy SUN - Normal Reward (Buggy DQN, with draw control)  -sp1
 # First try of self-play with simple reward and no draw control
 python selfplay_eval.py --csv_file_name "improvement_for_gallant-butterfly_in_eager-butterfly.csv" --val_episodes 200 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v0 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v20 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v31
 
-Wandering-Water - Simple Reward (Buggy DQN, with draw control) - sp2_simple_reward
+### Wandering-Water - Simple Reward (Buggy DQN, with draw control) - 
+python selfplay_eval.py --csv_file_name "imp_wandering_water.csv" --val_episodes 100 -a self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/dulcet-leaf-12_305.json -b betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v9 betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v9 betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v9 betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v9 betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v9 betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v9
+
+pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v9 overall win rate:  0.446
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v9 :  0.435
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v9 :  0.555
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v9 :  0.255
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v9 :  0.57
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v9 :  0.415
+gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v9 overall win rate:  0.546
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v9 :  0.565
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v9 :  0.58
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v9 :  0.515
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v9 :  0.655
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v9 :  0.415
+gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v9 overall win rate:  0.395
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v9 :  0.445
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v9 :  0.42
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v9 :  0.325
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v9 :  0.455
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v9 :  0.33
+fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v9 overall win rate:  0.646
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v9 :  0.745
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v9 :  0.485
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v9 :  0.675
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v9 :  0.68
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v9 :  0.645
+dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v9 overall win rate:  0.395
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v9 :  0.43
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v9 :  0.345
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v9 :  0.545
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v9 :  0.32
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v9 :  0.335
+dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v9 overall win rate:  0.572
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v9 :  0.585
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v9 :  0.585
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v9 :  0.67
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v9 :  0.355
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v9 :  0.665
+
+
+
+#Wandering vs Single DQN
+python selfplay_eval.py --csv_file_name "smart-voice_vs_wandering-water.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/dulcet-leaf-12_305.json -b  betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v113 betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v9 betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v9 betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v9 betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v9 betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v9 betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v9
+
 
 ## Morning Silence (with Bug) -> Canceled
 # All Against Butterfly - Scripted Agent
 # Simple Reward
 
-python selfplay_eval.py --csv_file_name "imp_butterfly_morning-silence.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b "betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139" betabiscuit/self-play/morning-silence-67sp-gallant-butterfly-13_139_model:v6 betabiscuit/self-play/morning-silence-67sp-gallant-butterfly-13_139_model:v6
+python selfplay_eval.py --csv_file_name "imp_wandering_water.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b "betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139" betabiscuit/self-play/morning-silence-67sp-gallant-butterfly-13_139_model:v6 betabiscuit/self-play/morning-silence-67sp-gallant-butterfly-13_139_model:v6
 
 
 
