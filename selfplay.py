@@ -196,11 +196,84 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite=None):
                         )
     return agent
 
+def fill_replay_buffer(agents,env,max_episodes,idx):
+    for i_episode in range(1, max_episodes+1):
+
+        while True: # continous loop for visualization
+            ob1, _info = env.reset()
+            ob2 = env.obs_agent_two()
+            # Incorporate  Acceleration - keep one past observation for derivative of velocities
+            past_obs1 = ob1.copy()
+            past_obs2 = ob2.copy()
+            total_reward=0
+            added_transitions = 0
+
+            agent1_touch_puck = []
+            agent2_touch_puck = []
+            temp_buffer=[]
+            A_puck_got_touched = False
+            for t in range(350):
+                
+                a1, a1_s = act(ob1,past_obs1,agents,config_agents,idx)
+                a2 = scripted_agent.act(ob2)
+                a2_s = a2
+                # a2, a2_s = act(ob2,past_obs2,agents,config_agents,idx_scripted)
+
+                (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
+                ob_new2 = env.obs_agent_two()
+
+
+                agent1_touch_puck.append(env._get_info()["reward_touch_puck"])
+                agent2_touch_puck.append(env.get_info_agent_two()["reward_touch_puck"])
+                
+                # The simple reward only returns 10 and -10 for goals
+                if args_main.simple_reward:
+                    reward1 = env._compute_reward()
+                    reward2 = - reward1
+                # The standard reward also considers closeness to puck
+                else: 
+                    reward1 = reward
+                    reward2 = env.get_reward_agent_two(env.get_info_agent_two())
+
+                # The dense reward also considers the direction of the puck - not used anymore
+                # if(self._config["dense_reward"]): 
+                #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
+                total_reward+= reward
+                
+                if not args_main.visualize:
+                    temp_buffer.append((ob1,ob2,past_obs1,past_obs2,a1_s,a2_s,reward1,reward2,ob_new1,ob_new2,done,done))
+                else:
+                    env.render()
+                    time.sleep(args_main.sleep)                        
+                
+                # added_transitions += 1
+                past_obs1 = ob1
+                past_obs2 = ob2
+                ob1=ob_new1
+                ob2=ob_new2
+            
+                if done or trunc: break
+            
+            if sum(agent1_touch_puck) + sum(agent2_touch_puck) > 0.: A_puck_got_touched = True
+            if A_puck_got_touched : 
+                added_transitions = len(temp_buffer)
+                for data in temp_buffer:
+                    store_transition(agents,config_agents,idx,data[0*2],data[1*2],data[2*2],data[3*2],data[4*2],data[5*2])
+                break
 
 def add_derivative(obs,pastobs):
     return np.append(obs,(obs-pastobs)[derivative_indices])
         
+def store_transition(agents,config_agents,idx,obs,pastobs,action,reward,next_obs,done):
+            if config_agents[idx]["use_derivative"]:    agents[idx].store_transition((add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done))
+            else :                                      agents[idx].store_transition((obs,action,reward,next_obs,done))
 
+def act(obs,pastobs,agents,config_agents,idx):
+    if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs))
+    else :                                      a_s = agents[idx].act(obs)
+    if config_agents[idx]["algo"] == "dqn":     a = discrete_to_continous_action(int(a_s))
+    else:                                       a = a_s
+    return a, a_s
 def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
     def act_val(obs,pastobs,agents,config_agents,idx):
         if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs),eps=0.)
@@ -298,6 +371,13 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                 wandb.define_metric(name+"win_rate_step")
                 wandb.define_metric(name+"win_rate", step_metric=name+"win_rate_step")
 
+    # fill replay buffer with runs with scripted agent
+    if args_main.replay_buffer_fill:
+        buffer = 1000000
+        ratio = 100
+        for idx in range(num_agents):
+            fill_replay_buffer(agents,env,buffer//ratio,idx)
+
     while True: # stop manually
         # randomly get pairing of agents
         # idx1, idx2 = random.sample(range(len(agents)), 2)
@@ -356,18 +436,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         rewards = []
         lengths = []
         losses = []
-
-        def act(obs,pastobs,agents,config_agents,idx):
-            if config_agents[idx]["use_derivative"]:    a_s = agents[idx].act(add_derivative(obs,pastobs))
-            else :                                      a_s = agents[idx].act(obs)
-            if config_agents[idx]["algo"] == "dqn":     a = discrete_to_continous_action(int(a_s))
-            else:                                       a = a_s
-            return a, a_s
         
-        def store_transition(agents,config_agents,idx,obs,pastobs,action,reward,next_obs,done):
-            if config_agents[idx]["use_derivative"]:    agents[idx].store_transition((add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done))
-            else :                                      agents[idx].store_transition((obs,action,reward,next_obs,done))
-
         # training loop
         for i_episode in range(1, max_episodes_per_pair+1):
 
@@ -500,6 +569,7 @@ if __name__ == '__main__':
     parser_main.add_argument('-g','--all_against_one', default=False, type=str)
     parser_main.add_argument('--all_against_one_bootstrap', default=False, type=str)
     parser_main.add_argument('--scripted_agent', action="store_true")
+    parser_main.add_argument('--replay_buffer_fill', action="store_true")
     parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', default=False)
     
 
