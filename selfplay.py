@@ -20,7 +20,7 @@ timestep_max = 350
 class ScriptedAgent():
     def __init__(self):
         self.player = h_env.BasicOpponent(weak=False)
-    def act(self,obs):
+    def act(self,obs,eps=0.0):
         return self.player.act(obs)
     
     def save_agent_wandb(self,x1,x2,x3,x4,x5):

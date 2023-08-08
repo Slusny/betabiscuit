@@ -258,12 +258,14 @@ class TD3Agent(object):
         #     wandb.watch(self.policy, log_freq=100)
 
     def save_buffer(self, path):
+        print("saving buffer to: ", path, " ...")
         if self._config["per"]:
             self.buffer.save_transitions(path)
         else:
             self.buffer.save(path)
 
     def load_buffer(self, path):
+        print("loading buffer from: ", path, " ...")
         if self._config["per"]:
             self.buffer.load_transitions(path)
         else:

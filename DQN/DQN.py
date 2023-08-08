@@ -364,6 +364,7 @@ class DQNAgent(object):
         return to_torch(s),to_torch(a),to_torch(rew),to_torch(s_prime),to_torch(done),idxs, weights
 
     def save_buffer(self, path):
+        print("saving buffer to: ", path, " ...")
         if self._config["per"]:
             self.buffer.save_transitions(path)
         else:
@@ -371,6 +372,7 @@ class DQNAgent(object):
             # self.buffer.save(path)
 
     def load_buffer(self, path):
+        print("loading buffer from: ", path, " ...")
         if self._config["per"]:
             self.buffer.load_transitions(path)
         else:
