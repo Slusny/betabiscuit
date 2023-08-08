@@ -421,7 +421,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
             
             for i,agent in enumerate(agents):
-                agent.save_buffer("self-play/buffers/"+args_main.id+"/"+names[i]+"_buffer_"+str(cycle)+"_"+date_str) 
+                agent.save_buffer("self-play/buffers/"+run_name+"/"+names[i]+"_buffer_"+str(cycle)+"_"+date_str) 
 
         # inital validation:    
         print("Pre Validating...")
@@ -603,10 +603,10 @@ if __name__ == '__main__':
     else: wandb_run = None
 
     if args_main.wandb: 
-        args_main["id"] = wandb_run.name
+        run_name = wandb_run.name
     else:
-          args_main["id"] = str(np.random.randint(100))
-    Path("self-play/buffers/"+args_main.id).mkdir(parents=True, exist_ok=True)
+          run_name = str(np.random.randint(100))
+    Path("self-play/buffers/"+run_name).mkdir(parents=True, exist_ok=True)
 
     # scripted agent
     config_scripted = {"algo": "scripted","use_derivative":False}
@@ -695,7 +695,7 @@ if __name__ == '__main__':
         # Save replay buffers
         for i,agent in enumerate(agents):
             date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
-            agent.save_buffer("self-play/buffers/"+args_main.id+"/"+names[i]+"_buffer_end_"+date_str)
+            agent.save_buffer("self-play/buffers/"+run_name+"/"+names[i]+"_buffer_end_"+date_str)
         if wandb_run:
             log_dict = dict()
             for i,table in enumerate(tables):
