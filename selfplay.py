@@ -564,7 +564,9 @@ if __name__ == '__main__':
         loner_idx = len(names)-1
         all_agains_one = True
         print("all against one !")
-    else: all_agains_one = False
+    else: 
+        all_agains_one = False
+        loner_idx = None
 
 
     # print agent configs
