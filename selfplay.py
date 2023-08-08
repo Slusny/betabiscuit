@@ -423,7 +423,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         # save replay buffers
         if cycle % args_main.save_buffer_interval == 0:
             for i,agent in enumerate(agents):
-                agent.save_buffer(names[i]+"_buffer_end") 
+                agent.save_buffer("self-play/buffers/"+names[i]+"_buffer_"+str(cycle)) 
 
         # inital validation:    
         print("Pre Validating...")
@@ -690,7 +690,7 @@ if __name__ == '__main__':
         print("closing script")
         # Save replay buffers
         for i,agent in enumerate(agents):
-            agent.save_buffer(names[i]+"_buffer_end")
+            agent.save_buffer("self-play/buffers/"+names[i]+"_buffer_end")
         if wandb_run:
             log_dict = dict()
             for i,table in enumerate(tables):
