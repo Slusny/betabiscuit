@@ -30,6 +30,6 @@ class Memory():
         np.save(filename, self.get_all_transitions())
     
     def load(self, filename):  
-        trans = np.load(filename)
+        trans = np.load(filename,allow_pickle=True)
         for tran in trans:
             self.add_transition(tran)
