@@ -266,7 +266,7 @@ def validation(args_main,agents, config_agents, names, env,val_episodes,visualiz
         for j in range(num_agents -1):
             if i  == j: own = 1
             print("\t",names[j+own],": ",round(last_row[j],4)) 
-        win_rates_CSV.insert(i,0)
+        win_rates_CSV[i].insert(i,0)
     
     df = pd.DataFrame(win_rates_CSV)
     if args_main.csv_file_name != "":
