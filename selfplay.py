@@ -658,7 +658,7 @@ if __name__ == '__main__':
     # All against one
     if args_main.all_against_one:
         names.append(Path(args_main.all_against_one).stem )
-        with open(file, 'r') as f:
+        with open(args_main.all_against_one, 'r') as f:
             config = json.load(f)
             config_agents.append(config) 
             if args_main.all_against_one_bootstrap:
