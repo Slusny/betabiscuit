@@ -341,5 +341,5 @@ if __name__ == '__main__':
     else:
         env = gym.make(env_name)
 
-    validation(args_main,agents, config_agents,names, env, args_main.val_episodes,args_main.visualize,args_main.sleep,max_timesteps)
+    validation(args_main,agents, config_agents,names, env, args_main.val_episodes,args_main.visualize,args_main.sleep,args_main.max_timesteps)
    
