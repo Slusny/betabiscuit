@@ -376,8 +376,11 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     if args_main.replay_buffer_fill:
         buffer = 1000000
         ratio = args_main.replay_buffer_fill_ratio
-        for idx in range(num_agents):
-            fill_replay_buffer(agents,env,buffer//ratio,idx)
+        if all_agains_one:
+            fill_replay_buffer(agents,env,buffer//ratio,loner_idx)
+        else:
+            for idx in range(num_agents):
+                fill_replay_buffer(agents,env,buffer//ratio,idx)
 
     while True: # stop manually
         # randomly get pairing of agents
@@ -631,12 +634,14 @@ if __name__ == '__main__':
     config_agents = []
     agents = []
     names = []
+
+    print("\nInstantiate Agents\n")
     for i, file in enumerate(args_main.agents):
         names.append(Path(file).stem)
         with open(file, 'r') as f:
             config = json.load(f)
             config_agents.append(config) 
-            # instanciate agents
+            # Instantiate agents
             if (args_main.bootstrap_overwrite):
                 if args_main.bootstrap_overwrite[i] == "None":
                     agents.append(instanciate_agent(config,wandb_run))
@@ -662,7 +667,7 @@ if __name__ == '__main__':
                 agents.append(instanciate_agent(config,wandb_run))
         loner_idx = len(names)-1
         all_agains_one = True
-        print("all against one !")
+        print("\nAll against one !\n")
     else: 
         all_agains_one = False
         loner_idx = None
