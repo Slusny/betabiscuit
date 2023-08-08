@@ -603,6 +603,7 @@ if __name__ == '__main__':
     parser_main.add_argument('--train_only_one', action="store_true")
     parser_main.add_argument('--cpu', action="store_true")
     parser_main.add_argument('--collect_buffer_from_run', default=None, type=str)
+    parser_main.add_argument('--buffer_identifyer', default="", type=str)
     
 
     args_main = parser_main.parse_args()
@@ -688,13 +689,13 @@ if __name__ == '__main__':
         for j,name in enumerate(names):
             found=False
             for i, file in enumerate(buffer_files):
-                if name in file:
+                if name in file and args_main.buffer_identifyer in file:
                     found=True
                     print("for agent ",name)
                     agents[j].load_buffer(buffer_path+"/"+file)
                     print("\n")
             if not found:
-                print("no buffer found for agent: ",name)
+                print("no buffer found for agent: ",name,"\n")
         print("done collecting buffer")
 
     # print agent configs
