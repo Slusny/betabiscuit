@@ -422,8 +422,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             for i,agent in enumerate(agents):
                 agent.save_buffer("self-play/buffers/"+run_name+"/"+names[i]+"_buffer_"+str(cycle)+"_"+date_str) 
 
-        cycle += int(current_pairing_idx == 0)
-        
+        if current_pairing_idx == 0:
+            print("\n------------------ new Cycle ------------------\n")
+            cycle += 1
+
         # inital validation:    
         print("Pre Validating...")
         win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,timesteps[current_pairing_idx])
@@ -431,7 +433,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         if draw_rate > 0.10 and timesteps[current_pairing_idx] <= timestep_max : timesteps[current_pairing_idx] += 50
         if draw_rate < 0.05: timesteps[current_pairing_idx] -= 25
         if all_agains_one:
-            win_rates[idx2_w].append(win_rate)
+            win_rates[idx2].append(win_rate)
         else:
             # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
             if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
@@ -473,8 +475,9 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     agent2_touch_puck.append(env.get_info_agent_two()["reward_touch_puck"])
                     
                     # The simple reward only returns 10 and -10 for goals
+                    simple_reward = env._compute_reward()
                     if args_main.simple_reward:
-                        reward1 = env._compute_reward()
+                        reward1 = simple_reward
                         reward2 = - reward1
                     # The standard reward also considers closeness to puck
                     else: 
@@ -484,7 +487,9 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     # The dense reward also considers the direction of the puck - not used anymore
                     # if(self._config["dense_reward"]): 
                     #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
-                    total_reward+= reward
+                    
+                    # Don't log standard reward, we can save one plot per pairing that way (standard reward is not symmetric)
+                    total_reward+= simple_reward
                     
                     if not args_main.visualize:
                         temp_buffer.append((ob1,ob2,past_obs1,past_obs2,a1_s,a2_s,reward1,reward2,ob_new1,ob_new2,done,done))
@@ -505,14 +510,16 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     added_transitions = len(temp_buffer)
                     for data in temp_buffer:
                         store_transition(agents,config_agents,idx1,data[0*2],data[1*2],data[2*2],data[3*2],data[4*2],data[5*2])
-                        store_transition(agents,config_agents,idx2,data[0*2+1],data[1*2+1],data[2*2+1],data[3*2+1],data[4*2+1],data[5*2+1])
+                        if not args_main.train_only_one:
+                            store_transition(agents,config_agents,idx2,data[0*2+1],data[1*2+1],data[2*2+1],data[3*2+1],data[4*2+1],data[5*2+1])
                     break
 
             if(args_main.replay_ratio != 0.):
                 iter_fit = int(added_transitions * args_main.replay_ratio) + 1  
 
             l1 = agents[idx1].train_innerloop(iter_fit)
-            l2 = agents[idx2].train_innerloop(iter_fit)
+            if not args_main.train_only_one:
+                l2 = agents[idx2].train_innerloop(iter_fit)
 
             rewards.append(total_reward)
             lengths.append(t)
@@ -520,14 +527,20 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             # logging
             if args_main.wandb: 
                 wandb_steps[current_pairing_idx] += 1
-                wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,
-                           names[idx1] +"-"+ names[idx2] +"_reward": total_reward, names[idx1] +"-"+ names[idx2] +"length":t,
+                if not args_main.train_only_one:
+                    wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean() , names[idx2]+"_loss": np.array(l2[0]).mean() ,
+                            names[idx1] +"-"+ names[idx2] +"_reward": total_reward, names[idx1] +"-"+ names[idx2] +"length":t,
                             names[idx1] +"-"+ names[idx2]+"_step":wandb_steps[current_pairing_idx] })
-
+                else:
+                    wandb.log({names[idx1]+"_loss": np.array(l1[0]).mean(),
+                            names[idx1] +"-"+ names[idx2] +"_reward": total_reward, names[idx1] +"-"+ names[idx2] +"length":t,
+                            names[idx1] +"-"+ names[idx2]+"_step":wandb_steps[current_pairing_idx] })
+            
             # save models
             if i_episode % save_interval == 0:
                 agents[idx1].save_agent_wandb(wandb_steps[current_pairing_idx], rewards, lengths, losses,"sp-"+names[idx1])
-                agents[idx2].save_agent_wandb(wandb_steps[current_pairing_idx], rewards, lengths, losses,"sp-"+names[idx2])           
+                if not args_main.train_only_one: 
+                    agents[idx2].save_agent_wandb(wandb_steps[current_pairing_idx], rewards, lengths, losses,"sp-"+names[idx2])           
 
             # logging
             if i_episode % log_interval == 0:
@@ -580,6 +593,7 @@ if __name__ == '__main__':
     parser_main.add_argument('--replay_buffer_fill_ratio', default=100, type=int)
     parser_main.add_argument('--save_buffer_interval', default=10000, type=int)
     parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', default=False)
+    parser_main.add_argument('--train_only_one', action="store_true")
     
 
     args_main = parser_main.parse_args()
