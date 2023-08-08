@@ -365,14 +365,14 @@ class DQNAgent(object):
 
     def save_buffer(self, path):
         if self._config["per"]:
-            self.buffer.save_transitions(self, path)
+            self.buffer.save_transitions(path)
         else:
             print("not implemented")
             # self.buffer.save(path)
 
     def load_buffer(self, path):
         if self._config["per"]:
-            self.buffer.load_transitions(self, path)
+            self.buffer.load_transitions(path)
         else:
             print("not implemented")
             # self.buffer.load(path)
