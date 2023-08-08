@@ -643,16 +643,23 @@ if __name__ == '__main__':
     names = []
 
     print("\nInstantiate Agents\n")
+    bootstrap=False
+    if (args_main.bootstrap_overwrite):
+        if len(args_main.bootstrap_overwrite) == len(args_main.agents):
+            print("\n Bootstraping \n")
+            bootstrap=True
+        else:
+            print("bootstrap list doesn't match agent list")
     for i, file in enumerate(args_main.agents):
         names.append(Path(file).stem)
         with open(file, 'r') as f:
             config = json.load(f)
             config_agents.append(config) 
             # Instantiate agents
-            if (args_main.bootstrap_overwrite):
+            if (bootstrap):
                 if args_main.bootstrap_overwrite[i] == "None":
                     agents.append(instanciate_agent(config,wandb_run,cpu=args_main.cpu))
-                instanciate_agent(config,wandb_run,args_main.bootstrap_overwrite[i],cpu=args_main.cpu)
+                else: agents.append(instanciate_agent(config,wandb_run,args_main.bootstrap_overwrite[i],cpu=args_main.cpu))
             else:
                 agents.append(instanciate_agent(config,wandb_run,cpu=args_main.cpu))
 
@@ -697,6 +704,8 @@ if __name__ == '__main__':
             if not found:
                 print("no buffer found for agent: ",name,"\n")
         print("done collecting buffer")
+
+    
 
     # print agent configs
     for i, agent_config in enumerate(config_agents):
