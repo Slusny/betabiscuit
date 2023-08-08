@@ -16,7 +16,7 @@
 #SBATCH --mem-per-cpu=12G
 # the job will need 12GB of memory equally distributed on 4 cpus.(251GB are available in total on one node)
 
-#SBATCH --gres=gpu:0
+#SBATCH --gres=gpu:1
 #the job can use and see 1 GPUs (4 GPUs are available in total on one node) use SBATCH --gres=gpu:1080ti:1 to explicitly demand a Geforce 1080 Ti GPU. Use SBATCH --gres=gpu:A4000:1 to explicitly demand a RTX A4000 GPU
 
 #SBATCH --time=3-3
@@ -56,6 +56,8 @@
 # python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
 singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python3 selfplay.py --max_episodes_per_pair 1000 --save_interval 1000 --max_timesteps 350 --notes "self play simple reward all against one restarted from morning silence" --agents self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/dulcet-leaf-12_305.json --wandb --val_episodes 100 --simple_reward --train_only_one --save_buffer_interval 5 --replay_ratio 0.25 --replay_buffer_fill --replay_buffer_fill_ratio 100 --scripted_agent --all_against_one self-play/agents/gallant-butterfly-13_139.json --all_against_one_bootstrap "betabiscuit/self-play/morning-silence-67sp-gallant-butterfly-13_139_model:v7" --collect_buffer_from_run "warm-mountain-69" --buffer_identifyer "end"
 
+#Hardy sun self play
+#selfplay.py --max_episodes_per_pair 500 --save_interval 500 --max_timesteps 350 --notes "self play started from Hard Sun" --agents self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/dulcet-leaf-12_305.json --wandb --val_episodes 100 --replay_buffer_fill --replay_buffer_fill_ratio 100 --save_buffer_interval 3 --scripted_agent
 
 #main.py --algo td3 --env hockey --max_episodes 1000000 --notes "resumed from dulcet-leaf at 1.3M try to retrain" --save_interval 5000 --batch_size 512 --hidden_sizes_actor "[300,300]" --hidden_sizes_critic "[300,300]" --bootstrap "betabiscuit/hockey - td3/dulcet-leaf-12_model:v264" --update 2 --discount 0.99 --learning_rate_actor 0.00001 --learning_rate_critic 0.00001 --policy_noise 0.1 --noise_clip 0.3 --per --cpu --replay_ratio 0.2 --eps 0.1 --validation_interval 500 --filled_buffer_ratio 1
 
