@@ -265,7 +265,7 @@ def add_derivative(obs,pastobs):
     return np.append(obs,(obs-pastobs)[derivative_indices])
         
 def store_transition(agents,config_agents,idx,obs,pastobs,action,reward,next_obs,done):
-            if config_agents[idx]["use_derivative"]:    agents[idx].store_transition((add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,pastobs),done))
+            if config_agents[idx]["use_derivative"]:    agents[idx].store_transition((add_derivative(obs,pastobs),action,reward,add_derivative(next_obs,obs),done))
             else :                                      agents[idx].store_transition((obs,action,reward,next_obs,done))
 
 def act(obs,pastobs,agents,config_agents,idx):
