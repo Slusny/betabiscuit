@@ -558,7 +558,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         if draw_rate > 0.10 and timesteps[current_pairing_idx] <= timestep_max : timesteps[current_pairing_idx] += 50
         if draw_rate < 0.05: timesteps[current_pairing_idx] -= 25
         if all_agains_one:
-            win_rates[idx2_w].append(win_rate)
+            win_rates[idx2].append(win_rate)
         else:
             # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
             if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
