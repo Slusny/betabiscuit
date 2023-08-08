@@ -233,9 +233,9 @@ def validation(args_main,agents, config_agents, names, env,val_episodes,visualiz
     
     num_agents = len(agents)
     win_rates = np.empty((num_agents,num_agents-1)).tolist()
-    for i in range(num_agents):
-        for j in range(num_agents-1):
-            win_rates[i][j].pop()
+    # for i in range(num_agents):
+    #     for j in range(num_agents-1):
+    #         win_rates[i][j].pop()
 
     pairings = list(itertools.combinations(range(num_agents), 2))
 
