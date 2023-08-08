@@ -690,7 +690,9 @@ if __name__ == '__main__':
             for i, file in enumerate(buffer_files):
                 if name in file:
                     found=True
-                    agents[j].load_buffer(file)
+                    print("for agent ",name)
+                    agents[j].load_buffer(buffer_path+"/"+file)
+                    print("\n")
             if not found:
                 print("no buffer found for agent: ",name)
         print("done collecting buffer")
