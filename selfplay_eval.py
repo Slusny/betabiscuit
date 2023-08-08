@@ -201,6 +201,8 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps,visualize,sleep
         past_obs1 = ob1.copy()
         past_obs2 = ob2.copy()
         total_reward=0
+        agent1_touch_puck = []
+        agent2_touch_puck = []
         for t in range(max_timesteps):
 
             if visualize: env.render()
@@ -212,6 +214,9 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps,visualize,sleep
             (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
             ob_new2 = env.obs_agent_two()
 
+            agent1_touch_puck.append(env._get_info()["reward_touch_puck"])
+            agent2_touch_puck.append(env.get_info_agent_two()["reward_touch_puck"])
+
             reward = env._compute_reward()/10
 
             total_reward+= reward
@@ -220,6 +225,9 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps,visualize,sleep
             ob1=ob_new1
             ob2=ob_new2
             if done or trunc: break
+        
+        print("agent 1 touches: ",sum(agent1_touch_puck))
+        print("agent 1 touches: ",sum(agent2_touch_puck))
         rewards.append(total_reward)
         length.append(t)
     win_rate = np.array(rewards)

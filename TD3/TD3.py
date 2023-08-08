@@ -257,6 +257,8 @@ class TD3Agent(object):
         #     wandb.watch(self.Q, log_freq=100)
         #     wandb.watch(self.policy, log_freq=100)
 
+    def save_buffer(self, path):
+        self.buffer.save(path)
 
     def _copy_nets(self):
         # Full copy
