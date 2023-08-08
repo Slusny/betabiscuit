@@ -603,7 +603,7 @@ if __name__ == '__main__':
         if args_main.wandb:
             tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
         else :tables = None
-        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,args_main.all_agains_one,loner_idx)
+        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,all_agains_one,loner_idx)
     finally:
         print("closing script")
         if wandb_run:
