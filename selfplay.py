@@ -552,19 +552,19 @@ if __name__ == '__main__':
         agents.append(scripted_agent)   
 
     # All against one
-        if args_main.all_against_one:
-            names.append(Path(args_main.all_against_one).stem )
-            with open(file, 'r') as f:
-                config = json.load(f)
-                config_agents.append(config) 
-                if args_main.all_against_one_bootstrap:
-                    instanciate_agent(config,False,args_main.all_against_one_bootstrap)
-                else:
-                    agents.append(instanciate_agent(config,wandb_run))
-            loner_idx = len(names)-1
-            all_agains_one = True
-            print("all against one !")
-        else: all_agains_one = False
+    if args_main.all_against_one:
+        names.append(Path(args_main.all_against_one).stem )
+        with open(file, 'r') as f:
+            config = json.load(f)
+            config_agents.append(config) 
+            if args_main.all_against_one_bootstrap:
+                instanciate_agent(config,False,args_main.all_against_one_bootstrap)
+            else:
+                agents.append(instanciate_agent(config,wandb_run))
+        loner_idx = len(names)-1
+        all_agains_one = True
+        print("all against one !")
+    else: all_agains_one = False
 
 
     # print agent configs
@@ -603,7 +603,7 @@ if __name__ == '__main__':
         if args_main.wandb:
             tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
         else :tables = None
-        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,all_agains_one,loner_idx)
+        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,args_main.all_agains_one,loner_idx)
     finally:
         print("closing script")
         if wandb_run:
