@@ -416,7 +416,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                         env.render()
                         time.sleep(args_main.sleep)                        
                     
-                    added_transitions += 1
+                    # added_transitions += 1
                     past_obs1 = ob1
                     past_obs2 = ob2
                     ob1=ob_new1
@@ -425,8 +425,8 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     if done or trunc: break
                 
                 if sum(agent1_touch_puck) + sum(agent2_touch_puck) > 0.: A_puck_got_touched = True
-                if not args_main.visualize: break
-                if A_puck_got_touched: 
+                if A_puck_got_touched and not args_main.visualize: 
+                    added_transitions = len(temp_buffer)
                     for data in temp_buffer:
                         store_transition(agents,config_agents,idx1,data[0*2],data[1*2],data[2*2],data[3*2],data[4*2],data[5*2])
                         store_transition(agents,config_agents,idx2,data[0*2+1],data[1*2+1],data[2*2+1],data[3*2+1],data[4*2+1],data[5*2+1])
