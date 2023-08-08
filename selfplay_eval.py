@@ -260,7 +260,7 @@ def validation(args_main,agents, config_agents, names, env,val_episodes,visualiz
     print("\n")
     win_rates_CSV = win_rates.copy()
     for i in range(num_agents):
-        last_row = np.array(win_rates[i])[:,-1]
+        last_row = np.array(win_rates[i])
         print(names[i] + " overall win rate: ",round(last_row.mean(),4))
         own = 0
         for j in range(num_agents -1):
