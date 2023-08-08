@@ -16,6 +16,22 @@ import math
 
 timestep_max = 350
    
+
+class ScriptedAgent():
+    def __init__(self):
+        self.player = h_env.BasicOpponent(weak=False)
+    def act(self,obs):
+        return self.player.act(obs)
+    
+    def save_agent_wandb(self,x1,x2,x3,x4,x5):
+        return
+
+    def train_innerloop(self,x):
+        return (0,0)
+
+    def store_transition(self,x):
+        return
+
 # added more actions
 def discrete_to_continous_action(discrete_action):
     ''' converts discrete actions into continuous ones (for each player)
@@ -354,6 +370,11 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                 past_obs2 = ob2.copy()
                 total_reward=0
                 added_transitions = 0
+
+                agent1_touch_puck = []
+                agent2_touch_puck = []
+                temp_buffer=[]
+                A_puck_got_touched = False
                 for t in range(timesteps[current_pairing_idx]):
                     
                     a1, a1_s = act(ob1,past_obs1,agents,config_agents,idx1)
@@ -361,6 +382,10 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
                     (ob_new1, reward, done, trunc, _info) = env.step(np.hstack([a1,a2]))
                     ob_new2 = env.obs_agent_two()
+
+
+                    agent1_touch_puck.append(env._get_info()["reward_touch_puck"])
+                    agent2_touch_puck.append(env.get_info_agent_two()["reward_touch_puck"])
                     
                     # The simple reward only returns 10 and -10 for goals
                     if args_main.simple_reward:
@@ -377,8 +402,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     total_reward+= reward
                     
                     if not args_main.visualize:
-                        store_transition(agents,config_agents,idx1,ob1,past_obs1,a1_s,reward1,ob_new1,done)
-                        store_transition(agents,config_agents,idx2,ob2,past_obs2,a2_s,reward2,ob_new2,done)
+                        temp_buffer.append((ob1,ob2,past_obs1,past_obs2,a1_s,a2_s,reward1,reward2,ob_new1,ob_new2,done,done))
                     else:
                         env.render()
                         time.sleep(args_main.sleep)                        
@@ -390,7 +414,14 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                     ob2=ob_new2
                 
                     if done or trunc: break
+                
+                if sum(agent1_touch_puck) + sum(agent2_touch_puck) > 0.: A_puck_got_touched = True
                 if not args_main.visualize: break
+                if A_puck_got_touched: 
+                    for data in temp_buffer:
+                        store_transition(agents,config_agents,idx1,data[0*2],data[1*2],data[2*2],data[3*2],data[4*2],data[5*2])
+                        store_transition(agents,config_agents,idx2,data[0*2+1],data[1*2+1],data[2*2+1],data[3*2+1],data[4*2+1],data[5*2+1])
+                    break
 
             if(args_main.replay_ratio != 0.):
                 iter_fit = int(added_transitions * args_main.replay_ratio) + 1  
@@ -459,6 +490,7 @@ if __name__ == '__main__':
     parser_main.add_argument('--val_episodes', default=20, type=int)
     parser_main.add_argument('-g','--all_against_one', default=False, type=str)
     parser_main.add_argument('--all_against_one_bootstrap', default=False, type=str)
+    parser_main.add_argument('--scripted_agent', action="store_true")
     parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', default=False)
     
 
@@ -483,6 +515,10 @@ if __name__ == '__main__':
             )
     else: wandb_run = None
 
+    # scripted agent
+    config_scripted = {"algo": "scripted","use_derivative":False}
+    name_scripted = "scripted_agent"
+    scripted_agent = ScriptedAgent()
 
     config_agents = []
     agents = []
@@ -499,6 +535,12 @@ if __name__ == '__main__':
                 instanciate_agent(config,False,args_main.bootstrap_overwrite[i])
             else:
                 agents.append(instanciate_agent(config,wandb_run))
+
+    # scripted agent
+    if args_main.scripted_agent:
+        names.append(name_scripted)
+        config_agents.append(config_scripted)  
+        agents.append(scripted_agent)   
 
     # All against one
         if args_main.all_against_one:
@@ -567,3 +609,4 @@ if __name__ == '__main__':
             #                     keys=["metric Y", "metric Z"],
             #                     title="Two Random Metrics",
             #                     xname="x units")})
+
