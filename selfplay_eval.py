@@ -267,12 +267,12 @@ def validation(args_main,agents, config_agents, names, env,val_episodes,visualiz
             if i  == j: own = 1
             print("\t",names[j+own],": ",round(last_row[j],4)) 
         win_rates_CSV[i].insert(i,0)
-    
-    df = pd.DataFrame(win_rates_CSV)
-    if args_main.csv_file_name != "":
-        file = args_main.csv_file_name
-    else: file = "-".join(names)+".csv"
-    df.to_csv("self-play/eval/"+file, header=names, index=names)
+    if not args_main.visualize:
+        df = pd.DataFrame(win_rates_CSV)
+        if args_main.csv_file_name != "":
+            file = args_main.csv_file_name
+        else: file = "-".join(names)+".csv"
+        df.to_csv("self-play/eval/"+file, header=names, index=names)
     return
 
 
