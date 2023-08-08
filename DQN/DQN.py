@@ -363,6 +363,20 @@ class DQNAgent(object):
             weights = None
         return to_torch(s),to_torch(a),to_torch(rew),to_torch(s_prime),to_torch(done),idxs, weights
 
+    def save_buffer(self, path):
+        if self._config["per"]:
+            self.buffer.save_transitions(self, path)
+        else:
+            print("not implemented")
+            # self.buffer.save(path)
+
+    def load_buffer(self, path):
+        if self._config["per"]:
+            self.buffer.load_transitions(self, path)
+        else:
+            print("not implemented")
+            # self.buffer.load(path)
+    
     def restore_state(self,state):
         self.Q.load_state_dict(state)
         self._update_target_net()

@@ -25,3 +25,11 @@ class Memory():
 
     def get_all_transitions(self):
         return self.transitions[0:self.size]
+
+    def save(self, filename):
+        np.save(filename, self.get_all_transitions(self))
+    
+    def load(self, filename):  
+        trans = np.load(filename)
+        for tran in trans:
+            self.add_transition(tran)

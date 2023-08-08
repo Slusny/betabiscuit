@@ -258,7 +258,16 @@ class TD3Agent(object):
         #     wandb.watch(self.policy, log_freq=100)
 
     def save_buffer(self, path):
-        self.buffer.save(path)
+        if self._config["per"]:
+            self.buffer.save_transitions(self, path)
+        else:
+            self.buffer.save(path)
+
+    def load_buffer(self, path):
+        if self._config["per"]:
+            self.buffer.load_transitions(self, path)
+        else:
+            self.buffer.load(path)
 
     def _copy_nets(self):
         # Full copy

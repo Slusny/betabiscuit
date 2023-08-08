@@ -31,6 +31,9 @@ class ScriptedAgent():
 
     def store_transition(self,x):
         return
+    
+    def save_buffer(self,x):
+        return
 
 # added more actions
 def discrete_to_continous_action(discrete_action):
@@ -197,6 +200,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite=None):
     return agent
 
 def fill_replay_buffer(agents,env,max_episodes,idx):
+    print("filling replay buffer for each agent with ",max_episodes," samples ... may take a while")
     for i_episode in range(1, max_episodes+1):
 
         while True: # continous loop for visualization
@@ -345,6 +349,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     else:
         pairings = list(itertools.combinations(range(num_agents), 2))
 
+    cycle = 0
     current_pairing = 0
     wandb_steps = [0]*len(pairings) # adjust step for plotting in wandb logging
     
@@ -374,11 +379,12 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     # fill replay buffer with runs with scripted agent
     if args_main.replay_buffer_fill:
         buffer = 1000000
-        ratio = 100
+        ratio = args_main.replay_buffer_fill_ratio
         for idx in range(num_agents):
             fill_replay_buffer(agents,env,buffer//ratio,idx)
 
     while True: # stop manually
+        cycle += 1
         # randomly get pairing of agents
         # idx1, idx2 = random.sample(range(len(agents)), 2)
 
@@ -413,9 +419,11 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
                             log_dict[names[i]+"win_rate"] = round(last_row.mean(),4)
                             log_dict[names[i]+"win_rate_step"] = win_rate_steps[i]
                         wandb.log(log_dict)
-                    # old code
-                    # table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
-                    # log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
+        
+        # save replay buffers
+        if cycle % args_main.save_buffer_interval == 0:
+            for i,agent in enumerate(agents):
+                agent.save_buffer(names[i]+"_buffer_end") 
 
         # inital validation:    
         print("Pre Validating...")
@@ -520,7 +528,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             # save models
             if i_episode % save_interval == 0:
                 agents[idx1].save_agent_wandb(wandb_steps[current_pairing_idx], rewards, lengths, losses,"sp-"+names[idx1])
-                agents[idx2].save_agent_wandb(wandb_steps[current_pairing_idx], rewards, lengths, losses,"sp-"+names[idx2])
+                agents[idx2].save_agent_wandb(wandb_steps[current_pairing_idx], rewards, lengths, losses,"sp-"+names[idx2])           
 
             # logging
             if i_episode % log_interval == 0:
@@ -559,7 +567,7 @@ if __name__ == '__main__':
     parser_main.add_argument('--save_interval', help='when should a model be saved in terms of episodes_per_pair. Should be less or equal to episodes_per_pair.', default=5000, type=int)
     parser_main.add_argument('--max_timesteps', default=350, type=int)
     parser_main.add_argument('--iter_fit', default=10, type=int)
-    parser_main.add_argument('--replay_ratio', default=0., type=float)
+    parser_main.add_argument('--replay_ratio', default=0.25, type=float)
     parser_main.add_argument('--notes', default="",type=str)
     parser_main.add_argument('--wandb', action="store_true")
     parser_main.add_argument('--visualize', action="store_true")
@@ -570,6 +578,8 @@ if __name__ == '__main__':
     parser_main.add_argument('--all_against_one_bootstrap', default=False, type=str)
     parser_main.add_argument('--scripted_agent', action="store_true")
     parser_main.add_argument('--replay_buffer_fill', action="store_true")
+    parser_main.add_argument('--replay_buffer_fill_ratio', default=100, type=int)
+    parser_main.add_argument('--save_buffer_interval', default=10000, type=int)
     parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', default=False)
     
 
@@ -678,6 +688,9 @@ if __name__ == '__main__':
         train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,all_agains_one,loner_idx)
     finally:
         print("closing script")
+        # Save replay buffers
+        for i,agent in enumerate(agents):
+            agent.save_buffer(names[i]+"_buffer_end")
         if wandb_run:
             log_dict = dict()
             for i,table in enumerate(tables):
