@@ -1,3 +1,12 @@
+# First try of self-play with standard reward and no draw control
 python selfplay_eval.py --csv_file_name "improvement_for_gallant-butterfly_in_fresh-resonance.csv" --val_episodes 200 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/fresh-resonance-29sp-gallant-butterfly-13_139_model:v0 betabiscuit/self-play/fresh-resonance-29sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/fresh-resonance-29sp-gallant-butterfly-13_139_model:v20 betabiscuit/self-play/fresh-resonance-29sp-gallant-butterfly-13_139_model:v31
 
+# First try of self-play with simple reward and no draw control
 python selfplay_eval.py --csv_file_name "improvement_for_gallant-butterfly_in_eager-butterfly.csv" --val_episodes 200 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v0 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v20 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v31
+
+
+
+
+
+# Start scripts for self-play 
+python selfplay.py --max_episodes_per_pair 1000 --save_interval 1000 --max_timesteps 350 --notes "self play simple reward all against one" --agents self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/dulcet-leaf-12_305.json --wandb --val_episodes 100 --simple_reward --train_only_one --save_buffer_interval 5 --replay_ratio 100 --replay_buffer_fill --scripted_agent --all_against_one self-play/agents/gallant-butterfly-13_139.json 

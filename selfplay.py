@@ -331,7 +331,7 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
     num_agents = len(agents)
     if all_agains_one:
         win_rates = [[]]*(num_agents-1)
-        win_rate_steps = [0]*len(names-1) # adjust step for plotting in wandb logging
+        win_rate_steps = [0]*len(names)-1) # adjust step for plotting in wandb logging
     else:
         win_rates = np.empty((num_agents,num_agents-1,1)).tolist()
         for i in range(num_agents):
