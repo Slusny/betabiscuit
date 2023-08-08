@@ -194,6 +194,7 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps,visualize,sleep
 
     length = []
     rewards = []
+    touches = []
     for i_episode in range(1, val_episodes+1):
         ob1, _info = env.reset()
         ob2 = env.obs_agent_two()
@@ -203,7 +204,6 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps,visualize,sleep
         total_reward=0
         agent1_touch_puck = []
         agent2_touch_puck = []
-        touches = []
         for t in range(max_timesteps):
 
             if visualize: env.render()
