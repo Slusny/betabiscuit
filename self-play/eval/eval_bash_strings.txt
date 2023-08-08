@@ -42,11 +42,12 @@ fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203
 	 fallen-shape-8_203_betabiscuit/self-play/fresh-resonance-29sp-fallen-shape-8_203_model:v20 :  0.5
 
 
-Hardy SUN - Normal Reward
+Hardy SUN - Normal Reward (Buggy DQN, with draw control)  -sp1
+#! Crashed
 # First try of self-play with simple reward and no draw control
 python selfplay_eval.py --csv_file_name "improvement_for_gallant-butterfly_in_eager-butterfly.csv" --val_episodes 200 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v0 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v20 betabiscuit/self-play/eager-butterfly-28sp-gallant-butterfly-13_139_model:v31
 
-
+Wandering-Water - Simple Reward (Buggy DQN, with draw control) - sp2_simple_reward
 
 ## Morning Silence (with Bug) -> Canceled
 # All Against Butterfly - Scripted Agent
