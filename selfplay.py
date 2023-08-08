@@ -199,10 +199,10 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite=None):
                         )
     return agent
 
-def fill_replay_buffer(agents,env,max_episodes,idx):
+def fill_replay_buffer(agents,env,max_samples,idx):
     print("filling replay buffer for each agent with ",max_episodes," samples ... may take a while")
-    for i_episode in range(1, max_episodes+1):
-
+    num_samples = 0
+    while True:
         while True: # continous loop for visualization
             ob1, _info = env.reset()
             ob2 = env.obs_agent_two()
@@ -210,7 +210,6 @@ def fill_replay_buffer(agents,env,max_episodes,idx):
             past_obs1 = ob1.copy()
             past_obs2 = ob2.copy()
             total_reward=0
-            added_transitions = 0
 
             agent1_touch_puck = []
             agent2_touch_puck = []
@@ -260,10 +259,11 @@ def fill_replay_buffer(agents,env,max_episodes,idx):
             
             if sum(agent1_touch_puck) + sum(agent2_touch_puck) > 0.: A_puck_got_touched = True
             if A_puck_got_touched : 
-                added_transitions = len(temp_buffer)
+                num_samples += len(temp_buffer)
                 for data in temp_buffer:
                     store_transition(agents,config_agents,idx,data[0*2],data[1*2],data[2*2],data[3*2],data[4*2],data[5*2])
                 break
+        if max_samples < num_samples: return print("\t done")
 
 def add_derivative(obs,pastobs):
     return np.append(obs,(obs-pastobs)[derivative_indices])
