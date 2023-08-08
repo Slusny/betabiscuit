@@ -229,7 +229,7 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps,visualize,sleep
     print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw_rate, " max length: ",np.array(length).max(), " avg length: ",np.array(length).mean())
     return win_rate, draw_rate
 
-def validation(args_main,agents, config_agents, names, env,val_episodes,visualize,sleep):
+def validation(args_main,agents, config_agents, names, env,val_episodes,visualize,sleep,maxtimesteps):
     
     num_agents = len(agents)
     win_rates = np.empty((num_agents,num_agents-1)).tolist()
@@ -248,7 +248,7 @@ def validation(args_main,agents, config_agents, names, env,val_episodes,visualiz
 
         # inital validation:    
         print("Validating...")
-        win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,350,visualize,sleep)
+        win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,maxtimesteps,visualize,sleep)
         # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
         if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
         else:              idx2_w = idx2    ; idx1_w = idx1 -1
@@ -285,6 +285,7 @@ if __name__ == '__main__':
     parser_main.add_argument('-v','--visualize', action="store_true")
     parser_main.add_argument('-s','--sleep', default=0., type=float)
     parser_main.add_argument('--val_episodes', default=50, type=int)
+    parser_main.add_argument('--max_timesteps', default=350, type=int)
 
     parser_main.add_argument('--csv_file_name', default="", type=str)
 
@@ -340,5 +341,5 @@ if __name__ == '__main__':
     else:
         env = gym.make(env_name)
 
-    validation(args_main,agents, config_agents,names, env, args_main.val_episodes,args_main.visualize,args_main.sleep)
+    validation(args_main,agents, config_agents,names, env, args_main.val_episodes,args_main.visualize,args_main.sleep,max_timesteps)
    
