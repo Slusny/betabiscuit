@@ -669,7 +669,7 @@ if __name__ == '__main__':
             config = json.load(f)
             config_agents.append(config) 
             if args_main.all_against_one_bootstrap:
-                instanciate_agent(config,wandb_run,args_main.all_against_one_bootstrap,cpu=args_main.cpu)
+                agents.append(instanciate_agent(config,wandb_run,args_main.all_against_one_bootstrap,cpu=args_main.cpu))
             else:
                 agents.append(instanciate_agent(config,wandb_run,cpu=args_main.cpu))
         loner_idx = len(names)-1
