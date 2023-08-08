@@ -13,7 +13,7 @@ import time
 import random
 import itertools
 import math
-
+import pandas as pd 
    
 # added more actions
 def discrete_to_continous_action(discrete_action):
@@ -229,10 +229,10 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps,visualize,sleep
     print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw_rate, " max length: ",np.array(length).max(), " avg length: ",np.array(length).mean())
     return win_rate, draw_rate
 
-def validation(agents, config_agents, names, env,val_episodes,visualize,sleep):
+def validation(args_main,agents, config_agents, names, env,val_episodes,visualize,sleep):
     
     num_agents = len(agents)
-    win_rates = np.empty((num_agents,num_agents-1,1)).tolist()
+    win_rates = np.empty((num_agents,num_agents-1)).tolist()
     for i in range(num_agents):
         for j in range(num_agents-1):
             win_rates[i][j].pop()
@@ -252,10 +252,13 @@ def validation(agents, config_agents, names, env,val_episodes,visualize,sleep):
         # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
         if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
         else:              idx2_w = idx2    ; idx1_w = idx1 -1
-        win_rates[idx1][idx2_w].append(win_rate)
-        win_rates[idx2][idx1_w].append(1-win_rate)
+        # win_rates[idx1][idx2_w].append(win_rate)
+        # win_rates[idx2][idx1_w].append(1-win_rate)
+        win_rates[idx1][idx2_w] = win_rate
+        win_rates[idx2][idx1_w] = 1-win_rate
     print("\n")
     print("\n")
+    win_rates_CSV = win_rates.copy()
     for i in range(num_agents):
         last_row = np.array(win_rates[i])[:,-1]
         print(names[i] + " overall win rate: ",round(last_row.mean(),4))
@@ -263,6 +266,13 @@ def validation(agents, config_agents, names, env,val_episodes,visualize,sleep):
         for j in range(num_agents -1):
             if i  == j: own = 1
             print("\t",names[j+own],": ",round(last_row[j],4)) 
+        win_rates_CSV.insert(i,0)
+    
+    df = pd.DataFrame(win_rates_CSV)
+    if args_main.csv_file_name != "":
+        file = args_main.csv_file_name
+    else: file = "-".join(names)+".csv"
+    df.to_csv("self-play/eval/"+file, header=names, index=names)
     return
 
 
@@ -275,6 +285,8 @@ if __name__ == '__main__':
     parser_main.add_argument('-v','--visualize', action="store_true")
     parser_main.add_argument('-s','--sleep', default=0., type=float)
     parser_main.add_argument('--val_episodes', default=50, type=int)
+
+    parser_main.add_argument('--csv_file_name', default="", type=str)
 
 
     args_main = parser_main.parse_args()
@@ -328,5 +340,5 @@ if __name__ == '__main__':
     else:
         env = gym.make(env_name)
 
-    validation(agents, config_agents,names, env, args_main.val_episodes,args_main.visualize,args_main.sleep)
+    validation(args_main,agents, config_agents,names, env, args_main.val_episodes,args_main.visualize,args_main.sleep)
    

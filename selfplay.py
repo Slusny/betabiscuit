@@ -231,10 +231,15 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
 def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max_timesteps, log_interval,save_interval,val_episodes,tables,all_agains_one,loner_idx):
     
     num_agents = len(agents)
-    win_rates = np.empty((num_agents,num_agents-1,1)).tolist()
-    for i in range(num_agents):
-        for j in range(num_agents-1):
-            win_rates[i][j].pop()
+    if all_agains_one:
+        win_rates = [[]]*(num_agents-1)
+        win_rate_steps = [0]*len(names-1) # adjust step for plotting in wandb logging
+    else:
+        win_rates = np.empty((num_agents,num_agents-1,1)).tolist()
+        for i in range(num_agents):
+            for j in range(num_agents-1):
+                win_rates[i][j].pop()
+        win_rate_steps = [0]*len(names) # adjust step for plotting in wandb logging
 
     if all_agains_one:
         print("All against One")
@@ -244,20 +249,29 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
 
     current_pairing = 0
     wandb_steps = [0]*len(pairings) # adjust step for plotting in wandb logging
-    win_rate_steps = [0]*len(names) # adjust step for plotting in wandb logging
+    
 
     # Set up wandb logging metrics
     if args_main.wandb:
-        for pair in pairings:
-            idx1, idx2 = pair
-            wandb.define_metric(names[idx1] +"-"+ names[idx2]+"_step")
-            wandb.define_metric(names[idx1]+"_loss", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
-            wandb.define_metric(names[idx2]+"_loss", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
-            wandb.define_metric(names[idx1] +"-"+ names[idx2] +"_reward", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
-            wandb.define_metric(names[idx1] +"-"+ names[idx2] +"length", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
-        for i,name in enumerate(names):
-            wandb.define_metric(name+"win_rate_step")
-            wandb.define_metric(name+"win_rate", step_metric=name+"win_rate_step")
+        if all_agains_one:
+            for i in range(num_agents -1):
+                wandb.define_metric(names[i]+"_step")
+                wandb.define_metric(names[i]+"_loss", step_metric=names[i]+"_step")
+                wandb.define_metric(names[i]+"_reward", step_metric=names[i]+"_step")
+                wandb.define_metric(names[i]+"length", step_metric=names[i]+"_step")
+                wandb.define_metric(names[i]+"win_rate_step")
+                wandb.define_metric(names[i]+"win_rate", step_metric=name+"win_rate_step")
+        else:   
+            for pair in pairings:
+                idx1, idx2 = pair
+                wandb.define_metric(names[idx1] +"-"+ names[idx2]+"_step")
+                wandb.define_metric(names[idx1]+"_loss", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
+                wandb.define_metric(names[idx2]+"_loss", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
+                wandb.define_metric(names[idx1] +"-"+ names[idx2] +"_reward", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
+                wandb.define_metric(names[idx1] +"-"+ names[idx2] +"length", step_metric=names[idx1] +"-"+ names[idx2]+"_step")
+            for i,name in enumerate(names):
+                wandb.define_metric(name+"win_rate_step")
+                wandb.define_metric(name+"win_rate", step_metric=name+"win_rate_step")
 
     while True: # stop manually
         # randomly get pairing of agents
@@ -275,15 +289,25 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         # log the last 2 validations (pre and post) to wandb at the start of a new pairing cycle
         if current_pairing_idx == 0 and current_pairing != 0:
             if args_main.wandb:
-                for l in [2,1]:
-                    log_dict = dict()
-                    for i,table in enumerate(tables):
-                        last_row = np.array(win_rates[i])[:,-l]
-                        win_rate_steps[i] += 1
-                        table.add_data(*last_row)
-                        log_dict[names[i]+"win_rate"] = round(last_row.mean(),4)
-                        log_dict[names[i]+"win_rate_step"] = win_rate_steps[i]
-                    wandb.log(log_dict)
+                if all_agains_one:
+                    for l in [2,1]:
+                        log_dict = dict()
+                        for j in range(num_agents-1):
+                            last_row = win_rates[j][-l]
+                            win_rate_steps[j] += 1
+                            log_dict[names[j]+"win_rate"] = round(last_row)
+                            log_dict[names[j]+"win_rate_step"] = win_rate_steps[j]
+                        wandb.log(log_dict)
+                else:
+                    for l in [2,1]:
+                        log_dict = dict()
+                        for i,table in enumerate(tables):
+                            last_row = np.array(win_rates[i])[:,-l]
+                            win_rate_steps[i] += 1
+                            table.add_data(*last_row)
+                            log_dict[names[i]+"win_rate"] = round(last_row.mean(),4)
+                            log_dict[names[i]+"win_rate_step"] = win_rate_steps[i]
+                        wandb.log(log_dict)
                     # old code
                     # table.add_data(*(win_rates[i][:i]+win_rates[i][i+1:]))
                     # log_dict[names[i]+"win_rate"] = np.array(win_rates[i])[:,-1].mean()[0]
@@ -294,11 +318,14 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         #if draw rate is too high or to low, we adjust the timesteps to drive episodes to conclusion
         if draw_rate > 0.10 and timesteps[current_pairing_idx] <= timestep_max : timesteps[current_pairing_idx] += 50
         if draw_rate < 0.05: timesteps[current_pairing_idx] -= 25
-        # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
-        if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
-        else:              idx2_w = idx2    ; idx1_w = idx1 -1
-        win_rates[idx1][idx2_w].append(win_rate)
-        win_rates[idx2][idx1_w].append(1-win_rate)
+        if all_agains_one:
+            win_rates[idx2_w].append(win_rate)
+        else:
+            # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
+            if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
+            else:              idx2_w = idx2    ; idx1_w = idx1 -1
+            win_rates[idx1][idx2_w].append(win_rate)
+            win_rates[idx2][idx1_w].append(1-win_rate)
         
         # logging variables
         rewards = []
@@ -398,11 +425,14 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
         #if draw rate is too high or to low, we adjust the timesteps
         if draw_rate > 0.10 and timesteps[current_pairing_idx] <= timestep_max : timesteps[current_pairing_idx] += 50
         if draw_rate < 0.05: timesteps[current_pairing_idx] -= 25
-        # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
-        if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
-        else:              idx2_w = idx2    ; idx1_w = idx1 -1
-        win_rates[idx1][idx2_w].append(win_rate)
-        win_rates[idx2][idx1_w].append(1-win_rate)
+        if all_agains_one:
+            win_rates[idx2_w].append(win_rate)
+        else:
+            # the array doesn't contain the diagonal (win_rate to it self) so we need to shift indices
+            if idx1 < idx2 :   idx2_w = idx2 -1 ; idx1_w = idx1
+            else:              idx2_w = idx2    ; idx1_w = idx1 -1
+            win_rates[idx1][idx2_w].append(win_rate)
+            win_rates[idx2][idx1_w].append(1-win_rate)
                 
         # Prepare next pair
         print("\n") 
@@ -428,6 +458,7 @@ if __name__ == '__main__':
     parser_main.add_argument('--simple_reward', action="store_true")
     parser_main.add_argument('--val_episodes', default=20, type=int)
     parser_main.add_argument('-g','--all_against_one', default=False, type=str)
+    parser_main.add_argument('--all_against_one_bootstrap', default=False, type=str)
     parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', default=False)
     
 
@@ -475,7 +506,10 @@ if __name__ == '__main__':
             with open(file, 'r') as f:
                 config = json.load(f)
                 config_agents.append(config) 
-                agents.append(instanciate_agent(config,wandb_run)) # missing bootstrap
+                if args_main.all_against_one_bootstrap:
+                    instanciate_agent(config,False,args_main.all_against_one_bootstrap)
+                else:
+                    agents.append(instanciate_agent(config,wandb_run))
             loner_idx = len(names)-1
             all_agains_one = True
             print("all against one !")
