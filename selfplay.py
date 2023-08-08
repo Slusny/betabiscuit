@@ -729,28 +729,33 @@ if __name__ == '__main__':
     else:
         env = gym.make(env_name)
 
-    # try:
+    try:
         
-    #     if args_main.wandb:
-    #         tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
-    #     else :tables = None
-    #     train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,all_agains_one,loner_idx)
-    # finally:
-    #     print("closing script")
-    #     # Save replay buffers
-    #     for i,agent in enumerate(agents):
-    #         date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
-    #         agent.save_buffer("self-play/buffers/"+run_name+"/"+names[i]+"_buffer_end_"+date_str)
-    #     if wandb_run:
-    #         log_dict = dict()
-    #         for i,table in enumerate(tables):
-    #             log_dict[names[i]] = table
-    #         wandb_run.log(log_dict)
+        if args_main.wandb:
+            tables = [wandb.Table(columns=(names[:i] + names[i+1:])) for i in range(len(agents))]
+        else :tables = None
+        train(agents, config_agents,names, env, args_main.iter_fit, args_main.max_episodes_per_pair, args_main.max_timesteps, args_main.log_interval,args_main.save_interval,args_main.val_episodes,tables,all_agains_one,loner_idx)
+    finally:
+        print("closing script")
+        # Save replay buffers
+        for i,agent in enumerate(agents):
+            date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
+            agent.save_buffer("self-play/buffers/"+run_name+"/"+names[i]+"_buffer_end_"+date_str)
+        # Save agents
+        for i,agent in enumerate(agents):
+            date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
+            agent.save_agent_wandb("end", "_", "_", date_str,"sp-"+names[i])
+
+        if wandb_run:
+            log_dict = dict()
+            for i,table in enumerate(tables):
+                log_dict[names[i]] = table
+            wandb_run.log(log_dict)
            
-    #         # wandb.log({"my_custom_id" : wandb.plot.line_series(
-    #         #                     xs=[0, 1, 2, 3, 4], 
-    #         #                     ys=[[10, 20, 30, 40, 50], [0.5, 11, 72, 3, 41]],
-    #         #                     keys=["metric Y", "metric Z"],
-    #         #                     title="Two Random Metrics",
-    #         #                     xname="x units")})
+            # wandb.log({"my_custom_id" : wandb.plot.line_series(
+            #                     xs=[0, 1, 2, 3, 4], 
+            #                     ys=[[10, 20, 30, 40, 50], [0.5, 11, 72, 3, 41]],
+            #                     keys=["metric Y", "metric Z"],
+            #                     title="Two Random Metrics",
+            #                     xname="x units")})
 
