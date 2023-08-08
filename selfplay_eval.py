@@ -226,7 +226,6 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps,visualize,sleep
             ob1=ob_new1
             ob2=ob_new2
             if done or trunc: break
-        
         rewards.append(total_reward)
         length.append(t)
         touches.append((sum(agent1_touch_puck) + sum(agent2_touch_puck)) > 0.0)
