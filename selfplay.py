@@ -380,7 +380,6 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             fill_replay_buffer(agents,env,buffer//ratio,idx)
 
     while True: # stop manually
-        cycle += 1
         # randomly get pairing of agents
         # idx1, idx2 = random.sample(range(len(agents)), 2)
 
@@ -423,6 +422,8 @@ def train(agents, config_agents,names, env, iter_fit, max_episodes_per_pair, max
             for i,agent in enumerate(agents):
                 agent.save_buffer("self-play/buffers/"+run_name+"/"+names[i]+"_buffer_"+str(cycle)+"_"+date_str) 
 
+        cycle += int(current_pairing_idx == 0)
+        
         # inital validation:    
         print("Pre Validating...")
         win_rate, draw_rate = validate(agents,names, idx1, idx2,val_episodes,timesteps[current_pairing_idx])

@@ -27,7 +27,7 @@ class Memory():
         return self.transitions[0:self.size]
 
     def save(self, filename):
-        np.save(filename, self.get_all_transitions(self))
+        np.save(filename, self.get_all_transitions())
     
     def load(self, filename):  
         trans = np.load(filename)
