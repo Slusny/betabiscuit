@@ -211,6 +211,7 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
 
     length = []
     rewards = []
+    touches = []
     for i_episode in range(1, val_episodes+1):
         ob1, _info = env.reset()
         ob2 = env.obs_agent_two()
@@ -218,6 +219,8 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
         past_obs1 = ob1.copy()
         past_obs2 = ob2.copy()
         total_reward=0
+        agent1_touch_puck = []
+        agent2_touch_puck = []
         for t in range(max_timesteps):
             
             a1, a1_s = act_val(ob1,past_obs1,agents,config_agents,idx1)
@@ -228,6 +231,9 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
 
             reward = env._compute_reward()/10
 
+            agent1_touch_puck.append(env._get_info()["reward_touch_puck"])
+            agent2_touch_puck.append(env.get_info_agent_two()["reward_touch_puck"])
+
             total_reward+= reward
             past_obs1 = ob1
             past_obs2 = ob2
@@ -236,11 +242,14 @@ def validate(agents,names, idx1, idx2,val_episodes,max_timesteps):
             if done or trunc: break
         rewards.append(total_reward)
         length.append(t)
+        touches.append((sum(agent1_touch_puck) + sum(agent2_touch_puck)) > 0.0)
     win_rate = np.array(rewards)
     draw_rate = np.sum(win_rate == 0) / win_rate.size
+    draw_rate_with_touch = np.sum(win_rate[touches]) / win_rate[touches].size
+    touch_rate = round(sum(touches) / len(touches),2)
     win_rate = (win_rate + 1 ) /2
     win_rate = win_rate.mean().round(3)
-    print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw_rate, " max length: ",np.array(length).max(), " avg length: ",np.array(length).mean())
+    print("\t win rate ",names[idx1], " vs ",names[idx2], ": ",np.round(win_rate,2), " - draws: ",draw_rate, ", touch_rate: ",touch_rate, ", draw_rate_with_touch: ",draw_rate_with_touch," max length: ",np.array(length).max(), " avg length: ",np.array(length).mean())
     return win_rate, draw_rate
 
 
