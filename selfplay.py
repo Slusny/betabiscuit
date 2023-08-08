@@ -200,7 +200,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite=None):
     return agent
 
 def fill_replay_buffer(agents,env,max_samples,idx):
-    print("filling replay buffer for each agent with ",max_episodes," samples ... may take a while")
+    print("filling replay buffer for each agent with ",max_samples," samples ... may take a while")
     num_samples = 0
     while True:
         while True: # continous loop for visualization
@@ -242,12 +242,7 @@ def fill_replay_buffer(agents,env,max_samples,idx):
                 # if(self._config["dense_reward"]): 
                 #     reward = reward + _info["reward_closeness_to_puck"] + _info["reward_touch_puck"] + _info["reward_puck_direction"]
                 total_reward+= reward
-                
-                if not args_main.visualize:
-                    temp_buffer.append((ob1,ob2,past_obs1,past_obs2,a1_s,a2_s,reward1,reward2,ob_new1,ob_new2,done,done))
-                else:
-                    env.render()
-                    time.sleep(args_main.sleep)                        
+                temp_buffer.append((ob1,ob2,past_obs1,past_obs2,a1_s,a2_s,reward1,reward2,ob_new1,ob_new2,done,done))                      
                 
                 # added_transitions += 1
                 past_obs1 = ob1
