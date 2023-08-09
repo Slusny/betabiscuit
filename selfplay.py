@@ -608,6 +608,8 @@ if __name__ == '__main__':
     parser_main.add_argument('--cpu', action="store_true")
     parser_main.add_argument('--collect_buffer_from_run', default=None, type=str)
     parser_main.add_argument('--buffer_identifyer', default="", type=str)
+    parser_main.add_argument('--weak', action="store_true")
+    parser_main.add_argument('--strong', action="store_true")
     
 
     args_main = parser_main.parse_args()
@@ -671,7 +673,24 @@ if __name__ == '__main__':
     if args_main.scripted_agent:
         names.append(name_scripted)
         config_agents.append(config_scripted)  
-        agents.append(scripted_agent)   
+        agents.append(scripted_agent)  
+
+    
+    if( args_main.weak):
+        config_scripted_weak = {"algo": "scripted_weak","use_derivative":False}
+        name_scripted_weak = "scripted_agent_weak"
+        scripted_agent_weak = ScriptedAgent(args_main.weak)
+        names.append(name_scripted_weak)
+        config_agents.append(config_scripted_weak)  
+        agents.append(scripted_agent_weak)
+
+    if( args_main.strong): 
+        config_scripted_strong = {"algo": "scripted_strong","use_derivative":False}
+        name_scripted_strong = "scripted_agent_strong"
+        scripted_agent_strong = ScriptedAgent(False)
+        names.append(name_scripted_strong)
+        config_agents.append(config_scripted_strong)  
+        agents.append(scripted_agent_strong) 
 
     # All against one
     if args_main.all_against_one:

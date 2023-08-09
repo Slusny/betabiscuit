@@ -1,4 +1,4 @@
-python selfplay_eval.py --csv_file_name "best_dqn.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v449 betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v64 betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v14 betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16
+python selfplay_eval.py --weak --strong --csv_file_name "best_dqn.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v458 betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v84 betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v15 betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v20
 
 
 gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v318 overall win rate:  0.75
@@ -13,4 +13,56 @@ gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterf
 
 
 inter celestial
-python selfplay_eval.py --csv_file_name "best_dqn.csv" --val_episodes 150 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b "betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139" betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v3 betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16
+python selfplay_eval.py --csv_file_name "best_dqn.csv" --val_episodes 150 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b "betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139" betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v3 betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 
+celestial
+
+
+gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v458 overall win rate:  0.4317
+	 gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v84 :  0.445
+	 gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v15 :  0.5
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 :  0.365
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v20 :  0.42
+	 scripted_agent_weak :  0.45
+	 scripted_agent_strong :  0.41
+gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v84 overall win rate:  0.3875
+	 gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v458 :  0.555
+	 gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v15 :  0.53
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 :  0.215
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v20 :  0.29
+	 scripted_agent_weak :  0.355
+	 scripted_agent_strong :  0.38
+gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v15 overall win rate:  0.3917
+	 gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v458 :  0.5
+	 gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v84 :  0.47
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 :  0.325
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v20 :  0.31
+	 scripted_agent_weak :  0.375
+	 scripted_agent_strong :  0.37
+gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 overall win rate:  0.7392
+	 gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v458 :  0.635
+	 gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v84 :  0.785
+	 gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v15 :  0.675
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v20 :  0.53
+	 scripted_agent_weak :  0.915
+	 scripted_agent_strong :  0.895
+gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v20 overall win rate:  0.6825
+	 gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v458 :  0.58
+	 gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v84 :  0.71
+	 gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v15 :  0.69
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 :  0.47
+	 scripted_agent_weak :  0.79
+	 scripted_agent_strong :  0.855
+scripted_agent_weak overall win rate:  0.415
+	 gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v458 :  0.55
+	 gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v84 :  0.645
+	 gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v15 :  0.625
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 :  0.085
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v20 :  0.21
+	 scripted_agent_strong :  0.375
+scripted_agent_strong overall win rate:  0.4525
+	 gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v458 :  0.59
+	 gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v84 :  0.62
+	 gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v15 :  0.63
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 :  0.105
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v20 :  0.145
+	 scripted_agent_weak :  0.625
