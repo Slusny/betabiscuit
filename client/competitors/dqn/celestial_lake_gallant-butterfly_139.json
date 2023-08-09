@@ -40,7 +40,7 @@
   "hidden_sizes_critic": "[128,128,64]",
   "use_derivative": true,
   "per": true,
-  "bootstrap": "betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16",
+  "bootstrap": "betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v19",
   "hil": false,
   "bc": false,
   "bc_lambda": 2.0,
