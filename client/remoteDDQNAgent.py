@@ -36,6 +36,8 @@ class RemoteBasicOpponent(RemoteControllerInterface):
         if self.use_derivative:
             if self.newGame:
                 print("new game")
+                print(obs.shape)
+                print(obs)
                 self.newGame = False
                 self.pastobs = obs.copy()
             a = self.agent.act(self.add_derivative(obs,self.pastobs),eps=0.0)
