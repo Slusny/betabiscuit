@@ -192,8 +192,8 @@ if __name__ == '__main__':
     controller = RemoteBasicOpponent(agent)
 
     # Play n (None for an infinite amount) games and quit
-    client = Client(username='stud35',
-                    password='uf4Aephei0',
+    client = Client(username='zxogq27',
+                    password='kC-paBp%',
                     controller=controller,
                     output_path='recordings/dqn', # rollout buffer with finished games will be saved in here
                     interactive=False,
