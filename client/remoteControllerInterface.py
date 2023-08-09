@@ -11,7 +11,7 @@ class RemoteControllerInterface(ABC):
         """
         Please use the identifier to specify the Algorithm you are using
         """
-        self.newGame = True
+
         self.identifier = identifier
 
     @abstractmethod
@@ -32,7 +32,7 @@ class RemoteControllerInterface(ABC):
         to reset the policy before a new game
         """
 
-        self.newGame = True
+        pass
 
     def after_game_ends(self) -> None:
         """
