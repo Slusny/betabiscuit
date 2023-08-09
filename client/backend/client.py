@@ -87,7 +87,7 @@ class Client:
         self.current_game = None
 
         self.num_games = num_games
-        self.played_games = 0
+        self.played_games = 0.
 
         self.network_interface = NetworkInterface(
                                                   client=self,
@@ -235,7 +235,7 @@ escape.
         action = self.controller.remote_act(np.asarray(ob)).tolist()
         if self.verbose and done:
             self.count += 1
-            self.mean = self.mean*(self.count-1)/self.count + (info['winner']+1)/2/self.count
+            self.mean = self.mean*(self.count-1)/self.count + float(info['winner'])/self.count
             print(f"Winner: {info['winner']}")
         try:
             self.current_game.add_transition(next_obs=ob,
