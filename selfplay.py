@@ -624,10 +624,14 @@ if __name__ == '__main__':
     # for key in ['notes','tags','wandb']:del config_wandb[key]
     # del config_wandb
     # if args["wandb_resume is not None :
+    if args_main.agents:
+        wandb_note = " - ".join(args_main.agents)
+    else:
+        wandb_note="fine tuneing on scripted agents"
     if args_main.wandb: 
         wandb_run = wandb.init(project="self-play",
             config=config_wandb,
-            notes=" - ".join(args_main.agents),
+            notes=wandb_note,
             # resume="must",
             # id=args["wandb_resume
             )
