@@ -45,8 +45,8 @@ class RemoteBasicOpponent(RemoteControllerInterface):
             a = self.agent.act(obs,eps=0.0)
         if self.algo == "dqn":
             a = self.discrete_to_continous_action(int(a))
-        print(a)
-        print(type(a))
+        # print(a)
+        # print(type(a))
         return a
         return np.array([0.0,0.0,0.0,0.0])
 
