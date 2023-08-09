@@ -179,7 +179,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite=None, cpu=False):
 
 if __name__ == '__main__':
     parser_main = argparse.ArgumentParser()
-    parser_main.add_argument('-c','--config', default="smart-voice_187_gallant-butterfly_139.json", help='json config files defining an agent')
+    parser_main.add_argument('-c','--config', default="competitors/smart-voice_187_gallant-butterfly_139.json", help='json config files defining an agent')
     parser_main.add_argument('--cpu',action='store_true', help='json config files defining an agent')
     parser_main.add_argument('--games', default=10, help='json config files defining an agent')
     args = parser_main.parse_args()
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     client = Client(username='yourusername',
                     password='1234',
                     controller=controller,
-                    output_path='competition/dqn', # rollout buffer with finished games will be saved in here
+                    output_path='recordings/dqn', # rollout buffer with finished games will be saved in here
                     interactive=False,
                     op='start_queuing',
                     # server_addr='localhost',
