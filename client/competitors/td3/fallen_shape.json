@@ -40,7 +40,7 @@
   "hidden_sizes_critic": "[200,200]",
   "use_derivative": false,
   "per": false,
-  "bootstrap": "betabiscuit/self-play/dazzling-sky-102sp-fallen-shape-8_203_model:v2 betabiscuit/hockey - td3/fallen-shape-8_model:v203",
+  "bootstrap": "betabiscuit/hockey - td3/fallen-shape-8_model:v203",
   "hil": false,
   "bc": false,
   "bc_lambda": 2.0,
