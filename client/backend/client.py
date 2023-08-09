@@ -235,7 +235,7 @@ escape.
         action = self.controller.remote_act(np.asarray(ob)).tolist()
         if self.verbose and done:
             self.count += 1
-            self.mean = self.mean*(self.count-1)/self.count + info['winner']/self.count
+            self.mean = self.mean*(self.count-1)/self.count + (info['winner']+1)/2/self.count
             print(f"Winner: {info['winner']}")
         try:
             self.current_game.add_transition(next_obs=ob,
