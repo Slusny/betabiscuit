@@ -61,6 +61,8 @@ class Client:
 
         self.interactive = interactive
         self.op = op
+        self.mean = 0
+        self.count=0
 
         self.username = username
         self.password = password
@@ -232,6 +234,8 @@ escape.
 
         action = self.controller.remote_act(np.asarray(ob)).tolist()
         if self.verbose and done:
+            self.count += 1
+            self.mean = self.mean*(self.count-1)/self.count + info['winner']/self.count
             print(f"Winner: {info['winner']}")
         try:
             self.current_game.add_transition(next_obs=ob,
@@ -276,6 +280,7 @@ escape.
 
         if self.verbose:
                 print(f"Winner: {info['winner']}")
+                print("mean: ",self.mean)
                 print(f'{result["games_played"]} games played. You won {result["games_won"]} games. You lost {result["games_lost"]} games. {result["games_drawn"]} game(s) end in a draw.')
         self.current_game.add_transition(next_obs=ob,
                                          next_action=None,

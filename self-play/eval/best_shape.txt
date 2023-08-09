@@ -25,3 +25,55 @@ fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_
 	 fallen-shape-8_203_betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v47 :  0.527
 	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v30 :  0.48
 	 fallen-shape-8_203_betabiscuit/self-play/scarlet-deluge-94sp-fallen-shape-8_203_model:v22 :  0.537
+
+
+
+fallen-shape-8_203_betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v68 overall win rate:  0.496
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v37 :  0.553
+	 fallen-shape-8_203_betabiscuit/self-play/scarlet-deluge-94sp-fallen-shape-8_203_model:v34 :  0.593
+	 fallen-shape-8_203_betabiscuit/self-play/chocolate-morning-95sp-fallen-shape-8_203_model:v36 :  0.593
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.457
+	 scripted_agent_weak :  0.363
+	 scripted_agent_strong :  0.417
+fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v37 overall win rate:  0.4532
+	 fallen-shape-8_203_betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v68 :  0.447
+	 fallen-shape-8_203_betabiscuit/self-play/scarlet-deluge-94sp-fallen-shape-8_203_model:v34 :  0.53
+	 fallen-shape-8_203_betabiscuit/self-play/chocolate-morning-95sp-fallen-shape-8_203_model:v36 :  0.513
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.483
+	 scripted_agent_weak :  0.373
+	 scripted_agent_strong :  0.373
+fallen-shape-8_203_betabiscuit/self-play/scarlet-deluge-94sp-fallen-shape-8_203_model:v34 overall win rate:  0.419
+	 fallen-shape-8_203_betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v68 :  0.407
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v37 :  0.47
+	 fallen-shape-8_203_betabiscuit/self-play/chocolate-morning-95sp-fallen-shape-8_203_model:v36 :  0.5
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.45
+	 scripted_agent_weak :  0.327
+	 scripted_agent_strong :  0.36
+fallen-shape-8_203_betabiscuit/self-play/chocolate-morning-95sp-fallen-shape-8_203_model:v36 overall win rate:  0.4085
+	 fallen-shape-8_203_betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v68 :  0.407
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v37 :  0.487
+	 fallen-shape-8_203_betabiscuit/self-play/scarlet-deluge-94sp-fallen-shape-8_203_model:v34 :  0.5
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.417
+	 scripted_agent_weak :  0.297
+	 scripted_agent_strong :  0.343
+fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 overall win rate:  0.4933
+	 fallen-shape-8_203_betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v68 :  0.543
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v37 :  0.517
+	 fallen-shape-8_203_betabiscuit/self-play/scarlet-deluge-94sp-fallen-shape-8_203_model:v34 :  0.55
+	 fallen-shape-8_203_betabiscuit/self-play/chocolate-morning-95sp-fallen-shape-8_203_model:v36 :  0.583
+	 scripted_agent_weak :  0.377
+	 scripted_agent_strong :  0.39
+scripted_agent_weak overall win rate:  0.6005
+	 fallen-shape-8_203_betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v68 :  0.637
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v37 :  0.627
+	 fallen-shape-8_203_betabiscuit/self-play/scarlet-deluge-94sp-fallen-shape-8_203_model:v34 :  0.673
+	 fallen-shape-8_203_betabiscuit/self-play/chocolate-morning-95sp-fallen-shape-8_203_model:v36 :  0.703
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.623
+	 scripted_agent_strong :  0.34
+scripted_agent_strong overall win rate:  0.6295
+	 fallen-shape-8_203_betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v68 :  0.583
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v37 :  0.627
+	 fallen-shape-8_203_betabiscuit/self-play/scarlet-deluge-94sp-fallen-shape-8_203_model:v34 :  0.64
+	 fallen-shape-8_203_betabiscuit/self-play/chocolate-morning-95sp-fallen-shape-8_203_model:v36 :  0.657
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.61
+	 scripted_agent_weak :  0.66

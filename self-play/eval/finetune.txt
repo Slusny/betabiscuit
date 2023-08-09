@@ -1,0 +1,40 @@
+python selfplay_eval.py --csv_file_name "finetune.csv" --weak --strong --val_episodes 150 -a self-play/agents/fallen-shape-8_203.json self-play/agents/fallen-shape-8_203.json -b betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 betabiscuit/self-play/jolly-silence-99sp-fallen-shape-8_203_model:v3
+python selfplay_eval.py --csv_file_name "finetune.csv" --weak --strong --val_episodes 150 -a self-play/agents/fallen-shape-8_203.json self-play/agents/fallen-shape-8_203.json self-play/agents/fallen-shape-8_203.json -b betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 betabiscuit/self-play/dazzling-sky-102sp-fallen-shape-8_203_model:v2 betabiscuit/hockey - td3/fallen-shape-8_model:v203
+
+betabiscuit/self-play/jolly-silence-99sp-fallen-shape-8_203_model:v3
+
+
+
+python selfplay_eval.py --weak --strong --csv_file_name "best_dqn_finetune.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 betabiscuit/self-play/legendary-glade-98sp-gallant-butterfly-13_139_model:v5
+python selfplay_eval.py --weak --strong --csv_file_name "best_dqn_finetune.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 betabiscuit/self-play/jumping-wave-103sp-gallant-butterfly-13_139_model:v11 "betabiscuit/hockey - dqn/gallant-butterfly-13_model:v199" "betabiscuit/hockey - dqn/gallant-butterfly-13_model:v139"
+
+
+
+
+OG shape
+
+fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 overall win rate:  0.499
+	 fallen-shape-8_203_betabiscuit/self-play/dazzling-sky-102sp-fallen-shape-8_203_model:v2 :  0.703
+	 fallen-shape-8_203_betabiscuit/hockey - td3/fallen-shape-8_model:v203 :  0.603
+	 scripted_agent_weak :  0.333
+	 scripted_agent_strong :  0.357
+fallen-shape-8_203_betabiscuit/self-play/dazzling-sky-102sp-fallen-shape-8_203_model:v2 overall win rate:  0.3875
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.297
+	 fallen-shape-8_203_betabiscuit/hockey - td3/fallen-shape-8_model:v203 :  0.46
+	 scripted_agent_weak :  0.373
+	 scripted_agent_strong :  0.42
+fallen-shape-8_203_betabiscuit/hockey - td3/fallen-shape-8_model:v203 overall win rate:  0.716
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.397
+	 fallen-shape-8_203_betabiscuit/self-play/dazzling-sky-102sp-fallen-shape-8_203_model:v2 :  0.54
+	 scripted_agent_weak :  0.927
+	 scripted_agent_strong :  1.0
+scripted_agent_weak overall win rate:  0.4392
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.667
+	 fallen-shape-8_203_betabiscuit/self-play/dazzling-sky-102sp-fallen-shape-8_203_model:v2 :  0.627
+	 fallen-shape-8_203_betabiscuit/hockey - td3/fallen-shape-8_model:v203 :  0.073
+	 scripted_agent_strong :  0.39
+scripted_agent_strong overall win rate:  0.4583
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v16 :  0.643
+	 fallen-shape-8_203_betabiscuit/self-play/dazzling-sky-102sp-fallen-shape-8_203_model:v2 :  0.58
+	 fallen-shape-8_203_betabiscuit/hockey - td3/fallen-shape-8_model:v203 :  0.0
+	 scripted_agent_weak :  0.61
