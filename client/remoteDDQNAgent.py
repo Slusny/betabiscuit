@@ -45,9 +45,9 @@ class RemoteBasicOpponent(RemoteControllerInterface):
             a = self.agent.act(obs,eps=0.0)
         if self.algo == "dqn":
             a = self.discrete_to_continous_action(int(a))
-        return a
         print(a)
         print(type(a))
+        return a
         return np.array([0.0,0.0,0.0,0.0])
 
     def add_derivative(self,obs,pastobs):
@@ -77,7 +77,7 @@ class RemoteBasicOpponent(RemoteControllerInterface):
                     (discrete_action == 5) * -1 + (discrete_action == 6) * 1]  # player angle
         if True: # keep_mode
             action_cont.append(discrete_action == 7)
-        return action_cont
+        return np.array(action_cont)
 
 def instanciate_agent(args,wandb_run,bootstrap_overwrite=None, cpu=False):
     
