@@ -16,9 +16,9 @@ import math
 from datetime import datetime
 import os
 
-# from laserhockey.hockey_env import BasicOpponent
-from client.remoteControllerInterface import RemoteControllerInterface
-from client.backend.client import Client
+# # from laserhockey.hockey_env import BasicOpponent
+# from client.remoteControllerInterface import RemoteControllerInterface
+# from client.backend.client import Client
 
 timestep_max = 350
    
