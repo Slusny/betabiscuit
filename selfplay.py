@@ -626,8 +626,9 @@ if __name__ == '__main__':
     # if args["wandb_resume is not None :
     if args_main.agents:
         wandb_note = " - ".join(args_main.agents)
+        args_agents = args_main.agents
     else:
-        args_main["agents"] = []
+        args_agents = []
         wandb_note="fine tuneing on scripted agents"
     if args_main.wandb: 
         wandb_run = wandb.init(project="self-play",
@@ -656,12 +657,12 @@ if __name__ == '__main__':
     print("\nInstantiate Agents\n")
     bootstrap=False
     if (args_main.bootstrap_overwrite):
-        if len(args_main.bootstrap_overwrite) == len(args_main.agents):
+        if len(args_main.bootstrap_overwrite) == len(args_agents):
             print("\n Bootstraping \n")
             bootstrap=True
         else:
             print("bootstrap list doesn't match agent list")
-    for i, file in enumerate(args_main.agents):
+    for i, file in enumerate(args_agents):
         names.append(Path(file).stem)
         with open(file, 'r') as f:
             config = json.load(f)
