@@ -36,9 +36,6 @@ class RemoteBasicOpponent(RemoteControllerInterface):
         if self.use_derivative:
             if self.newGame:
                 print("new game")
-                print(obs.shape)
-                print(obs)
-                print(type(obs))
                 self.newGame = False
                 self.pastobs = obs.copy()
             a = self.agent.act(self.add_derivative(obs,self.pastobs),eps=0.0)
@@ -48,7 +45,7 @@ class RemoteBasicOpponent(RemoteControllerInterface):
         return a
 
     def add_derivative(self,obs,pastobs):
-        return np.append(np.array(obs),np.array(obs-pastobs)[3,4,5,9,10,11,14,15])
+        return np.append(obs,(obs-pastobs)[[3,4,5,9,10,11,14,15]])
 
 def instanciate_agent(args,wandb_run,bootstrap_overwrite=None, cpu=False):
     
