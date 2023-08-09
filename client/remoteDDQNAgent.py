@@ -24,16 +24,28 @@ from client.backend.client import Client
 
 class RemoteBasicOpponent(RemoteControllerInterface):
 
-    def __init__(self, Agent):
-        RemoteControllerInterface.__init__(self, identifier='BetaBiscuit_DDQN')
+    def __init__(self, Agent, use_derivative=False):
+        RemoteControllerInterface.__init__(self, identifier='DDQN')
         self.agent = Agent
+        self.pastobs = None
+        self.use_derivative = use_derivative
 
     def remote_act(self,
             obs : np.ndarray,
            ) -> np.ndarray:
+        if self.use_derivative:
+            if self.newGame:
+                print("new game")
+                self.newGame = False
+                self.pastobs = obs.copy()
+            a = self.agent.act(self.add_derivative(obs,self.pastobs),eps=0.0)
+            self.pastobs = obs.copy()
+        else: 
+            a = self.agent.act(obs,eps=0.0)
+        return a
 
-        return self.agent.act(obs,eps=0.0)
-
+    def add_derivative(self,obs,pastobs):
+        return np.append(obs,(obs-pastobs)[3,4,5,9,10,11,14,15])
 
 def instanciate_agent(args,wandb_run,bootstrap_overwrite=None, cpu=False):
     
@@ -189,7 +201,7 @@ if __name__ == '__main__':
 
     agent = instanciate_agent(config,False,cpu=args.cpu)
 
-    controller = RemoteBasicOpponent(agent)
+    controller = RemoteBasicOpponent(agent,config["use_derivative"])
 
     # Play n (None for an infinite amount) games and quit
     client = Client(username="BetaBiscuit",#'zxogq27','yourusername'stud35
