@@ -627,6 +627,7 @@ if __name__ == '__main__':
     if args_main.agents:
         wandb_note = " - ".join(args_main.agents)
     else:
+        args_main["agents"] = []
         wandb_note="fine tuneing on scripted agents"
     if args_main.wandb: 
         wandb_run = wandb.init(project="self-play",
