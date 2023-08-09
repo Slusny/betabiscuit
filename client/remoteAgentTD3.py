@@ -225,7 +225,7 @@ if __name__ == '__main__':
     parser_main = argparse.ArgumentParser()
     parser_main.add_argument('-c','--config', default="competitors/td3/celestial_lake_fallen_shape.json", help='json config files defining an agent')
     parser_main.add_argument('--cpu',action='store_true', help='json config files defining an agent')
-    parser_main.add_argument('--games', default=10, help='json config files defining an agent', type=int)
+    parser_main.add_argument('--games', default=None, help='json config files defining an agent', type=int)
     args = parser_main.parse_args()
 
     with open(args.config, 'r') as f:
