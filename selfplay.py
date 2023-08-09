@@ -743,7 +743,7 @@ if __name__ == '__main__':
         print("\n") 
 
     # creating environment
-    env_name = config_agents[0]["env_name"]
+    env_name = config_agents[-1]["env_name"]
     if env_name == "lunarlander":
         env = gym.make("LunarLander-v2", continuous = True)
         action_n = env.action_space.shape[0]
