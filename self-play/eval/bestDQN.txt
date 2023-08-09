@@ -1,0 +1,12 @@
+python selfplay_eval.py --csv_file_name "best_dqn.csv" --val_episodes 100 -a self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/gallant-butterfly-13_139.json -b betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v318 betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v38 betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v11
+
+
+gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v318 overall win rate:  0.75
+	 gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v38 :  0.76
+	 gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v11 :  0.74
+gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v38 overall win rate:  0.3825
+	 gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v318 :  0.24
+	 gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v11 :  0.525
+gallant-butterfly-13_139_betabiscuit/self-play/upbeat-salad-81sp-gallant-butterfly-13_139_model:v11 overall win rate:  0.3675
+	 gallant-butterfly-13_139_betabiscuit/self-play/smart-voice-70sp-gallant-butterfly-13_139_model:v318 :  0.26
+	 gallant-butterfly-13_139_betabiscuit/self-play/worldly-haze-79sp-gallant-butterfly-13_139_model:v38 :  0.475
