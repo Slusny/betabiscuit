@@ -76,7 +76,7 @@ class RemoteBasicOpponent(RemoteControllerInterface):
                     ((discrete_action == 3) | (discrete_action == 8) | (discrete_action == 10)) * -1 + ((discrete_action == 4) | (discrete_action == 9) | (discrete_action == 11)) * 1,  # player y
                     (discrete_action == 5) * -1 + (discrete_action == 6) * 1]  # player angle
         if True: # keep_mode
-        action_cont.append(discrete_action == 7)
+            action_cont.append(discrete_action == 7)
         return action_cont
 
 def instanciate_agent(args,wandb_run,bootstrap_overwrite=None, cpu=False):
