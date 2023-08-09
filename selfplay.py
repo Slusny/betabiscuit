@@ -584,7 +584,7 @@ if __name__ == '__main__':
 
     # Load agent config from files
     parser_main = argparse.ArgumentParser()
-    parser_main.add_argument('--agents', nargs='+', help='json config files defining an agent', required=True)
+    parser_main.add_argument('--agents', nargs='+', help='json config files defining an agent')
     parser_main.add_argument('--max_episodes_per_pair',help='how many episodes should be spend training before switching agents. The training only terminates manually with Strg+C.', default=1000000, type=int)
     parser_main.add_argument('--log_interval', default=20, type=int)
     parser_main.add_argument('--save_interval', help='when should a model be saved in terms of episodes_per_pair. Should be less or equal to episodes_per_pair.', default=5000, type=int)
