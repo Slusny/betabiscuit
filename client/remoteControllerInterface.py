@@ -11,7 +11,6 @@ class RemoteControllerInterface(ABC):
         """
         Please use the identifier to specify the Algorithm you are using
         """
-
         self.identifier = identifier
 
     @abstractmethod
@@ -31,6 +30,7 @@ class RemoteControllerInterface(ABC):
         In case of a stateful policy, e.g. recurrent policy, this function can be used
         to reset the policy before a new game
         """
+        self.newGame = True
 
         pass
 
