@@ -81,7 +81,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite=None, cpu=False):
     Path(args["savepath"]).mkdir(parents=True, exist_ok=True)
 
     if args["algo"] == "ddpg":
-        sys.path.insert(0,'./DDPG')
+        sys.path.insert(0,'../DDPG')
         from DDPG import DDPGAgent
         sys.path.pop(0)
         agent = DDPGAgent(env, env_name, action_n, args["seed"], args["savepath"], wandb_run,
@@ -107,7 +107,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite=None, cpu=False):
                         replay_ratio=args["replay_ratio"],
                         )
     elif args["algo"] == "td3":
-        sys.path.insert(0,'./TD3')
+        sys.path.insert(0,'../TD3')
         from TD3 import TD3Agent
         sys.path.pop(0)
         agent = TD3Agent(env, env_name, action_n, args["seed"], args["savepath"], wandb_run,
@@ -140,7 +140,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite=None, cpu=False):
                         filled_buffer_ratio=args["filled_buffer_ratio"],
                         )
     elif args["algo"] == "dqn":
-        sys.path.insert(0,'./DQN')
+        sys.path.insert(0,'../DQN')
         from DQN import DQNAgent
         sys.path.pop(0)
         agent = DQNAgent(env, env_name, 12 , args["seed"], args["savepath"], wandb_run,
