@@ -1,6 +1,7 @@
 
 import gymnasium as gym
 import sys
+sys.path.insert(0,'../')
 from pathlib import Path
 # import laserhockey.hockey_env as 
 import hockey_env as h_env
