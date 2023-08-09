@@ -136,3 +136,22 @@ gallant-butterfly-13_139_betabiscuit/self-play/warm-mountain-69sp-gallant-butter
 
 
 python selfplay.py --max_episodes_per_pair 1000 --save_interval 1000 --max_timesteps 350 --notes "self play simple reward all against one" --agents self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/dulcet-leaf-12_305.json --wandb --val_episodes 100 --simple_reward --train_only_one --save_buffer_interval 5 --replay_ratio 0.25 --replay_buffer_fill_ratio 100 --replay_buffer_fill --scripted_agent --all_against_one self-play/agents/gallant-butterfly-13_139.json 
+
+
+# Best Guys
+
+python selfplay_eval.py --csv_file_name "best_dudes.csv" --val_episodes 150 
+-a self-play/agents/dulcet-leaf-12_305.json 
+self-play/agents/dulcet-leaf-12_305.json
+self-play/agents/fallen-shape-8_203.json
+
+
+-b betabiscuit/self-play/pretty-snowball-90sp-dulcet-leaf-12_305_model:v18
+betabiscuit/self-play/splendid-music-89sp-dulcet-leaf-12_305_model:v17
+betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v18
+
+#best dulcet
+python selfplay_eval.py --csv_file_name "best_dulcet.csv" --val_episodes 150 -a self-play/agents/dulcet-leaf-12_305.json self-play/agents/dulcet-leaf-12_305.json -b betabiscuit/self-play/pretty-snowball-90sp-dulcet-leaf-12_305_model:v18 betabiscuit/self-play/splendid-music-89sp-dulcet-leaf-12_305_model:v17
+
+#best fallen
+python selfplay_eval.py --csv_file_name "best_dudes.csv" --val_episodes 150 -a self-play/agents/dulcet-leaf-12_305.json self-play/agents/fallen-shape-8_203.json -b betabiscuit/self-play/pretty-snowball-90sp-dulcet-leaf-12_305_model:v18 betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v18
