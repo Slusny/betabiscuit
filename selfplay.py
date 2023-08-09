@@ -24,8 +24,8 @@ timestep_max = 350
    
 
 class ScriptedAgent():
-    def __init__(self):
-        self.player = h_env.BasicOpponent(weak=False)
+    def __init__(self,weak=False):
+        self.player = h_env.BasicOpponent(weak)
     def act(self,obs,eps=0.0):
         return self.player.act(obs)
     

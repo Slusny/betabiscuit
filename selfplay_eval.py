@@ -14,7 +14,26 @@ import random
 import itertools
 import math
 import pandas as pd 
-   
+
+
+class ScriptedAgent():
+    def __init__(self,weak=False):
+        self.player = h_env.BasicOpponent(weak)
+    def act(self,obs,eps=0.0):
+        return self.player.act(obs)
+    
+    def save_agent_wandb(self,x1,x2,x3,x4,x5):
+        return
+
+    def train_innerloop(self,x):
+        return (0,0)
+
+    def store_transition(self,x):
+        return
+    
+    def save_buffer(self,x):
+        return
+
 # added more actions
 def discrete_to_continous_action(discrete_action):
     ''' converts discrete actions into continuous ones (for each player)
@@ -295,6 +314,8 @@ if __name__ == '__main__':
     parser_main.add_argument('-s','--sleep', default=0., type=float)
     parser_main.add_argument('--val_episodes', default=50, type=int)
     parser_main.add_argument('--max_timesteps', default=350, type=int)
+    parser_main.add_argument('--weak', action="store_true")
+    parser_main.add_argument('--strong', action="store_true")
 
     parser_main.add_argument('--csv_file_name', default="", type=str)
 
@@ -324,6 +345,18 @@ if __name__ == '__main__':
         print(names[i])
         print(agent_config)
         print("\n") 
+
+
+    # scripted agent
+    config_scripted = {"algo": "scripted","use_derivative":False}
+    name_scripted = "scripted_agent"
+    scripted_agent = ScriptedAgent(args_main.weak)
+
+    
+    if( args_main.weak or args_main.strong):
+        names.append(name_scripted)
+        config_agents.append(config_scripted)  
+        agents.append(scripted_agent)   
 
     # creating environment
     env_name = config_agents[0]["env_name"]
