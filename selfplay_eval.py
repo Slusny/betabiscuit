@@ -348,15 +348,23 @@ if __name__ == '__main__':
 
 
     # scripted agent
-    config_scripted = {"algo": "scripted","use_derivative":False}
-    name_scripted = "scripted_agent"
-    scripted_agent = ScriptedAgent(args_main.weak)
 
     
-    if( args_main.weak or args_main.strong):
-        names.append(name_scripted)
-        config_agents.append(config_scripted)  
-        agents.append(scripted_agent)   
+    if( args_main.weak):
+        config_scripted_weak = {"algo": "scripted_weak","use_derivative":False}
+        name_scripted_weak = "scripted_agent_weak"
+        scripted_agent_weak = ScriptedAgent(args_main.weak)
+        names.append(name_scripted_weak)
+        config_agents.append(config_scripted_weak)  
+        agents.append(scripted_agent_weak)
+
+    if( args_main.strong): 
+        config_scripted_strong = {"algo": "scripted_strong","use_derivative":False}
+        name_scripted_strong = "scripted_agent_strong"
+        scripted_agent_strong = ScriptedAgent(False)
+        names.append(name_scripted_strong)
+        config_agents.append(config_scripted_strong)  
+        agents.append(scripted_agent_strong)
 
     # creating environment
     env_name = config_agents[0]["env_name"]
