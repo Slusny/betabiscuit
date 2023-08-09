@@ -13,6 +13,8 @@ import datetime
 from laserhockey.hockey_env import HockeyEnv, FPS, CENTER_X, CENTER_Y
 from numpy.lib.function_base import trim_zeros
 
+FPS = 20
+
 def set_env_state_from_observation(env, observation):
     env.player1.position = (observation[[0, 1]] + [CENTER_X, CENTER_Y]).tolist()
     env.player1.angle = observation[2]
