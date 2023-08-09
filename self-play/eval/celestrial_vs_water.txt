@@ -1,0 +1,124 @@
+python selfplay_eval.py --csv_file_name "celestrial_vs_water.csv" --val_episodes 100 -a self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/pretty-shape-22_199.json self-play/agents/gallant-butterfly-13_199.json self-play/agents/gallant-butterfly-13_139.json self-play/agents/fallen-shape-8_203.json self-play/agents/dulcet-leaf-12_270.json self-play/agents/dulcet-leaf-12_305.json -b betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 betabiscuit/self-play/stellar-fire-86sp-fallen-shape-8_203_model:v18 betabiscuit/self-play/pretty-snowball-90sp-dulcet-leaf-12_305_model:v18
+
+pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 overall win rate:  0.423
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.305
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.185
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.4
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.375
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.485
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.55
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.505
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.555
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.385
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.485
+gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 overall win rate:  0.695
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.695
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.725
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.855
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.705
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.415
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.745
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.65
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.85
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.685
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.625
+gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 overall win rate:  0.7415
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.815
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.275
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.84
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.915
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.61
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.745
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.685
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.885
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.805
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.84
+fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 overall win rate:  0.518
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.6
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.145
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.16
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.68
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.65
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.655
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.53
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.48
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.655
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.625
+dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 overall win rate:  0.4935
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.625
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.295
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.085
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.32
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.725
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.695
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.56
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.505
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.605
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.52
+
+pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 overall win rate:              0.4955
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.515
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.585
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.39
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.35
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.275
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.765
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.565
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.32
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.71
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.48
+gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 overall win rate:    0.326
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.45
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.255
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.255
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.345
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.305
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.235
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.46
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.25
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.43
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.275
+gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 overall win rate:    0.425
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.495
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.35
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.315
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.47
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.44
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.435
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.54
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.4
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.44
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.365
+fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 overall win rate:                0.498
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.445
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.15
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.115
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.52
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.495
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.68
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.75
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.6
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.61
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.615
+dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 overall win rate:                0.399
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.615
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.315
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.195
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.345
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.395
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.29
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.57
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.56
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.39
+	 dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 :  0.315
+dulcet-leaf-12_305_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_305_model:v19 overall win rate:                0.4855
+	 pretty-shape-22_199_betabiscuit/self-play/celestial-lake-80sp-pretty-shape-22_199_model:v10 :  0.515
+	 gallant-butterfly-13_199_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_199_model:v10 :  0.375
+	 gallant-butterfly-13_139_betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v10 :  0.16
+	 fallen-shape-8_203_betabiscuit/self-play/celestial-lake-80sp-fallen-shape-8_203_model:v10 :  0.375
+	 dulcet-leaf-12_270_betabiscuit/self-play/celestial-lake-80sp-dulcet-leaf-12_270_model:v10 :  0.48
+	 pretty-shape-22_199_betabiscuit/self-play/wandering-water-54sp-pretty-shape-22_199_model:v19 :  0.52
+	 gallant-butterfly-13_199_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_199_model:v19 :  0.725
+	 gallant-butterfly-13_139_betabiscuit/self-play/wandering-water-54sp-gallant-butterfly-13_139_model:v19 :  0.635
+	 fallen-shape-8_203_betabiscuit/self-play/wandering-water-54sp-fallen-shape-8_203_model:v19 :  0.385
+	 dulcet-leaf-12_270_betabiscuit/self-play/wandering-water-54sp-dulcet-leaf-12_270_model:v19 :  0.685
