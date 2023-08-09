@@ -12,7 +12,7 @@ class RemoteControllerInterface(ABC):
         Please use the identifier to specify the Algorithm you are using
         """
         self.identifier = identifier
-        self.newGame=False
+        self.newGame=True
 
     @abstractmethod
     def remote_act(self,
