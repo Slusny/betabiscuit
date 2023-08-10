@@ -283,7 +283,7 @@ class DQNAgent(object):
 
         if(self._config["bootstrap"] is not None):
             if self._config["bootstrap_local"]:
-                self.restore_state(torch.load(self._config["bootstrap"]))
+                self.restore_state(str(torch.load(self._config["bootstrap"])))
             else:
                 api = wandb.Api()
                 art = api.artifact(self._config["bootstrap"], type='model')
