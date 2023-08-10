@@ -4,7 +4,7 @@ import pickle
 import torch
 import wandb
 import numpy as np
-import gym
+import gymnasium as gym
 import hockey_env as h_env
 from pathlib import Path
 import sys
