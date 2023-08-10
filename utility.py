@@ -125,7 +125,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
         print("no save path specified, using default : ",new_path)
         args["savepath"] = new_path
     if "savepath" not in args:
-        seed = None
+        args["seed"] = None
     Path(args["savepath"]).mkdir(parents=True, exist_ok=True)
 
     if args["algo"] == "ddpg":
