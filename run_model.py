@@ -40,7 +40,7 @@ def discrete_to_continous_action(discrete_action):
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-v','--vir', action='store_true')
-parser.add_argument('-e','--max_episodes', type=int, default=2)
+parser.add_argument('-e','--max_episodes', type=int, default=10)
 parser.add_argument('-t','--max_timesteps', type=int, default=100)
 parser.add_argument('-p','--project', type=str, default=False)
 parser.add_argument('--local_config', type=str, default="")
@@ -90,7 +90,7 @@ elif run_args.project:
 if (run_args.bootstrap_local):
     args["bootstrap_local"] = True
 # Instantiate agent
-agent, env = instanciate_agent(args,False,run_args["bootstrap"])
+agent, env = instanciate_agent(args,False,run_args.bootstrap)
 
 # creating environment
 # env_name = args['env_name']
