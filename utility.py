@@ -9,6 +9,7 @@ import hockey_env as h_env
 from pathlib import Path
 import sys
 
+sys.path.insert(0,'./DQN')
 from DQN import *
 
 def save_statistics(savepath,algo,env_name,i_episode,rewards=None,lengths=None,train_iter=None, losses=None, eps="Nan",lr="Nan",seed="Nan"):
