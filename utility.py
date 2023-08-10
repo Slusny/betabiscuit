@@ -9,8 +9,8 @@ import hockey_env as h_env
 from pathlib import Path
 import sys
 
-sys.path.insert(0,'./DQN')
-from DQN import *
+# sys.path.insert(0,'./DQN')
+# from DQN import *
 
 def save_statistics(savepath,algo,env_name,i_episode,rewards=None,lengths=None,train_iter=None, losses=None, eps="Nan",lr="Nan",seed="Nan"):
     date_str = datetime.today().strftime('%Y-%m-%dT%H.%M')
@@ -194,9 +194,9 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
                         )
     elif args["algo"] == "dqn":
         sys.path.insert(0,'./DQN')
-        # from DQN import DQNAgent
-        # from DQN import QFunction
-        # from DDPG import DuelingQFunction
+        from DQN import DQNAgent
+        from DQN import QFunction
+        from DQN import DuelingQFunction
         sys.path.pop(0)
         agent = DQNAgent(env, env_name, 12 , args["seed"], args["savepath"], wandb_run,
                         eps = args["eps"], 
