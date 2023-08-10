@@ -120,6 +120,9 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
         env = gym.make(env_name)
 
     #create save path
+    if "savepath" not in args:
+        print("please specify a savepath in the config file")
+        exit(0)
     Path(args["savepath"]).mkdir(parents=True, exist_ok=True)
 
     if args["algo"] == "ddpg":

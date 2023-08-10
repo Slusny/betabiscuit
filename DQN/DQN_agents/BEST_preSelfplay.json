@@ -31,5 +31,6 @@
     "wandb": false,
     "use_derivative": false,
     "bootstrap": "DQN/DQN_agents/BEST_preSelfplay.json",
-    "bootstrap_local": true
+    "bootstrap_local": true,
+    "savepath":"results"
   }
