@@ -5,6 +5,7 @@ from pathlib import Path
 import laserhockey.hockey_env as h_env
 from importlib import reload
 import wandb
+from utility import save_checkpoint
 
 # Available arguments for program
 environments_implemented=['pendulum', 'lunarlander', 'hockey', 'hockey-train-defense', "hockey-train-shooting"]

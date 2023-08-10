@@ -10,6 +10,7 @@ import pyvirtualdisplay
 import time
 from utility import instanciate_agent
 import json
+from utility import save_checkpoint
 
 
 # added more actions

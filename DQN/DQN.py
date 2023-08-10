@@ -15,7 +15,6 @@ import memory_DQN as mem
 from feedforward_DQN import Feedforward
 from feedforward_DQN import DuelingDQN
 sys.path.append('..')
-from utility import save_checkpoint
 
 from cpprb import PrioritizedReplayBuffer, ReplayBuffer
 
