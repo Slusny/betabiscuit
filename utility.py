@@ -153,6 +153,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
                         bc_lambda=args["bc_lambda"],
                         cpu=args["cpu"],
                         replay_ratio=args["replay_ratio"],
+                        bootstrap_local=args["bootstrap_local"],
                         )
     elif args["algo"] == "td3":
         sys.path.insert(0,'./TD3')
@@ -186,6 +187,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
                         validation_episodes=args["validation_episodes"],
                         validation_interval=args["validation_interval"],
                         filled_buffer_ratio=args["filled_buffer_ratio"],
+                        bootstrap_local=args["bootstrap_local"],
                         )
     elif args["algo"] == "dqn":
         sys.path.insert(0,'./DQN')
@@ -221,6 +223,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
                         beta_growth=args["beta_growth"],
                         eps_decay=args["eps_decay"],
                         min_eps=args["min_eps"],
+                        bootstrap_local=args["bootstrap_local"],
 
                         )
     return agent, env
