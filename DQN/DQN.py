@@ -216,6 +216,7 @@ class DQNAgent(object):
             "activation_fun":torch.nn.Tanh(),
             "activation_fun_value":torch.nn.ReLU(),
             "activation_fun_advantage":torch.nn.ReLU(),
+            "bootstrap_local":False,
         }
         self._config.update(userconfig)
         self._eps = self._config['eps']
@@ -282,13 +283,16 @@ class DQNAgent(object):
 
 
         if(self._config["bootstrap"] is not None):
-            api = wandb.Api()
-            art = api.artifact(self._config["bootstrap"], type='model')
-            if self._config["cpu"]:
-                state = torch.load(art.file(),map_location='cpu')
+            if self._config["bootstrap_local"]:
+                self.restore_state(torch.load(self._config["bootstrap"]))
             else:
-                state = torch.load(art.file())
-            self.restore_state(state)
+                api = wandb.Api()
+                art = api.artifact(self._config["bootstrap"], type='model')
+                if self._config["cpu"]:
+                    state = torch.load(art.file(),map_location='cpu')
+                else:
+                    state = torch.load(art.file())
+                self.restore_state(state)
 
         # init Q' weights = Q weights
         self._update_target_net()

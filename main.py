@@ -132,6 +132,7 @@ architecture.add_argument('--use_derivative',action='store_true',
 architecture.add_argument('--per', action='store_true',help='use prioritized experience replay')
 architecture.add_argument('--bootstrap',action='store', type=str, default=None,
                     help='wandb path ("betabiscuit/project/artifact") to model artifacts')
+architecture.add_argument('--restore_local', action='store_true',help='don\'t download model from wandb, but use local model')
 architecture.add_argument('--hil', action='store_true',help='human in the loop training')
 architecture.add_argument('--bc', action='store_true',help='use behavior cloning')
 architecture.add_argument('--bc_lambda', action='store', type=float, 
@@ -243,6 +244,7 @@ if __name__ == "__main__":
                         bc_lambda=args.bc_lambda,
                         cpu=args.cpu,
                         replay_ratio=args.replay_ratio,
+                        restore_local=args.restore_local,
                         )
     elif args.algo == "td3":
         sys.path.insert(0,'./TD3')
@@ -275,6 +277,7 @@ if __name__ == "__main__":
                         validation_episodes=args.validation_episodes,
                         validation_interval=args.validation_interval,
                         filled_buffer_ratio=args.filled_buffer_ratio,
+                        restore_local=args.restore_local,
                         )
     elif args.algo == "dqn":
         sys.path.insert(0,'./DQN')
@@ -309,6 +312,7 @@ if __name__ == "__main__":
                         beta_growth=args.beta_growth,
                         eps_decay=args.eps_decay,
                         min_eps=args.min_eps,
+                        restore_local=args.restore_local,
 
                         )
     
