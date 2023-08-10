@@ -65,7 +65,7 @@ if run_args.vir :
 # load agent config file from local storage
 if run_args.local_config != "":
     with open(run_args.local_config, 'r') as f:
-        config = json.load(f)  
+        args = json.load(f)  
 # load agent config file from local storage   
 elif run_args.project:
     entity = "betabiscuit"
@@ -137,7 +137,7 @@ if (run_args.weak):
     player = player_weak
 else:
     player = player_normal
-    
+
 def opponent_action(obs,env_name):
     if (env_name == "hockey"):
         return player.act(obs)
