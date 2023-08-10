@@ -124,7 +124,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
         new_path = os.path.join(os.getcwd(),"results")
         print("no save path specified, using default : ",new_path)
         args["savepath"] = new_path
-    if "savepath" not in args:
+    if "seed" not in args:
         args["seed"] = None
     Path(args["savepath"]).mkdir(parents=True, exist_ok=True)
 
