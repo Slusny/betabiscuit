@@ -43,7 +43,8 @@ parser.add_argument('-t','--max_timesteps', type=int, default=100)
 parser.add_argument('-p','--project', type=str, default="hockey - ddpg")
 parser.add_argument('-r','--run_name', type=str, default="latest")
 parser.add_argument('--run_id', type=str, default="latest")
-parser.add_argument('-a','--artifact', type=str, default='model:v4')
+parser.add_argument('-b','--bootstrap', type=str, default='model:v4')
+parser.add_argument('--bootstrap_local', type=str, default='')
 parser.add_argument('-s','--sleep', type=float, default=0., help="slow down simulation by sleep x seconds")
 parser.add_argument('-w','--weak_opponent', action='store_true')
 parser.add_argument('-l','--legacy', action='store_true')
@@ -77,13 +78,13 @@ else:
         _display.stop()
         exit(1)
 
-art = api.artifact(entity + "/" + run_args.project + "/" + run_args.artifact, type='model')
-print(art.file())
-artifact_dir = art.download()
-# run = wandb.init(mode='offline')
-# artifact = run.use_artifact('betabiscuit/hockey - ddpg/model:v4', type='model')
-# artifact_dir = artifact.download()
-state = torch.load(art.file())
+if (run_args.bootstrap_local):
+    state = torch.load(run_args.bootstrap)
+else:
+    art = api.artifact(entity + "/" + run_args.project + "/" + run_args.bootstrap, type='model')
+    print(art.file())
+    artifact_dir = art.download()
+    state = torch.load(art.file())
 # creating environment
 env_name = args['env_name']
 if env_name == "lunarlander":
@@ -220,6 +221,7 @@ elif args['algo'] == "dqn":
                     beta_growth=args["beta_growth"],
                     eps_decay=args["eps_decay"],
                     min_eps=args["min_eps"],
+                    restore_local=args["restore_local"],
                     )
 
 length = []
