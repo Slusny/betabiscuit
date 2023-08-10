@@ -82,7 +82,7 @@ def transform_obs(obs,help=False):
 
 def instanciate_agent(args,wandb_run,bootstrap_overwrite):
     
-    if bootstrap_overwrite is not None or bootstrap_overwrite:
+    if bootstrap_overwrite:
         args["bootstrap"] = bootstrap_overwrite
 
     # creating environment
