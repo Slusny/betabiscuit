@@ -131,6 +131,8 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
     if args["algo"] == "ddpg":
         sys.path.insert(0,'./DDPG')
         from DDPG import DDPGAgent
+        from DDPG import QFunction
+        from DDPG import DuelingQFunction
         sys.path.pop(0)
         agent = DDPGAgent(env, env_name, action_n, args["seed"], args["savepath"], wandb_run,
                         eps = args["eps"], 
