@@ -12,6 +12,12 @@ from utility import instanciate_agent
 import json
 from utility import save_checkpoint
 
+sys.path.insert(0,'./DQN')
+from DQN import DQNAgent
+from DQN import QFunction
+from DQN import DuelingQFunction
+
+print(torch.load("DQN/DQN_agents/BEST"))
 
 # added more actions
 def discrete_to_continous_action(discrete_action):
