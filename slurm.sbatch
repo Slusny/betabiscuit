@@ -65,6 +65,7 @@ singularity exec --nv /home/stud35/betabiscuit/betabiscuit_container3.sif python
 
 # DDQN tune
 #selfplay.py --max_episodes_per_pair 500 --save_interval 500 --max_timesteps 350 --notes "fine tune DDQN" --all_against_one self-play/agents/gallant-butterfly-13_139.json --all_against_one_bootstrap betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 --wandb --val_episodes 150 --replay_ratio 0.25 --weak --strong --simple_reward --agents self-play/agents/dulcet-leaf-12_305.json
+selfplay.py --max_episodes_per_pair 500 --save_interval 500 --max_timesteps 350 --notes "fine tune only w/s DDQN" --all_against_one self-play/agents/gallant-butterfly-13_139.json --all_against_one_bootstrap betabiscuit/self-play/celestial-lake-80sp-gallant-butterfly-13_139_model:v16 --wandb --val_episodes 150 --replay_ratio 0.25 --weak --strong --simple_reward
 
 
 
