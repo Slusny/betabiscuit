@@ -5,7 +5,7 @@ from run_model import parse_arguments_and_get_agent
 from run_model import run
 from argparse import Namespace
 
-run_args_list =
+run_args_list = [
 Namespace(**{
     "validate":True,
     "local_config":"validation/agents/TD3.json",
