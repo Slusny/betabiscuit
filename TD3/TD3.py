@@ -124,7 +124,7 @@ class TD3Agent(object):
     """
     Agent implementing Q-learning with NN function approximation.
     """
-    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, **userconfig):
+    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, userconfig):
 
         observation_space = env.observation_space
         action_space = env.action_space
