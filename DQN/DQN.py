@@ -218,6 +218,9 @@ class DQNAgent(object):
             "bootstrap_local":False,
         }
         self._config.update(userconfig)
+        for key in ["hidden_sizes",'hidden_sizes_values','hidden_sizes_advantages']:
+            if type(self._config[key]) == str:
+                self._config[key] = eval(self._config[key])
         self._eps = self._config['eps']
         self.tau = self._config["tau"]
         self._obs_dim=self._observation_space.shape[0] + len(self._config["derivative_indices"])
@@ -295,9 +298,7 @@ class DQNAgent(object):
 
         # init Q' weights = Q weights
         self._update_target_net()
-        for key in ["hidden_sizes",'hidden_sizes_values','hidden_sizes_advantages']:
-            if type(self._config[key]) == str:
-                self._config[key] = eval(self._config[key])
+        
         self.train_iter = 0
         
         if self._config["bc"]:
