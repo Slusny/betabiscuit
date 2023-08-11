@@ -40,7 +40,7 @@
   "hidden_sizes_critic": "[128,128,64]",
   "use_derivative": false,
   "per": false,
-  "bootstrap": null,
+  "bootstrap": "validation/agents/DDPG2.pth",
   "hil": false,
   "bc": false,
   "bc_lambda": 2.0,
