@@ -14,6 +14,7 @@ import wandb
 import memory_DQN as mem
 from feedforward_DQN import Feedforward
 from feedforward_DQN import DuelingDQN
+import collections
 sys.path.append('..')
 
 from cpprb import PrioritizedReplayBuffer, ReplayBuffer
@@ -286,7 +287,11 @@ class DQNAgent(object):
 
         if(self._config["bootstrap"] is not None):
             if self._config["bootstrap_local"]:
-                self.restore_state(torch.load(str(self._config["bootstrap"])))
+                state = torch.load(str(self._config["bootstrap"]))
+                if isinstance(state, collections.OrderedDict):
+                    self.Q = state
+                else:
+                    self.restore_state(state)
             else:
                 api = wandb.Api()
                 art = api.artifact(self._config["bootstrap"], type='model')
