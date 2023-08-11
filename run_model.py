@@ -150,7 +150,7 @@ def opponent_action(obs,env_name):
         return np.array([0,0.,0,0])
     
 def add_derivative(obs,pastobs):
-            return np.append(obs,(obs-pastobs)[self._config["derivative_indices"]])
+            return np.append(obs,(obs-pastobs)[args["derivative_indices"]])
 # if run_args.legacy and args['algo'] == "ddpg" :
 #     sys.path.insert(0,'./DDPG')
 #     from DDPG import DDPGAgent
