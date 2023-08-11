@@ -5,7 +5,7 @@ from run_model import parse_arguments_and_get_agent
 from run_model import run
 from argparse import Namespace
 
-MAX_EPISODES = 200
+MAX_EPISODES = 500
 
 run_args_list_strong = [
 Namespace(**{
