@@ -255,8 +255,8 @@ for i_episode in range(1, run_args.max_episodes+1):
         done = False
         obs_agent2 = env.obs_agent_two()
         a2 = opponent_action(obs_agent2,args['env_name'])
-        if args["use_derivative"]: ob = add_derivative(ob, past_obs)
-        a = agent.act(ob,eps=0.0)
+        if args["use_derivative"]: a = agent.act(add_derivative(ob, past_obs),eps=0.0)
+        else: a = agent.act(ob,eps=0.0)
         if args['algo'] == "dqn" :
             a = discrete_to_continous_action(a)
         a = a[:4]
