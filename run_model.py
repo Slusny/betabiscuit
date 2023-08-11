@@ -148,7 +148,9 @@ def opponent_action(obs,env_name):
         return player.act(obs)
     else:
         return np.array([0,0.,0,0])
-
+    
+def add_derivative(obs,pastobs):
+            return np.append(obs,(obs-pastobs)[self._config["derivative_indices"]])
 # if run_args.legacy and args['algo'] == "ddpg" :
 #     sys.path.insert(0,'./DDPG')
 #     from DDPG import DDPGAgent
@@ -245,6 +247,7 @@ length = []
 rewards = []
 for i_episode in range(1, run_args.max_episodes+1):
     ob, _info = env.reset()
+    past_obs = ob.copy()
     total_reward = 0
     for t in range(run_args.max_timesteps):
         time.sleep(run_args.sleep)
@@ -252,12 +255,14 @@ for i_episode in range(1, run_args.max_episodes+1):
         done = False
         obs_agent2 = env.obs_agent_two()
         a2 = opponent_action(obs_agent2,args['env_name'])
+        if args["derivative"]: ob = add_derivative(ob, past_obs)
         a = agent.act(ob,eps=0.0)
         if args['algo'] == "dqn" :
             a = discrete_to_continous_action(a)
         a = a[:4]
-        (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))
+        (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))    
         total_reward+= reward
+        past_obs = ob
         ob=ob_new
         if done: 
             length.append(t)
