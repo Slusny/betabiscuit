@@ -295,6 +295,9 @@ class DQNAgent(object):
 
         # init Q' weights = Q weights
         self._update_target_net()
+        for key in ["hidden_sizes",'hidden_sizes_values','hidden_sizes_advantages']:
+            if type(self._config[key]) == str:
+                self._config[key] = eval(self._config[key])
         self.train_iter = 0
         
         if self._config["bc"]:
