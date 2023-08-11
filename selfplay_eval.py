@@ -341,9 +341,10 @@ if __name__ == '__main__':
             config_agents.append(config) 
             # instanciate agents
             if args_main.bootstrap_overwrite :
-                agents.append(instanciate_agent(config,False,args_main.bootstrap_overwrite[i]))
+                agent, env = instanciate_agent(config,False,args_main.bootstrap_overwrite[i])
             else :
-                agents.append(instanciate_agent(config,False,False))
+                agent, env = instanciate_agent(config,False,False)
+            agents.append(agent)
 
     # print agent configs
     for i, agent_config in enumerate(config_agents):
