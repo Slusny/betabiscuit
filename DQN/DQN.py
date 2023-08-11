@@ -289,9 +289,9 @@ class DQNAgent(object):
             if self._config["bootstrap_local"]:
                 state = torch.load(str(self._config["bootstrap"]))
                 if isinstance(state, collections.OrderedDict):
-                    self.Q = state
-                else:
                     self.restore_state(state)
+                else:
+                    self.Q = state
             else:
                 api = wandb.Api()
                 art = api.artifact(self._config["bootstrap"], type='model')
