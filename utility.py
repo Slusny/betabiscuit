@@ -102,6 +102,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
         # vx1, vy1, rot1, vx2, vy2, rot2, puck_vx, puck_vy
         if args["use_derivative"]:
             derivative_indices = [3,4,5,9,10,11,14,15]
+            args["derivative_indices"] = [3,4,5,9,10,11,14,15]
         else:
             derivative_indices = []
     elif env_name == "hockey-train-shooting":
@@ -109,6 +110,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
         env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
         if args["use_derivative"]:
             derivative_indices = [3,4,5,9,10,11,14,15]
+            args["derivative_indices"] = [3,4,5,9,10,11,14,15]
         else:
             derivative_indices = []
         action_n = 4
@@ -117,6 +119,7 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
         action_n = 4
         if args["use_derivative"]:
             derivative_indices = [3,4,5,9,10,11,14,15]
+            args["derivative_indices"] = [3,4,5,9,10,11,14,15]
         else:
             derivative_indices = []
     else:
