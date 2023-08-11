@@ -274,10 +274,12 @@ for run_args in run_args_list_weak:
     strings_w.append(string)
     run_args_list_w.append(run_args)
 
+print("\n -------------------------------- \n")
+
 print("Validate for "+str(MAX_EPISODES)+" episodes against the Strong Opponent")
-run(run_args_list,agents,env,args_list,strings)
+win_rates_strong = run(run_args_list,agents,env,args_list,strings)
 
 print("\n -------------------------------- \n")
 
 print("Validate for "+str(MAX_EPISODES)+" episodes against the Weak Opponent")
-run(run_args_list,agents_w,env,args_list_w,strings_w)
+winn_rates_weak = run(run_args_list,agents_w,env,args_list_w,strings_w)

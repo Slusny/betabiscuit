@@ -98,7 +98,7 @@ def parse_arguments_and_get_agent(run_args):
     # action_n = run_args.action_n
 
 def run(run_args_list,agents,env,args_list,strings):
-    
+    win_rates = []
     for i in range(len(agents)):
         string = strings[i]
         agent = agents[i]
@@ -142,6 +142,8 @@ def run(run_args_list,agents,env,args_list,strings):
         print("\t avg length: ",np.array(length).mean())
         print("\t avg reward: ",np.array(rewards).mean())
         print("\t win rate: ",win_rate)
+        win_rates.append(win_rate)
+    return win_rates
 
 
 
