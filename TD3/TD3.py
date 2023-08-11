@@ -231,14 +231,21 @@ class TD3Agent(object):
         # To resume training from a saved model.
         # Models get saved in weights-and-biases and loaded from there.
         if(self._config["bootstrap"] is not None):
-            api = wandb.Api()
-            art = api.artifact(self._config["bootstrap"], type='model')
-            print("Loading bootstrap model from: ", art.file())
-            if self._config["cpu"]:
-                state = torch.load(art.file(),map_location='cpu')
+            if self._config["bootstrap_local"]:
+                state = torch.load(str(self._config["bootstrap"]))
+                if isinstance(state, collections.OrderedDict):
+                    self.restore_state(state)
+                else:
+                    self.Q = state
             else:
-                state = torch.load(art.file())
-            self.restore_state(state)
+                api = wandb.Api()
+                art = api.artifact(self._config["bootstrap"], type='model')
+                print("Loading bootstrap model from: ", art.file())
+                if self._config["cpu"]:
+                    state = torch.load(art.file(),map_location='cpu')
+                else:
+                    state = torch.load(art.file())
+                self.restore_state(state)
         
         if self._config["bc"]:
             self.teacher = h_env.BasicOpponent(weak=False)
