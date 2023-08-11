@@ -138,7 +138,7 @@ action_n = run_args.action_n
 # #test
 player_normal = h_env.BasicOpponent(weak=False)
 player_weak = h_env.BasicOpponent(weak=True)
-if (run_args.weak):
+if (run_args.weak_opponent):
     player = player_weak
 else:
     player = player_normal
