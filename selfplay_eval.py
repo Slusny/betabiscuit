@@ -310,7 +310,7 @@ if __name__ == '__main__':
     # Load agent config from files
     parser_main = argparse.ArgumentParser()
     parser_main.add_argument('-a','--agents', nargs='+', help='json config files defining an agent', required=True)
-    parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent', required=True)
+    parser_main.add_argument('-b','--bootstrap_overwrite', nargs='+', help='json config files defining an agent')
     parser_main.add_argument('-v','--visualize', action="store_true")
     parser_main.add_argument('-s','--sleep', default=0., type=float)
     parser_main.add_argument('--val_episodes', default=50, type=int)
