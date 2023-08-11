@@ -233,7 +233,7 @@ class TD3Agent(object):
         if(self._config["bootstrap"] is not None):
             if self._config["bootstrap_local"]:
                 state = torch.load(str(self._config["bootstrap"]))
-                if isinstance(state, collections.OrderedDict):
+                if isinstance(state[0], collections.OrderedDict):
                     self.restore_state(state)
                 else:
                     self.Q = state
