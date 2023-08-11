@@ -30,7 +30,7 @@
     "tau": 0.001,
     "wandb": false,
     "use_derivative": false,
-    "bootstrap": "DQN/DQN_agents/BEST_preSelfplay.json",
+    "bootstrap": "DQN/DQN_agents/BEST_preSelfplay.pth",
     "bootstrap_local": true,
     "savepath":"results",
     "dense_reward": false,
