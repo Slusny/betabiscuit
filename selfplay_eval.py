@@ -339,7 +339,10 @@ if __name__ == '__main__':
             config = json.load(f)
             config_agents.append(config) 
             # instanciate agents
-            agents.append(instanciate_agent(config,False,args_main.bootstrap_overwrite[i]))
+            if args_main.bootstrap_overwrite :
+                agents.append(instanciate_agent(config,False,args_main.bootstrap_overwrite[i]))
+            else :
+                agents.append(instanciate_agent(config,False,False))
 
     # print agent configs
     for i, agent_config in enumerate(config_agents):
