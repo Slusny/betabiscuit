@@ -228,7 +228,5 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
                         # beta_growth=args["beta_growth"],
                         # eps_decay=args["eps_decay"],
                         # min_eps=args["min_eps"],
-                        # bootstrap_local=args["bootstrap_local"],
-
-                        )
+                        # bootstrap_local=args["bootstrap_local"])
     return agent, env
