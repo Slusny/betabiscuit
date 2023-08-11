@@ -1,1 +1,1 @@
-__all__ = ["DDPG","feedforward","memory"]
+__all__ = ["DDPG","feedforward_DDPG","memory_DDPG"]
