@@ -15,6 +15,7 @@ import itertools
 import math
 import pandas as pd 
 from utility import save_checkpoint
+from utility import instanciate_agent
 
 
 class ScriptedAgent():
@@ -60,7 +61,7 @@ def discrete_to_continous_action(discrete_action):
       action_cont.append(discrete_action == 7)
     return action_cont
 
-def instanciate_agent(args,wandb_run,bootstrap_overwrite):
+def instanciate_agent_old(args,wandb_run,bootstrap_overwrite):
     
     if bootstrap_overwrite is not None:
         args["bootstrap"] = bootstrap_overwrite
