@@ -282,7 +282,6 @@ class DQNAgent(object):
 
 
         if(self._config["bootstrap"] is not None):
-            # x = torch.load("DQN/DQN_agents/BEST")
             if self._config["bootstrap_local"]:
                 self.restore_state(torch.load(str(self._config["bootstrap"])))
             else:
