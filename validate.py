@@ -260,18 +260,20 @@ for run_args in run_args_list_strong:
     args_list.append(args)
     strings.append(string)
 
+
+agents_w = []
+args_list_w = []
+strings_w = []
+for run_args in run_args_list_weak:
+    agent,env,args,string = parse_arguments_and_get_agent(run_args)
+    agents_w.append(agent)
+    args_list_w.append(args)
+    strings_w.append(string)
+
 print("Validate for "+str(MAX_EPISODES)+" episodes against the Strong Opponent")
 run(run_args,agents,env,args_list,strings)
 
 
-agents = []
-args_list = []
-strings = []
-for run_args in run_args_list_weak:
-    agent,env,args,string = parse_arguments_and_get_agent(run_args)
-    agents.append(agent)
-    args_list.append(args)
-    strings.append(string)
 
 print("Validate for "+str(MAX_EPISODES)+" episodes against the Weak Opponent")
-run(run_args,agents,env,args_list,strings)
+run(run_args,agents_w,env,args_list_w,strings_w)
