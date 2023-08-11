@@ -9,14 +9,14 @@ run_args = {
     "validate":True,
     "local_config":"validation/agents/TD3.json",
     "boostrap_local":True,
-    "bootstrap":"validation/agents/TD3.pth"
+    "bootstrap":"validation/agents/TD3.pth",
     "vir":False,
-    "max_episodes": 100
+    "max_episodes": 100,
     "max_timesteps": 250,
     "sleep": 0.,
     "legacy":False,
     "action_n":4,
-    "validate":True
+    "validate":True,
     "weak_opponent":False,
     "project":False,
     "run_name":"latest",
