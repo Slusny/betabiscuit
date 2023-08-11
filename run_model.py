@@ -52,7 +52,7 @@ def opponent_action(obs,env_name,player):
         return np.array([0,0.,0,0])
     
 def add_derivative(obs,pastobs):
-            return np.append(obs,(obs-pastobs)[args["derivative_indices"]])
+            return np.append(obs,(obs-pastobs)[[3,4,5,9,10,11,14,15]])
 
 
 def parse_arguments_and_get_agent(run_args):
