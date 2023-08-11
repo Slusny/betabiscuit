@@ -17,8 +17,6 @@ from DQN import DQNAgent
 from DQN import QFunction
 from DQN import DuelingQFunction
 
-print(torch.load("DQN/DQN_agents/BEST"))
-
 # added more actions
 def discrete_to_continous_action(discrete_action):
     ''' converts discrete actions into continuous ones (for each player)
