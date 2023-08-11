@@ -138,7 +138,7 @@ for run_args in run_args_list_strong:
     args_list.append(args)
     strings.append(string)
 
-print("Validate for "+MAX_EPISODES+" episodes against the Strong Opponent")
+print("Validate for "+str(MAX_EPISODES)+" episodes against the Strong Opponent")
 run(run_args,agents,env,args_list,strings)
 
 
@@ -151,5 +151,5 @@ for run_args in run_args_list_weak:
     args_list.append(args)
     strings.append(string)
 
-print("Validate for "+MAX_EPISODES+" episodes against the Weak Opponent")
+print("Validate for "+str(MAX_EPISODES)+" episodes against the Weak Opponent")
 run(run_args,agents,env,args_list,strings)
