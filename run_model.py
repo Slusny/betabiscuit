@@ -251,7 +251,7 @@ for i_episode in range(1, run_args.max_episodes+1):
         if not run_args.validate :env.render()
         done = False
         obs_agent2 = env.obs_agent_two()
-        a2 = opponent_action(obs_agent2)
+        a2 = opponent_action(obs_agent2,args['env_name'])
         a = agent.act(ob,eps=0.0)
         if args['algo'] == "dqn" :
             a = discrete_to_continous_action(a)
