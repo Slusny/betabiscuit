@@ -55,12 +55,7 @@ def add_derivative(obs,pastobs):
             return np.append(obs,(obs-pastobs)[args["derivative_indices"]])
 
 
-def run(run_args):
-    if run_args.vir :
-        _display = pyvirtualdisplay.Display(visible=True,  # use False with Xvfb
-                    rfbport=55901, backend="xvnc", size=(700, 450))
-        _display.start()
-
+def parse_arguments_and_get_agent(run_args):
     # load agent config file from local storage
     if run_args.local_config != "":
         string = Path(run_args.local_config).stem
@@ -92,55 +87,58 @@ def run(run_args):
         args["bootstrap_local"] = True
     # Instantiate agent
     agent, env = instanciate_agent(args,False,run_args.bootstrap)
-
+    
+    return (agent,env,args,string)
     #create save path
     # savepath = 'results_run'
     # Path().mkdir(parents=True, exist_ok=True)
 
-    action_n = run_args.action_n
+    # action_n = run_args.action_n
 
-
+def run(run_args,agents,env,args_list,strings):
     if (run_args.weak_opponent):
         player = player_weak
         string_opponent = "Weak Opponent"
     else:
         player = player_normal
         string_opponent = "Normal Opponent"
+    
+    for i in range(len(agents)):
+        string = strings[i]
+        agent = agents[i]
+        args = args_list[i]
+        length = []
+        rewards = []
+        print("\n"+string +" vs " +string_opponent)
+        for i_episode in range(1, run_args.max_episodes+1):
+            ob, _info = env.reset()
+            past_obs = ob.copy()
+            total_reward = 0
+            for t in range(run_args.max_timesteps):
+                time.sleep(run_args.sleep)
+                if not run_args.validate :env.render()
+                done = False
+                obs_agent2 = env.obs_agent_two()
+                a2 = opponent_action(obs_agent2,args['env_name'],player)
+                if args["use_derivative"]: a = agent.act(add_derivative(ob, past_obs),eps=0.0)
+                else: a = agent.act(ob,eps=0.0)
+                if args['algo'] == "dqn" :
+                    a = discrete_to_continous_action(a)
+                a = a[:4]
+                (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))    
+                reward = env._compute_reward()/10
+                total_reward+= reward
+                past_obs = ob
+                ob=ob_new
+                if done: 
+                    length.append(t)
+                    rewards.append(total_reward)
+                    break
+        win_rate = ((np.array(rewards) + 1 ) /2).mean().round(4)
+        print("\t avg length: ",np.array(length).mean())
+        print("\t avg reward: ",np.array(rewards).mean())
+        print("\t win rate: ",win_rate)
 
-    length = []
-    rewards = []
-    print(string +" vs " +string_opponent)
-    for i_episode in range(1, run_args.max_episodes+1):
-        ob, _info = env.reset()
-        past_obs = ob.copy()
-        total_reward = 0
-        for t in range(run_args.max_timesteps):
-            time.sleep(run_args.sleep)
-            if not run_args.validate :env.render()
-            done = False
-            obs_agent2 = env.obs_agent_two()
-            a2 = opponent_action(obs_agent2,args['env_name'],player)
-            if args["use_derivative"]: a = agent.act(add_derivative(ob, past_obs),eps=0.0)
-            else: a = agent.act(ob,eps=0.0)
-            if args['algo'] == "dqn" :
-                a = discrete_to_continous_action(a)
-            a = a[:4]
-            (ob_new, reward, done, trunc, _info) = env.step(np.hstack([a,a2]))    
-            reward = env._compute_reward()/10
-            total_reward+= reward
-            past_obs = ob
-            ob=ob_new
-            if done: 
-                length.append(t)
-                rewards.append(total_reward)
-                break
-    win_rate = ((np.array(rewards) + 1 ) /2).mean().round(4)
-    print("\t avg length: ",np.array(length).mean())
-    print("\t avg reward: ",np.array(rewards).mean())
-    print("\t win rate: ",win_rate)
-
-    if run_args.vir :
-        _display.stop()
 
 
 if __name__ == '__main__':
@@ -163,4 +161,14 @@ if __name__ == '__main__':
 
     run_args = parser.parse_args()
 
-    run(run_args)
+
+    if run_args.vir :
+        _display = pyvirtualdisplay.Display(visible=True,  # use False with Xvfb
+                    rfbport=55901, backend="xvnc", size=(700, 450))
+        _display.start()
+
+    agent,env,args,string = parse_arguments_and_get_agent(run_args)
+    run(run_args,[agent],env,[args],[string])
+
+    if run_args.vir :
+        _display.stop()
