@@ -97,20 +97,22 @@ def parse_arguments_and_get_agent(run_args):
 
     # action_n = run_args.action_n
 
-def run(run_args,agents,env,args_list,strings):
-    if (run_args.weak_opponent):
-        player = player_weak
-        string_opponent = "Weak Opponent"
-    else:
-        player = player_normal
-        string_opponent = "Normal Opponent"
+def run(run_args_list,agents,env,args_list,strings):
     
     for i in range(len(agents)):
         string = strings[i]
         agent = agents[i]
         args = args_list[i]
+        run_args = run_args_list[i]
         length = []
         rewards = []
+        if (run_args.weak_opponent):
+            player = player_weak
+            string_opponent = "Weak Opponent"
+        else:
+            player = player_normal
+            string_opponent = "Normal Opponent"
+        
         print("\n"+string +" vs " +string_opponent)
         for i_episode in range(1, run_args.max_episodes+1):
             ob, _info = env.reset()
@@ -170,7 +172,7 @@ if __name__ == '__main__':
         _display.start()
 
     agent,env,args,string = parse_arguments_and_get_agent(run_args)
-    run(run_args,[agent],env,[args],[string])
+    run([run_args],[agent],env,[args],[string])
 
     if run_args.vir :
         _display.stop()

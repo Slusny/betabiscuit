@@ -254,26 +254,30 @@ Namespace(**{
 agents = []
 args_list = []
 strings = []
+run_args_list=[]
 for run_args in run_args_list_strong:
     agent,env,args,string = parse_arguments_and_get_agent(run_args)
     agents.append(agent)
     args_list.append(args)
     strings.append(string)
+    run_args_list.append(run_args)
 
 
 agents_w = []
 args_list_w = []
 strings_w = []
+run_args_list_w=[]
 for run_args in run_args_list_weak:
     agent,env,args,string = parse_arguments_and_get_agent(run_args)
     agents_w.append(agent)
     args_list_w.append(args)
     strings_w.append(string)
+    run_args_list_w.append(run_args)
 
 print("Validate for "+str(MAX_EPISODES)+" episodes against the Strong Opponent")
-run(run_args,agents,env,args_list,strings)
+run(run_args_list,agents,env,args_list,strings)
 
-
+print("\n -------------------------------- \n")
 
 print("Validate for "+str(MAX_EPISODES)+" episodes against the Weak Opponent")
-run(run_args,agents_w,env,args_list_w,strings_w)
+run(run_args_list,agents_w,env,args_list_w,strings_w)
