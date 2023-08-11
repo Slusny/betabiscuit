@@ -152,7 +152,7 @@ class DQNAgent(object):
     """
     Agent implementing Q-learning with NN function approximation.
     """
-    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, **userconfig):
+    def __init__(self, env, env_name, action_n, seed, savepath, wandb_run, userconfig):
         
         observation_space = env.observation_space
         # if not isinstance(observation_space, spaces.box.Box):
