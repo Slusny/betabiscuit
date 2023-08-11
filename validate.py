@@ -5,7 +5,7 @@ from run_model import parse_arguments_and_get_agent
 from run_model import run
 from argparse import Namespace
 
-run_args = Namespace(**{
+run_args = {
     "validate":True,
     "local_config":"validation/agents/TD3.json",
     "boostrap_local":True,
@@ -21,6 +21,7 @@ run_args = Namespace(**{
     "project":False,
     "run_name":"latest",
     "run_id":"latest"
-})
+}
+run_args = Namespace(**run_args)
 agent,env,args,string = parse_arguments_and_get_agent(run_args)
 run(run_args,[agent],env,[args],[string])
