@@ -85,6 +85,8 @@ def parse_arguments_and_get_agent(run_args):
 
     if (run_args.bootstrap_local):
         args["bootstrap_local"] = True
+    if (run_args.legacy):
+        args["legacy"] = True
     # Instantiate agent
     agent, env = instanciate_agent(args,False,run_args.bootstrap)
     
