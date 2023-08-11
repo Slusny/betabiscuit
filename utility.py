@@ -135,6 +135,8 @@ def instanciate_agent(args,wandb_run,bootstrap_overwrite):
     Path(args["savepath"]).mkdir(parents=True, exist_ok=True)
 
     if args["algo"] == "ddpg":
+        if args["legacy"]:
+            action_n = 8
         sys.path.insert(0,'./DDPG')
         from DDPG import DDPGAgent
         sys.path.pop(0)
