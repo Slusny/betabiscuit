@@ -134,7 +134,7 @@ def run(run_args):
                 length.append(t)
                 rewards.append(total_reward)
                 break
-    win_rate = ((np.array(rewards) + 1 ) /2).mean().round(2)
+    win_rate = ((np.array(rewards) + 1 ) /2).mean().round(4)
     print("\t avg length: ",np.array(length).mean())
     print("\t avg reward: ",np.array(rewards).mean())
     print("\t win rate: ",win_rate)
@@ -147,8 +147,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v','--vir', action='store_true')
-    parser.add_argument('-e','--max_episodes', type=int, default=10)
-    parser.add_argument('-t','--max_timesteps', type=int, default=100)
+    parser.add_argument('-e','--max_episodes', type=int, default=100)
+    parser.add_argument('-t','--max_timesteps', type=int, default=250)
     parser.add_argument('-p','--project', type=str, default=False)
     parser.add_argument('--local_config', type=str, default="")
     parser.add_argument('-r','--run_name', type=str, default="latest")
