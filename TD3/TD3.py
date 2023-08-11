@@ -178,6 +178,9 @@ class TD3Agent(object):
 
         }
         self._config.update(userconfig)
+        for key in ["hidden_sizes_actor",'hidden_sizes_critic']:
+            if type(self._config[key]) == str:
+                self._config[key] = eval(self._config[key])
         self._eps = self._config['eps']
         self._obs_dim=self._observation_space.shape[0] + len(self._config["derivative_indices"])
         print("Config: ", self._config)
