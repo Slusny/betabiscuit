@@ -8,7 +8,7 @@ from argparse import Namespace
 run_args = {
     "validate":True,
     "local_config":"validation/agents/TD3.json",
-    "boostrap_local":True,
+    "bootstrap_local":True,
     "bootstrap":"validation/agents/TD3.pth",
     "vir":False,
     "max_episodes": 100,
